@@ -1,7 +1,7 @@
-Index: netanim/animxmlparser.cpp
+Index: animxmlparser.cpp
 ===================================================================
---- a/netanim/animxmlparser.cpp
-+++ b/netanim/animxmlparser.cpp
+--- a/animxmlparser.cpp
++++ b/animxmlparser.cpp
 @@ -513,8 +513,8 @@ Animxmlparser::parseAnim ()
    m_version = v.toDouble ();
    if (m_version < ANIM_MIN_VERSION)
