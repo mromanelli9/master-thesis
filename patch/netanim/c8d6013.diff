@@ -1,0 +1,15 @@
+Index: netanim/animxmlparser.cpp
+===================================================================
+--- a/netanim/animxmlparser.cpp
++++ b/netanim/animxmlparser.cpp
+@@ -513,8 +513,8 @@ Animxmlparser::parseAnim ()
+   m_version = v.toDouble ();
+   if (m_version < ANIM_MIN_VERSION)
+     {
+-      AnimatorMode::getInstance ()->showPopup ("This XML format is not supported. Minimum Version:" + QString::number (ANIM_MIN_VERSION));
+-      NS_FATAL_ERROR ("This XML format is not supported. Minimum Version:" << ANIM_MIN_VERSION);
++      // AnimatorMode::getInstance ()->showPopup ("This XML format is not supported. Minimum Version:" + QString::number (ANIM_MIN_VERSION));
++      NS_LOG_DEBUG ("This XML format is not supported. Minimum Version:" << ANIM_MIN_VERSION);
+     }
+   parsedElement.version = m_version;
+   //qDebug (QString::number (m_version));
