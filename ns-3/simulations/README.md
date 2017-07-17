@@ -9,7 +9,7 @@ ns-3.23
 Copy cc files into scratch folder and input data into main ns-3 folder, than lunch waf.
 E.g. if you want to test the basic Obstacle Shadowing Model example:
 ```
-cd obstacle-shadowing-model-basic/example
+cd obstacle-shadowing-model-basic-example
 cp obstacle-shadowing-model-basic-example.cc  $NS3_HOME/scratch
 cp basic-example.building.xml $NS3_HOME
 cd $NS3_HOME
