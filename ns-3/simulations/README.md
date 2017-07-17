@@ -1,6 +1,6 @@
 # Simulations
 
-Various experiments and examples
+Various experiments and examples.
 
 ### Prerequisites
 ns-3.23
