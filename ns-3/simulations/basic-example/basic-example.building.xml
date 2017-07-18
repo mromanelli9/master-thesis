@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+
+	<poly id="b1" type="building.yes" color="235,235,227" fill="1" shape="3.0,2.0 7.0,2.0 7.0,0.0 3.0,0.0"/>
+</additional>
