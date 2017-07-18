@@ -1,0 +1,11 @@
+Index: src/wave/examples/wscript
+===================================================================
+--- a/src/wave/examples/wscript
++++ b/src/wave/examples/wscript
+@@ -10,5 +10,5 @@
+     obj.source = 'wave-simple-device.cc'
+
+     obj = bld.create_ns3_program('vanet-routing-compare',
+-        ['core', 'aodv', 'applications', 'dsr', 'dsdv', 'flow-monitor', 'mobility', 'network', 'olsr', 'propagation', 'wifi', 'wave'])
++        ['core', 'aodv', 'applications', 'dsr', 'dsdv', 'flow-monitor', 'mobility', 'network', 'olsr', 'propagation', 'wifi', 'wave', 'obstacle'])
+     obj.source = 'vanet-routing-compare.cc'

@@ -6,9 +6,12 @@ Various works, files and data for my Master Degree's thesis at University of Pad
 .
 ├── Documentation
 ├── Simulations
-|   └── Basic Example
-└── Patch
-    └── NetAnim
+|		├── Simple Building
+|   └── Simple Building Custom
+├─── Patch
+|		 ├── NetAnim
+|    └── ns-3
+└─-	GNU GPL License		
 ```
 * _Documentation_: contains files and data that will be used to build the final thesis.
 * _Simulations_: various experiments and examples for ns-3.
