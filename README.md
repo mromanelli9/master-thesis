@@ -1,4 +1,4 @@
-# Simulations
+# Master Thesis
 Various works, files and data for my Master Degree's thesis at University of Padova.
 
 ## Repo organization
