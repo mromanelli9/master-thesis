@@ -62,7 +62,7 @@ $RANDOM_TRIPS_CC -n "$NET_FILE" -e "$SIMULATION_END_TIME" -o "$ROUTES_FILE" &&
 # Generate config file
 cat >> "$SUMO_CFG_FILE" <<EOF
 <configuration>
-    <input
+    <input>
         <net-file value="$NET_FILE"/>
         <route-files value="$ROUTES_FILE"/>
         <additional-files value="$BUILDINGS_FILE"/>
@@ -77,7 +77,9 @@ cat >> "$SUMO_CFG_FILE" <<EOF
 </configuration>
 EOF
 
-$SUMO_CC -c "$SUMO_CFG_FILE" 2&>/dev/null &&
+sleep 2
+
+$SUMO_CC -c "$SUMO_CFG_FILE"  &&
 $TRACE_EXPORTER -i "$TRACE_FILE" --ns2mobility-out "$MOBILITY_FILE"
 
 # Exit
