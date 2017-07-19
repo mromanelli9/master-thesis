@@ -7,8 +7,6 @@ Various works, files and data for my Master Degree's thesis at University of Pad
 ├── Documentation
 ├── ns-3
 |   └── Simulations
-|       ├── Simple Building
-|       └── Simple Building Custom
 ├─── Patch
 |    ├── NetAnim
 |    └── ns-3
