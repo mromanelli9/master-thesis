@@ -10,6 +10,7 @@ ns-3, Obstacle Shadowing Model patch
 data is provided with a file.
 * _Simple building custom_: like the previous one, but you can also set the model
 parameters beta and gamma.
+* _Routing Math Department_: vanet-routing-compare example (with Obstacle modification) on Math Department osm data.
 
 ### Usage
 Copy cc files into scratch folder and input data into main ns-3 folder, than lunch waf.
