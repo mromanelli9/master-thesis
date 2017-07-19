@@ -42,18 +42,18 @@ fi
 
 # Generate data
 NET_FILE="$BASENAME.net.xml"
-BUILDINGS_FILE="$BASENAME.buildings.xml"
+BUILDINGS_FILE="$BASENAME.poly.xml"
 ROUTES_FILE="$BASENAME.trips.xml"
 SUMO_CFG_FILE="$BASENAME.sumo.cfg"
 TRACE_FILE="$BASENAME.trace.xml"
-MOBILITY_FILE="$BASENAME.ns2mobility.tcl"
+MOBILITY_FILE="$BASENAME.ns2mobility.xml"
 
 
 # Generate network
 $NETCONVERT_CC --osm-files="$OSM_FILE" -o "$NET_FILE" &&
 
 # Generate buildings
-$POLYCONVERT_CC --osm-files="$OSM_FILE" -o "$BUILDINGS_FILE" &&
+$POLYCONVERT_CC --osm-files="$OSM_FILE" --net-file="$NET_FILE" --osm.keep-full-type=true -o "$BUILDINGS_FILE" &&
 
 # Generate routes
 $RANDOM_TRIPS_CC -n "$NET_FILE" -e "$SIMULATION_END_TIME" -o "$ROUTES_FILE" &&
