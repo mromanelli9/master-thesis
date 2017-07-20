@@ -62,24 +62,151 @@ def parsePolyFile( filename ):
 
 	return saved
 
+def extractData( osmData, polyData ):
+	osmData_n = len( osmData )
+	polyData_n = len( polyData )
+
+	assert osmData_n == polyData_n, "[!] Different number of buildings: %d and %d" % (osmData_n, polyData_n)
+
+	output = []
+
+	for i, osmEl in enumerate( osmData ):
+		polyEl = polyData[i]
+		building = {}
+
+
+		building["Name"] = getName( osmEl )
+		building["Height"], building["Min_Height"] = getHeight( osmEl )
+		building["NFloors"] = getNFloor( osmEl )
+		building["Box"] = getBoundaries( polyEl, building["Height"], building["Min_Height"], building["NFloors"] )
+
+		output.append( building )
+
+	return output
+
+def getNFloor( el ):
+	n = 0
+
+	for tags in el.findall("tag"):
+		attributes = tags.attrib
+
+		if ( attributes.get( 'k' ) == "building:levels" ):
+			n = int( attributes.get( 'v' ) )
+
+	return n
+
+def getHeight( el ):
+	h = 0.0
+	m_h = 0.0
+
+	for tags in el.findall("tag"):
+		attributes = tags.attrib
+
+		if ( attributes.get( 'k' ) == "height" ):
+			h = float( attributes.get( 'v' ) )
+
+		if ( attributes.get( 'k' ) == "min_height" ):
+			m_h = float( attributes.get( 'v' ) )
+
+	return h, m_h
+
+def getName( el ):
+	name = ""
+
+	for tags in el.findall("tag"):
+		attributes = tags.attrib
+
+		if ( attributes.get( 'k' ) == "name" ):
+			name = str( attributes.get( 'v' ) )
+
+	name = genVarName( name )
+
+	return name
+
+def getBoundaries( el, height, min_height, nfloors, floor_height=2.7 ):
+	x_min = x_max = y_min = y_max = z_min = z_max = 0
+
+	shape = el.attrib["shape"]
+	assert shape != None, "[!] No shape found in building %s" % el
+
+	values = [ vertex for vertex in shape.split( ' ' )  ]
+
+	vertices = []
+	for pair in values:
+		z = map( float, pair.split( ',' ) )
+		vertices.append( (z[0], z[1]) )
+
+	x_es = [v[0] for v in vertices]
+	z_es = [v[1] for v in vertices]
+
+	x_min = min( x_es )
+	x_max = max( x_es )
+
+	y_min = min_height
+	if ( height != 0 ):
+		y_max = height
+	else:
+		y_max = nfloors * floor_height
+	y_max += y_min
+
+	z_min = min( z_es )
+	z_max = max( z_es )
+
+	return ( x_min, x_max, y_min, y_max, z_min, z_max )
+
+def createBuildings( data ):
+	s = ""
+
+	for building in data:
+		var = building["Name"]
+		s += "double x_min = %s;\n" % building["Box"][0]
+		s += "double x_max = %s;\n" % building["Box"][1]
+		s += "double y_min = %s;\n" % building["Box"][2]
+		s += "double y_max = %s;\n" % building["Box"][3]
+		s += "double z_min = %s;\n" % building["Box"][4]
+		s += "double z_max = %s;\n" % building["Box"][5]
+
+		s += "Ptr<Building> %s = CreateObject <Building> ();\n" % var
+
+		s += "%s->SetBoundaries (Box (x_min, x_max, y_min, y_max, z_min, z_max));\n" % var
+
+		nfloors = building["NFloors"]
+		if ( nfloors != None ):
+			s += "%s->SetNFloors (%s);\n" % (var, nfloors)
+		else:
+			s += "%s->SetNFloors (0);\n" % var
+
+		s += "\n"
+
+	return s
+
+def genVarName( sp ):
+	# 1: Remove special chars
+	sp = re.sub( "\W+", '', sp )
+
+	# 2: Remove numbers
+	sp = filter( lambda x: x.isalpha(), sp )
+
+	return sp
+
 def main( argv ):
 	# Parse args
 	osmFilepath = str(argv[0])
 	polyFilepath = str(argv[1])
 
 	# Parse osm file
-	osmdata = []
-	osmdata.extend( parseOsmFile( osmFilepath ) )
-	print( osmdata )
+	osmdata = parseOsmFile( osmFilepath )
 
 	# Parse poly file
-	polydata = []
-	polydata.extend( parsePolyFile( polyFilepath ) )
-	print( polydata )
+	polydata = parsePolyFile( polyFilepath )
 
 	# Merge data
+	data = extractData( osmdata, polydata )
+	print(data)
 
 	# Build output
+	out = createBuildings( data )
+	print( out )
 
 if __name__ == "__main__":
 	main( sys.argv[1:] )
