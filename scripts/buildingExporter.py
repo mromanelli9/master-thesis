@@ -192,28 +192,22 @@ def genVarName( sp ):
 def main( argv ):
 	# Parse args
 	try:
-        opts, args = getopt.getopt(sys.argv[1:], "", ["osm-file=", "poly-file="])
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print( str( err ) )  # will print something like "option -a not recognized"
-        sys.exit(2)
+		opts, args = getopt.getopt(sys.argv[1:], "", ["osm-file=", "poly-file="])
+	except getopt.GetoptError as err:
+		# print help information and exit:
+		print( str( err ) )  # will print something like "option -a not recognized"
+		sys.exit(2)
 
-    osmFilepath = polyFilepath = None
-    for o, a in opts:
-        if o == "-v":
-            verbose = True
-        elif o in ("--osm-file"):
-            osmFilepath = str(a)
-        elif o in ("--poly-file"):
-            polyFilepath = str(a)
-        else:
-            assert False, "[!] Unhandled option."
+	osmFilepath = polyFilepath = None
+	for o, a in opts:
+		if o in ("--osm-file"):
+			osmFilepath = str(a)
+		elif o in ("--poly-file"):
+			polyFilepath = str(a)
+		else:
+			assert False, "[!] Unhandled option."
 
 	assert osmFilepath != None and polyFilepath != None, "[!] Missing inputs."
-
-
-	osmFilepath = str(argv[0])
-	polyFilepath = str(argv[1])
 
 	# Parse osm file
 	osmdata = parseOsmFile( osmFilepath )
