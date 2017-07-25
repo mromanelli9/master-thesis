@@ -82,6 +82,48 @@ protected:
 	void ParseCommandLineArguments (int argc, char **argv);
 
 	/**
+   * \brief Configure default attributes
+   * \return none
+   */
+  void ConfigureDefaults ();
+
+	/**
+   * \brief Configure nodes
+   * \return none
+   */
+  void ConfigureNodes ();
+
+	/**
+   * \brief Configure devices
+   * \return none
+   */
+  void ConfigureDevices ();
+
+  /**
+   * \brief Configure mobility
+   * \return none
+   */
+  void ConfigureMobility ();
+
+	/**
+	 * \brief Set up the adhoc devices
+	 * \return none
+	 */
+	void SetupAdhocDevices ();
+
+	/**
+	 * \brief Set up Fast Broadcast protocol
+	 * \return none
+	 */
+	void SetupFBProtocol ();
+
+	/**
+   * \brief Configure tracing and logging
+   * \return none
+   */
+  void ConfigureTracingAndLogging ();
+
+	/**
    * \brief Run the simulation
    * \return none
    */
@@ -112,11 +154,26 @@ private:
    */
   void SetupScenario ();
 
+	/**
+	 * \brief Set up Fast Broadcast protocol parameters for a node
+	 * \parm node node to configure
+	 * \return none
+	 */
+	void SetupFBParameters (Ptr<Node> node);
+
 	double									m_txp;
 	uint32_t 								m_nNodes;
+	NodeContainer						m_adhocNodes;
+	NetDeviceContainer			m_adhocDevices;
 	uint32_t								m_actualRange;
 	uint32_t								m_estimatedRange;
+	bool										m_flooding;
 	uint32_t								m_rCirc;
+	std::string 						m_rate;
+  std::string 						m_phyMode;
+	uint32_t 								m_mobility;
+	uint32_t 								m_scenario;
+	std::vector <uint32_t>	m_lineNodePositions;
 	std::string 						m_CSVfileName;
 	double									m_TotalSimTime;
 };
@@ -126,7 +183,10 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_nNodes (10),
 		m_actualRange (300),
 		m_estimatedRange (0),
+		m_flooding (true),
 		m_rCirc (1000),
+		m_rate ("2048bps"),
+		m_phyMode ("DsssRate11Mbps"),
 		m_CSVfileName ("manet-routing.output.csv"),
 		m_TotalSimTime (300.01)
 {
@@ -143,10 +203,29 @@ FBVanetExperiment::Simulate (int argc, char **argv)
 {
 	NS_LOG_INFO ("Enter 'FB Vanet Experiment' enviroment.");
 
+	// Initial configuration and parameters parsing
   ParseCommandLineArguments (argc, argv);
-	// varie configurazionei
+	ConfigureDefaults ();
+
+	// Configure the network and the elements within
+	ConfigureNodes ();
+	ConfigureMobility ();
+	SetupAdhocDevices ();
+	SetupFBProtocol ();
+	ConfigureTracingAndLogging ();
+
+	// Run simulation and print some results
 	RunSimulation ();
 	ProcessOutputs ();
+}
+
+void
+FBVanetExperiment::ConfigureDefaults ()
+{
+
+	Config::SetDefault ("ns3::OnOffApplication::PacketSize",StringValue ("64"));
+	Config::SetDefault ("ns3::OnOffApplication::DataRate",  StringValue (m_rate));
+	Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (m_phyMode));
 }
 
 void
@@ -155,6 +234,94 @@ FBVanetExperiment::ParseCommandLineArguments (int argc, char **argv)
 	CommandSetup (argc, argv);
 	SetupScenario ();
 }
+
+void
+FBVanetExperiment::ConfigureNodes ()
+{
+	m_adhocNodes.Create (m_nNodes);
+}
+
+void
+FBVanetExperiment::ConfigureMobility ()
+{
+	NS_LOG_INFO ("Configure mobility.");
+
+	if (m_mobility == 1)
+	{
+		MobilityHelper mobility;
+		Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+
+		// I don't like put that in here, but dunno where.
+		// Set nodes position
+		for (uint32_t i = 0 ; i < m_nNodes; i++)
+		{
+			positionAlloc->Add (Vector (m_lineNodePositions[i], 0.0, 0.0));
+		}
+
+		// Install nodes in a constant velocity mobility model
+		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
+		mobility.SetPositionAllocator (positionAlloc);
+		mobility.Install (m_adhocNodes);
+
+		// Set the velocity value (constant) to zero
+		for (uint32_t i = 0 ; i < m_nNodes; i++)
+		{
+			Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
+			mob->SetVelocity (Vector(0, 0, 0));
+		}
+	}
+	else
+	{
+		NS_LOG_ERROR ("Mobility 2 is not implemented yet.");
+	}
+}
+
+void
+FBVanetExperiment::SetupAdhocDevices ()
+{
+	// Setting up wifi phy and channel using helpers
+	WifiHelper wifi;
+	wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
+
+	//Setting max range
+	YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
+	YansWifiChannelHelper wifiChannel;
+	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100));
+	wifiPhy.SetChannel (wifiChannel.Create ());
+
+	//Add a mac and disable rate control
+	WifiMacHelper wifiMac;
+	//NqosWifiMacHelper wifiMac=NqosWifiMacHelper::Default();
+	wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
+																"DataMode",StringValue (m_phyMode),
+																"ControlMode",StringValue (m_phyMode));
+	wifiPhy.Set ("TxPowerStart",DoubleValue (m_txp));
+	wifiPhy.Set ("TxPowerEnd", DoubleValue (m_txp));
+	wifiMac.SetType ("ns3::AdhocWifiMac");
+	m_adhocDevices = wifi.Install (wifiPhy, wifiMac, m_adhocNodes);
+}
+
+void
+FBVanetExperiment::SetupFBProtocol ()
+{
+	// Configure FB protocol parameters for all nodes
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		SetupFBParameters (m_adhocNodes.Get (i));
+	}
+}
+
+void
+FBVanetExperiment::ConfigureTracingAndLogging ()
+{
+	// Enable logging from the ns2 helper
+  LogComponentEnable ("Ns2MobilityHelper", LOG_LEVEL_DEBUG);
+
+	Packet::EnablePrinting ();
+}
+
+
 
 void
 FBVanetExperiment::CommandSetup (int argc, char **argv)
@@ -166,7 +333,13 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
 	// cmd.AddValue ("estimatedRange", "Estimated transimision range (meters)", m_estimatedRange);	// disabled for now
-	cmd.AddValue ("rCirc", "Vehicles transimision area." , m_rCirc);
+	cmd.AddValue ("flooding", "Enable flooding", m_flooding);
+	cmd.AddValue ("rCirc", "Vehicles transimision area" , m_rCirc);
+	cmd.AddValue ("rate", "Rate", m_rate);
+	cmd.AddValue ("phyModeB", "Phy mode 802.11b", m_phyMode);
+	cmd.AddValue ("mobility", "1=stationary, 2=moving", m_mobility);
+	// cmd.AddValue ("speed", "Node speed (m/s)", m_nodeSpeed);
+	cmd.AddValue ("scenario", "1=straight street, 2=grid layout, 3=real world", m_scenario);
 	cmd.AddValue ("CSVfileName", "The name of the CSV output file name", m_CSVfileName);
 	cmd.AddValue ("totaltime", "Simulation end time", m_TotalSimTime);
 
@@ -178,15 +351,52 @@ FBVanetExperiment::SetupScenario ()
 {
 	NS_LOG_INFO ("Setup current scenario.");
 
-	// vari scenari.
-	// alemmno 2 o 3
+	if (m_scenario == 1)
+	{
+		m_mobility = 1;
+		m_nNodes = 10;
+
+		// Node positions (in meters) along the straight street (or line)
+		m_lineNodePositions[0] = 100;
+		m_lineNodePositions[1] = 300;
+		m_lineNodePositions[2] = 500;
+		m_lineNodePositions[3] = 700;
+		m_lineNodePositions[4] = 900;
+		m_lineNodePositions[5] = 1000;
+		m_lineNodePositions[6] = 1100;
+		m_lineNodePositions[7] = 1500;
+		m_lineNodePositions[8] = 1700;
+		m_lineNodePositions[9] = 2000;
+	}
+	else if (m_scenario == 2)
+	{
+		m_mobility = 1;
+		NS_LOG_ERROR ("Scenario 3 is not implemented yet.");
+	}
+	else if (m_scenario == 3)
+	{
+		m_mobility = 2;
+		NS_LOG_ERROR ("Scenario 3 is not implemented yet.");
+	}
+}
+
+void
+FBVanetExperiment::SetupFBParameters (Ptr<Node> node)
+{
+	node->SetCMFR (m_estimatedRange);
+	node->SetLMFR (m_estimatedRange);
+	node->SetCMBR (m_estimatedRange);
+	node->SetLMBR (m_estimatedRange);
+	node->SetNum (0);
+	node->SetPhase (-1);
+	node->SetSent (false);
+	node->SetReceived (false);
+	node->SetSlot (0);
 }
 
 void
 FBVanetExperiment::RunSimulation ()
 {
-	NS_LOG_INFO ("Run simulation.");
-
   Run ();
 }
 
@@ -200,7 +410,7 @@ FBVanetExperiment::ProcessOutputs ()
 void
 FBVanetExperiment::Run ()
 {
-  NS_LOG_INFO ("Run Simulation.");
+  NS_LOG_INFO ("Run simulation.");
 
 	// Setup netanim config ?
 	Simulator::Stop (Seconds (m_TotalSimTime));
