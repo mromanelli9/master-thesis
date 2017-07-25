@@ -112,15 +112,25 @@ private:
    */
   void SetupScenario ();
 
-
+	double									m_txp;
+	uint32_t 								m_nNodes;
+	uint32_t								m_actualRange;
+	uint32_t								m_estimatedRange;
+	uint32_t								m_rCirc;
 	std::string 						m_CSVfileName;
 	double									m_TotalSimTime;
 };
 
 FBVanetExperiment::FBVanetExperiment ()
-  : m_CSVfileName ("manet-routing.output.csv"),
+  : m_txp (7.5),
+		m_nNodes (10),
+		m_actualRange (300),
+		m_estimatedRange (0),
+		m_rCirc (1000),
+		m_CSVfileName ("manet-routing.output.csv"),
 		m_TotalSimTime (300.01)
 {
+	srand (time (0));
 }
 
 FBVanetExperiment::~FBVanetExperiment ()
@@ -152,6 +162,11 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	CommandLine cmd;
 
 	// allow command line overrides
+	cmd.AddValue ("txp", "Transmit power (dB), e.g. txp=7.5", m_txp);
+	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
+	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
+	// cmd.AddValue ("estimatedRange", "Estimated transimision range (meters)", m_estimatedRange);	// disabled for now
+	cmd.AddValue ("rCirc", "Vehicles transimision area." , m_rCirc);
 	cmd.AddValue ("CSVfileName", "The name of the CSV output file name", m_CSVfileName);
 	cmd.AddValue ("totaltime", "Simulation end time", m_TotalSimTime);
 
