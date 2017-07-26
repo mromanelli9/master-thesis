@@ -56,6 +56,7 @@ NS_LOG_COMPONENT_DEFINE ("fb-vanet");
 */
 
 /**
+ * \ingroup obstacle
  * \brief The VanetRoutingExperiment class implements an application that
  * allows this VANET experiment to be simulated
  */
@@ -178,10 +179,145 @@ private:
 
 	/**
 	 * \brief Set up Fast Broadcast protocol parameters for a node
-	 * \parm node node to configure
+	 * \param node node to configure
 	 * \return none
 	 */
 	void SetupFBParameters (Ptr<Node> node);
+
+	/* -----------------------------------------------------------------------------
+	*			SPECIFIC TO FB PROTOCOL
+	* ------------------------------------------------------------------------------
+	*/
+	// TODO methods definition for docs
+
+	/**
+	 * \brief Set up receivers socket
+	 * \param node noe to configure
+	 * \return socket created
+	 */
+	Ptr<Socket> SetupPacketReceive (Ptr<Node> node);
+
+	/**
+	 * \brief Set up senders socket
+	 * \param addr address of the node
+	 * \param node node to configure
+	 * \return socket created
+	 */
+	Ptr<Socket> SetupPacketSend (Ipv4Address addr, Ptr<Node> node);
+
+	/**
+	 * \brief Procure triggered when a packet is received
+	 * \param socket socket of the receiver
+	 * \return none
+	 */
+	void ReceivePacket (Ptr<Socket> socket);
+
+	/**
+	 * \brief Send a Hello message to all nodes in its range
+	 * \param socket socket of the sender
+	 * \return none
+	 */
+	void GenerateHelloTraffic (Ptr<Socket> socket);
+
+	/**
+	 * \brief Send an Alert message to the nodes (in its range)
+	 * \param node sender
+	 * \return none
+	 */
+	void GenerateAlertTraffic (Ptr<Node> node);
+
+	/**
+	 * \brief Procedure triggered when a Hello packet is received
+	 * \param socket socket of the node
+	 * \param head FB packet header
+	 * \return none
+	 */
+	void HandleHello (Ptr<Socket> socket, FBHeader head);
+
+	/**
+	 * \brief Procedure triggered when an Alert packet is received
+	 * \param socket socket of the node
+	 * \param head FB packet header
+	 * \param distance distance between the nodes
+	 * \param FB protocol phase
+	 * \return none
+	 */
+	void HandleAlert (Ptr<Socket> socket, FBHeader head, int distance, int phase);
+
+	// TODO: check function definition
+	/**
+	 * \brief Procedure Broad
+	 * \param node
+	 * \param phase FB protocol phase
+	 * \param rs slot size
+	 * \param sx x coordinate of the sender
+	 * \param sy y coordinate of the sender
+	 * \return none
+	 */
+	void Broad (Ptr<Node> node, int phase, uint32_t rs, int sx, int sy);
+
+	/**
+	 * \brief Node waiting procedure
+	 * \param node node
+	 * \param phase FB protocol phase
+	 * \param rs slot size
+	 * \param par sender x-y coordinates
+	 * \return none
+	 */
+	void WaitAgain (Ptr<Node> node, int phase, uint32_t rs, std::vector<int> par);
+
+	/**
+	 * \brief Print node position
+	 * \param node node
+	 * \return none
+	 */
+	void PrintPosition (Ptr<Node> node);
+
+	/**
+	 * \brief Stop a node
+	 * \param node node
+	 * \return none
+	 */
+	void StopNode (Ptr<Node> node);
+
+	/**
+	 * \brief Get the position of a node
+	 * \param node node
+	 * \return node x coordinate
+	 */
+	int GetNodeXPosition (Ptr<Node> node);
+
+	/**
+	 * \brief Get the position of a node
+	 * \param node node
+	 * \return node y coordinate
+	 */
+	int GetNodeYPosition (Ptr<Node> node);
+
+	/**
+	 * \brief Compute the distance between two nodes
+	 * \param x1 x coordinate of the first node
+	 * \param y1 y coordinate of the first node
+	 * \param x2 x coordinate of the second node
+	 * \param y2 y coordinate of the second node
+	 * \return distance
+	 */
+	double CalculateDistance (int x1, int y1, int x2, int y2);
+
+	/**
+	 * \brief Schedule who must send a Hello message
+	 * \param count number of nodes that haven't send the message yet
+	 * \return none
+	 */
+	void Hello (int count);
+
+	/**
+	 * \brief Get the address of a node
+	 * \param node node
+	 * \return node address
+	 */
+	Ipv4Address GetAddress (Ptr<Node> node);
+
 
 	double									m_txp;
 	uint32_t 								m_nNodes;
