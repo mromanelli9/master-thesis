@@ -335,6 +335,8 @@ private:
 	std::vector <uint32_t>	m_lineNodePositions;
 	std::string							m_address;
 	uint32_t								m_port;
+	uint32_t								m_totalPacketReceived;
+	uint32_t								m_totalPacketSent;
 	std::string 						m_CSVfileName;
 	double									m_TotalSimTime;
 };
@@ -540,10 +542,10 @@ FBVanetExperiment::ScheduleFBProtocol ()
 {
 	// TODO
 	// // Hello messages
-	// Simulator::Schedule (Seconds (500), &RoutingExperiment::Hello, adhocNodes, 60);
+	// Simulator::Schedule (Seconds (500), &FBVanetExperiment::Hello, adhocNodes, 60);
 	//
 	// // Generate alert message
-	// Simulator::ScheduleWithContext (adhocNodes.Get (start)->GetId (), Seconds (45000), &RoutingExperiment::GenerateAlertTraffic, adhocNodes.Get (start), adhocNodes);
+	// Simulator::ScheduleWithContext (adhocNodes.Get (start)->GetId (), Seconds (45000), &FBVanetExperiment::GenerateAlertTraffic, adhocNodes.Get (start), adhocNodes);
 }
 
 void
@@ -644,6 +646,117 @@ FBVanetExperiment::Run ()
 	Simulator::Run ();
 	Simulator::Destroy ();
 }
+
+/* -----------------------------------------------------------------------------
+*			SPECIFIC TO FB PROTOCOL
+* ------------------------------------------------------------------------------
+*/
+Ptr<Socket>
+FBVanetExperiment::SetupPacketReceive (Ptr<Node> node)
+{
+	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+	Ptr<Socket> sink = Socket::CreateSocket (node, tid);
+	InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
+	sink->Bind (local);
+	sink->SetRecvCallback (MakeCallback (&FBVanetExperiment::ReceivePacket, this));	// [DEBUG] without "this" it won't work
+
+	return sink;
+}
+
+Ptr<Socket>
+FBVanetExperiment::SetupPacketSend (Ipv4Address addr, Ptr<Node> node)
+{
+	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+	Ptr<Socket> sender = Socket::CreateSocket (node, tid);
+	InetSocketAddress remote = InetSocketAddress (addr, m_port);	// [DEBUG] why this way here and the other way above?
+
+	sender->Connect (remote);
+
+	return sender;
+}
+
+void
+FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
+{
+	Ptr<Packet> packet;
+	Address senderAddress;
+	Ptr<Node> node= socket->GetNode();
+
+	while ((packet = socket->RecvFrom (senderAddress)))
+	{
+		FBHeader head;
+		packet->RemoveHeader (head);
+
+		//Type
+		uint32_t type = head.getType();
+
+		// Current node position
+		int myXPosition = GetNodeXPosition (socket->GetNode ());
+		int myYPosition = GetNodeYPosition (socket->GetNode ());
+
+		// Sender position
+		int senderXPosition = head.getSenderXPosition ();
+		int senderYPosition = head.getSenderYPosition ();
+
+		// If it's a Hello message
+		if (type == 1)
+		{
+			double myDistance2 = CalculateDistance (senderXPosition, senderYPosition, myXPosition, myYPosition);
+
+			// If the node is in range, I can read the packet
+			if ( myDistance2 <= m_actualRange )
+			{
+				HandleHello (socket, head);
+			}
+		}
+		// Alert message otherwise
+		else if ( type == 2)
+		{
+			// Starting node position
+			int startXPosition = head.getStartXPosition ();
+			int startYPosition = head.getStartYPosition ();
+
+			// Compute various distances
+			double myDistance = CalculateDistance (myXPosition, myYPosition, startXPosition, startYPosition);
+			double senderDistance = CalculateDistance (senderXPosition, senderYPosition, startXPosition, startYPosition);
+			double myDistance2 = CalculateDistance (senderXPosition, senderYPosition, myXPosition, myYPosition);
+
+			// TODO: change int to uint32_t
+			int phase = head.getPhase ();
+
+			// If the node is in range, I can read the packet
+			if ((std::abs (myDistance2) <= m_actualRange))
+			{
+				m_totalPacketReceived++;
+
+				if (myDistance > senderDistance && !socket->GetNode ()->GetReceived ())
+				{
+					uint32_t sl = head.getSlot ();
+					socket->GetNode ()->SetSlot (socket->GetNode ()->GetSlot () + sl);
+					StopNode (socket->GetNode ());
+					socket->GetNode ()->SetReceived (true);
+
+					if (socket->GetNode ()->GetNum () == 0)
+					{
+						socket->GetNode ()->SetNum (phase);
+					}
+
+					HandleAlert (socket, head, myDistance2, phase);
+				}
+				else
+				{
+					if (node->GetPhase () < phase)
+						node->SetPhase (phase);
+				}
+			}
+		}
+		else
+		{
+			NS_LOG_ERROR ("Ther's only two phase in FB protocol.");
+		}
+	}
+}
+
 
 /* -----------------------------------------------------------------------------
 *			MAIN
