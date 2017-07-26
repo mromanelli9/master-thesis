@@ -188,7 +188,6 @@ private:
 	*			SPECIFIC TO FB PROTOCOL
 	* ------------------------------------------------------------------------------
 	*/
-	// TODO methods definition for docs
 
 	/**
 	 * \brief Set up receivers socket
@@ -337,6 +336,9 @@ private:
 	uint32_t								m_port;
 	uint32_t								m_totalPacketReceived;
 	uint32_t								m_totalPacketSent;
+	uint32_t								m_cwMin;
+	uint32_t								m_cwMax;
+	uint32_t 								m_packetPayloadSize;
 	std::string 						m_CSVfileName;
 	double									m_TotalSimTime;
 };
@@ -359,6 +361,11 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_scenario (1),
 		m_address ("10.1.255.255"),
 		m_port (9),
+		m_totalPacketReceived (0),
+		m_totalPacketSent (0),
+		m_cwMin (32),
+		m_cwMax (1024),
+		m_packetPayloadSize (100),
 		m_CSVfileName ("manet-routing.output.csv"),
 		m_TotalSimTime (300.01)
 {
@@ -507,15 +514,14 @@ FBVanetExperiment::ConfigureConnections ()
 	}
 
 	// Set unicast sender
-	// TODO: add SetupPacketSend function
-	// for (uint32_t i = 0; i < m_nNodes; i++)
-	// {
-	// 	Ptr<Socket> sender = SetupPacketSend (ns3::Ipv4Address(m_address.c_str ()),  m_adhocNodes.Get (i));
-	// 	sender->SetAllowBroadcast (true);
-	//
-	// 	// Add socket to the node
-	// 	m_adhocNodes.Get(i)->setBroadcast(sender);
-	// }
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		Ptr<Socket> sender = SetupPacketSend (ns3::Ipv4Address(m_address.c_str ()),  m_adhocNodes.Get (i));
+		sender->SetAllowBroadcast (true);
+
+		// Add socket to the node
+		m_adhocNodes.Get (i)->setBroadcast (sender);
+	}
 }
 
 void
@@ -540,12 +546,13 @@ FBVanetExperiment::ConfigureTracingAndLogging ()
 void
 FBVanetExperiment::ScheduleFBProtocol ()
 {
-	// TODO
 	// // Hello messages
-	// Simulator::Schedule (Seconds (500), &FBVanetExperiment::Hello, adhocNodes, 60);
-	//
-	// // Generate alert message
-	// Simulator::ScheduleWithContext (adhocNodes.Get (start)->GetId (), Seconds (45000), &FBVanetExperiment::GenerateAlertTraffic, adhocNodes.Get (start), adhocNodes);
+	Simulator::Schedule (Seconds (500), &FBVanetExperiment::Hello, this, 60);
+
+	// Generate alert message
+	// TODO: this if for initial debug only
+	uint32_t start = 8;
+	Simulator::ScheduleWithContext (m_adhocNodes.Get (start)->GetId (), Seconds (45000), &FBVanetExperiment::GenerateAlertTraffic, this, m_adhocNodes.Get (start));
 }
 
 void
@@ -757,6 +764,266 @@ FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
 	}
 }
 
+void
+FBVanetExperiment::GenerateHelloTraffic (Ptr<Socket> socket)
+{
+	Ptr<Node> node= socket->GetNode();
+
+	// Create a packet with the correct parameters taken from the node
+	FBHeader header;
+	header.setCMFR (node->GetCMBR());
+	header.setStartXPosition (GetNodeXPosition (node));
+	header.setStartYPosition (GetNodeYPosition (node));
+	header.setSenderXPosition (GetNodeXPosition (node));
+	header.setSenderYPosition (GetNodeYPosition (node));
+	header.setType(1);
+
+	Ptr<Packet> p = Create<Packet> (m_packetPayloadSize);
+	p->AddHeader (header);
+
+	Ptr<Socket> sock = node->getBroadcast ();
+	sock->Send (p);
+}
+
+void
+FBVanetExperiment::GenerateAlertTraffic (Ptr<Node> node)
+{
+	Ptr<Packet> p= Create<Packet> (m_packetPayloadSize);
+	uint32_t LMBR, CMBR, maxi;
+	// Create a packet with the correct parameters taken from the node
+	FBHeader header;
+	header.setType (2);
+
+	LMBR = node->GetLMBR ();
+	CMBR = node->GetCMBR ();
+	maxi = std::max (LMBR, CMBR);
+
+	header.setStartXPosition (GetNodeXPosition (node));
+	header.setStartYPosition (GetNodeYPosition (node));
+	header.setSenderXPosition (GetNodeXPosition (node));
+	header.setSenderYPosition (GetNodeYPosition (node));
+	header.setMax (maxi);
+	header.setPhase (0);
+	header.setSlot (0);
+	p->AddHeader (header);
+
+	Ptr<Socket> sock = node->getBroadcast ();
+
+	// Current node address
+	Ipv4Address addr = GetAddress(node);
+
+	NS_LOG_INFO (addr<<": sending Alert");
+
+	sock->Send (p);
+	node->SetSent (true);
+	StopNode (node);
+
+	m_totalPacketSent++;
+}
+
+void
+FBVanetExperiment::HandleHello (Ptr<Socket> socket, FBHeader head)
+{
+	Ptr<Node> node = socket->GetNode ();
+
+	// CMFR received
+	int CMFR = head.getCMFR ();
+
+	// Current node position
+	int myXPosition = GetNodeXPosition (socket->GetNode ());
+	int myYPosition = GetNodeYPosition (socket->GetNode ());
+
+	// Sender position
+	int senderXPosition = head.getSenderXPosition ();
+	int senderYPosition = head.getSenderYPosition ();
+	uint32_t distance = CalculateDistance (senderXPosition, senderYPosition, myXPosition, myYPosition);
+
+	// Current node CMBR
+	int myCMBR = node->GetCMBR ();
+
+
+	uint32_t m0 = std::max (myCMBR, CMFR);
+	int maxi = std::max (m0, distance);
+	node->SetCMBR (maxi);
+
+	// Storing CMBR in LMBR
+	node->SetLMBR (myCMBR);
+}
+
+void
+FBVanetExperiment::HandleAlert (Ptr<Socket> socket, FBHeader head, int distance, int phase)
+{
+	Ptr<Node> node= socket->GetNode ();
+	int myPhase = node->GetPhase ();
+
+	// If it's from the front
+	if (phase > myPhase)
+	{
+		node-> SetPhase (phase);
+
+		// Compute the window
+		int BMR = node->GetCMBR ();
+		int dist = std::abs (distance);
+		double rapp = (double) (BMR - dist) / BMR;
+		rapp = (rapp < 0) ? 0 : rapp;
+
+		int range = (rapp * (m_cwMax - m_cwMin)) + m_cwMin;
+
+		//Random value
+		uint32_t rs = (rand () % range) + 1;
+		int startXPosition = head.getStartXPosition ();
+		int startYPosition = head.getStartYPosition ();
+
+		std::vector<int> par;
+		par.push_back (startXPosition);
+		par.push_back (startYPosition);
+
+		if (m_flooding == false)
+			Simulator::ScheduleWithContext (socket->GetNode ()->GetId (),
+																			MilliSeconds (rs * 200 * 3),
+																			&FBVanetExperiment::WaitAgain, this,
+																			socket->GetNode (),
+																			phase, rs, par);
+		else
+			Simulator::ScheduleWithContext (socket->GetNode ()->GetId (),
+																			MilliSeconds (0),
+																			&FBVanetExperiment::Broad, this,
+																			socket->GetNode (),
+																			phase, rs, par.at (0), par.at (1));
+	}
+}
+
+void
+FBVanetExperiment::Broad (Ptr<Node> node, int phase, uint32_t rs, int sx, int sy)
+{
+	// If I'm the first to wake up, I must forward the message
+	if ((!m_flooding && phase >= node->GetPhase ()) || (m_flooding && !node->GetSent ()) )
+	{
+		// Create a packet with the correct parameters taken from the node
+		Ptr<Packet> p = Create<Packet> (m_packetPayloadSize);
+		FBHeader header;
+
+		header.setType (2);
+		uint32_t LMBR = node -> GetLMBR ();
+		uint32_t CMBR = node -> GetCMBR ();
+		uint32_t maxi = std::max (LMBR, CMBR);
+
+		header.setSenderXPosition (GetNodeXPosition (node));
+		header.setSenderYPosition (GetNodeYPosition (node));
+		header.setStartXPosition (sx);
+		header.setStartYPosition (sy);
+		header.setMax (maxi);
+		header.setPhase (phase + 1);
+		header.setSlot (node->GetSlot () + rs);
+		p->AddHeader (header);
+
+		Ptr<Socket> sock = node->getBroadcast ();
+
+		// My address
+		Ipv4Address addr = GetAddress (node);
+		// state = phase;	// [DEBUG]: what for?
+		NS_LOG_INFO (addr<<" (" << phase << "): forwarding alert.");
+
+		sock->Send (p);
+		node->SetSent (true);
+		m_totalPacketSent++;
+	}
+}
+
+void
+FBVanetExperiment::WaitAgain (Ptr<Node> node, int phase, uint32_t rs, std::vector<int> par)
+{
+	if (phase >= node->GetPhase ())
+	{
+		uint32_t rnd = (rand() % 20) + 1;
+		uint32_t rnd1 = (rand() % 20) + 1;
+		uint32_t rnd2 = (rand() % 20) + 1;
+		uint32_t rnd3 = (rand() % 20) + 1;
+		Simulator::ScheduleWithContext (node->GetId (),
+																		MilliSeconds (10 * (rs + rnd + rnd1 + rnd2 + rnd3) * 200 * 3),
+																		&FBVanetExperiment::Broad, this,
+																		node, phase, rs, par.at(0), par.at(1));
+	}
+}
+
+void
+FBVanetExperiment::PrintPosition (Ptr<Node> node)
+{
+	Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
+	Vector pos = positionmodel->GetPosition ();
+	NS_LOG_INFO ("x = " << pos.x << "; y = " << pos.y << "; z = " << pos.z);
+}
+
+void
+FBVanetExperiment::StopNode (Ptr<Node> node)
+{
+	Ptr<ConstantVelocityMobilityModel> mob = node->GetObject<ConstantVelocityMobilityModel> ();
+	mob->SetVelocity (Vector (0, 0, 0));
+}
+
+int
+FBVanetExperiment::GetNodeXPosition (Ptr<Node> node)
+{
+	Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
+	Vector pos = positionmodel->GetPosition ();
+	return pos.x;
+}
+
+int
+FBVanetExperiment::GetNodeYPosition (Ptr<Node> node)
+{
+	Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
+	Vector pos = positionmodel->GetPosition ();
+	return pos.y;
+}
+
+double
+FBVanetExperiment::CalculateDistance (int x1, int y1, int x2, int y2)
+{
+	int distancex = (x2 - x1) * (x2 - x1);
+	int distancey = (y2 - y1) * (y2 - y1);
+	double distance = sqrt (distancex + distancey);
+
+	return distance;
+}
+
+void
+FBVanetExperiment::Hello (int count)
+{
+	std::vector<int> he;
+	uint32_t hel = 20;
+	int pos;
+
+	if (count > 0)
+	{
+		for (uint32_t i = 0; i < hel; i++)
+		{
+			pos = rand() % m_nNodes;
+			he.push_back (pos);
+
+			Ptr<Socket> sk =  m_adhocNodes.Get (pos)->getBroadcast ();
+			Simulator::ScheduleWithContext (m_adhocNodes.Get (pos)->GetId (),
+																			Seconds (i * 40),
+																			&FBVanetExperiment::GenerateHelloTraffic, this,
+																			sk);
+		}
+
+		// Other nodes must send Hello messages
+		Simulator::Schedule (Seconds (250),
+												&FBVanetExperiment::Hello, this,
+												count - 1);
+	}
+}
+
+Ipv4Address
+FBVanetExperiment::GetAddress (Ptr<Node> node)
+{
+	Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
+	Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1,0);
+	Ipv4Address addr = iaddr.GetLocal ();
+
+	return addr;
+}
 
 /* -----------------------------------------------------------------------------
 *			MAIN
