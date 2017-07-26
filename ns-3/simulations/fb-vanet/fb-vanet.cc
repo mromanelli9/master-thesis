@@ -549,7 +549,10 @@ void
 FBVanetExperiment::ScheduleFBProtocol ()
 {
 	// // Hello messages
-	Simulator::Schedule (Seconds (500), &FBVanetExperiment::Hello, this, 60);
+	if ( m_estimatedRange == 0)
+	{
+		Simulator::Schedule (Seconds (500), &FBVanetExperiment::Hello, this, 60);
+	}
 
 	// Generate alert message
 	// TODO: this if for initial debug only
