@@ -339,6 +339,7 @@ private:
 	uint32_t								m_cwMin;
 	uint32_t								m_cwMax;
 	uint32_t 								m_packetPayloadSize;
+	uint32_t								m_startingNode;
 	std::string 						m_CSVfileName;
 	double									m_TotalSimTime;
 };
@@ -366,6 +367,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_cwMin (32),
 		m_cwMax (1024),
 		m_packetPayloadSize (100),
+		m_startingNode (0),
 		m_CSVfileName ("manet-routing.output.csv"),
 		m_TotalSimTime (300.01)
 {
@@ -508,7 +510,7 @@ FBVanetExperiment::ConfigureConnections ()
 	// Set receiver (for each node)
 	for (uint32_t j = 0; j < m_nNodes; j++)
 	{
-		//Ptr<Socket> sink = SetupPacketReceive (m_adhocInterfaces.GetAddress (j), m_adhocNodes.Get (j));	// TODO: add SetupPacketReceive function
+		Ptr<Socket> sink = SetupPacketReceive (m_adhocNodes.Get (j));
 		AddressValue remoteAddress (InetSocketAddress (ns3::Ipv4Address::GetAny (), m_port));
 		onoff1.SetAttribute ("Remote", remoteAddress);
 	}
@@ -551,8 +553,7 @@ FBVanetExperiment::ScheduleFBProtocol ()
 
 	// Generate alert message
 	// TODO: this if for initial debug only
-	uint32_t start = 8;
-	Simulator::ScheduleWithContext (m_adhocNodes.Get (start)->GetId (), Seconds (45000), &FBVanetExperiment::GenerateAlertTraffic, this, m_adhocNodes.Get (start));
+	Simulator::ScheduleWithContext (m_adhocNodes.Get (m_startingNode)->GetId (), Seconds (45000), &FBVanetExperiment::GenerateAlertTraffic, this, m_adhocNodes.Get (m_startingNode));
 }
 
 void
@@ -583,12 +584,13 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 void
 FBVanetExperiment::SetupScenario ()
 {
-	NS_LOG_INFO ("Setup current scenario.");
+	NS_LOG_INFO ("Setup current scenario (" <<  m_scenario << ").");
 
 	if (m_scenario == 1)
 	{
 		m_mobility = 1;
 		m_nNodes = 10;
+		m_startingNode = 8;
 
 		// Node positions (in meters) along the straight street (or line)
 		m_lineNodePositions.resize (10, 0);
@@ -649,8 +651,61 @@ FBVanetExperiment::Run ()
 	NS_LOG_INFO ("Run simulation.");
 
 	// Setup netanim config ?
+
+	std::cout << "[d] Parto. dovrei finire a " << m_TotalSimTime << std::endl;
+
 	Simulator::Stop (Seconds (m_TotalSimTime));
 	Simulator::Run ();
+
+	// [DEBUG] For intial debug
+	uint32_t cover = 1;
+	uint32_t circ = 0, circCont = 0;
+	uint32_t dist = 1;
+	for (uint32_t i=0; i<m_nNodes; i++)
+	{
+		double distStart = CalculateDistance( GetNodeXPosition (m_adhocNodes.Get (i)),
+																					GetNodeYPosition (m_adhocNodes.Get (i)),
+																					GetNodeXPosition (m_adhocNodes.Get (m_startingNode)),
+																					GetNodeYPosition (m_adhocNodes.Get (m_startingNode)));
+
+		if ( i != m_startingNode && distStart > 0 &&  ((distStart - m_rCirc <= (dist / 2) && (distStart - m_rCirc) >= 0) || (m_rCirc - distStart <= (dist / 2) && distStart - m_rCirc <= 0)))
+		{
+			circCont++;
+
+			if (m_adhocNodes.Get (i)->GetReceived ())
+				circ++;
+		}
+
+		if (m_adhocNodes.Get (i)->GetReceived ())
+			cover++;
+		else
+		{
+			std::cout << i <<" didn't receive: (" << GetNodeXPosition (m_adhocNodes.Get (i)) << ";" << GetNodeYPosition (m_adhocNodes.Get (i)) << ")\n";
+		}
+
+		if (!m_adhocNodes.Get(i)->GetSent ())
+		{
+			std::cout<<i<<" didn't send: (" << GetNodeXPosition (m_adhocNodes.Get (i)) << ";" << GetNodeYPosition (m_adhocNodes.Get (i)) << ")" << std::endl;
+		}
+	}
+
+	std::cout << m_actualRange << " m/" << m_estimatedRange << " max/" << m_nNodes << " cars/" << std::endl;
+
+	std::cout << cover << "/" << m_nNodes << ": " << ((double) cover / (double) m_nNodes) * 100 << "%" << std::endl;
+
+	std::cout << circ << "/" << circCont <<": " << ((double)circ/(double)circCont) * 100 << "%" << std::endl;
+
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		std::cout << m_adhocNodes.Get (i)->GetNum() << " ";
+	}
+	std::cout << std::endl;
+
+	std::cout<<"Messages sent: " << m_totalPacketSent << std::endl;
+
+	std::cout<<"Messages received: " << m_totalPacketReceived << std::endl;
+
+
 	Simulator::Destroy ();
 }
 
@@ -756,10 +811,6 @@ FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
 						node->SetPhase (phase);
 				}
 			}
-		}
-		else
-		{
-			NS_LOG_ERROR ("Ther's only two phase in FB protocol.");
 		}
 	}
 }
