@@ -26,6 +26,11 @@
 *
 */
 
+/* -----------------------------------------------------------------------------
+*			HEADERS
+* ------------------------------------------------------------------------------
+*/
+
 #include <fstream>
 #include <iostream>
 
@@ -44,6 +49,11 @@
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("fb-vanet");
+
+/* -----------------------------------------------------------------------------
+*			CLASS AND METHODS PROTOTIPES
+* ------------------------------------------------------------------------------
+*/
 
 /**
  * \brief The VanetRoutingExperiment class implements an application that
@@ -193,6 +203,11 @@ private:
 	double									m_TotalSimTime;
 };
 
+/* -----------------------------------------------------------------------------
+*			METHOD DEFINITIONS
+* ------------------------------------------------------------------------------
+*/
+
 FBVanetExperiment::FBVanetExperiment ()
 	: m_txp (7.5),
 		m_nNodes (10),
@@ -215,7 +230,6 @@ FBVanetExperiment::FBVanetExperiment ()
 FBVanetExperiment::~FBVanetExperiment ()
 {
 }
-
 
 void
 FBVanetExperiment::Simulate (int argc, char **argv)
@@ -495,9 +509,15 @@ FBVanetExperiment::Run ()
 	Simulator::Destroy ();
 }
 
+/* -----------------------------------------------------------------------------
+*			MAIN
+* ------------------------------------------------------------------------------
+*/
 
 int main (int argc, char *argv[])
 {
+	NS_LOG_UNCOND ("FB Vanet Experiment.");
+
 	FBVanetExperiment experiment;
 	experiment.Simulate (argc, argv);
 }
