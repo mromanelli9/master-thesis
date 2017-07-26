@@ -428,7 +428,7 @@ FBVanetExperiment::ConfigureNodes ()
 void
 FBVanetExperiment::ConfigureMobility ()
 {
-	NS_LOG_INFO ("Configure mobility.");
+	NS_LOG_INFO ("Configure mobility (" << m_mobility << ").");
 
 	if (m_mobility == 1)
 	{
