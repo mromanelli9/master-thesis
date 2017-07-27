@@ -331,7 +331,7 @@ private:
 	std::string 						m_phyMode;
 	uint32_t 								m_mobility;
 	uint32_t 								m_scenario;
-	std::vector <uint32_t>	m_lineNodePositions;
+	std::vector <Vector>		m_fixNodePosition;
 	std::string							m_address;
 	uint32_t								m_port;
 	uint32_t								m_totalPacketReceived;
@@ -359,7 +359,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_rate ("2048bps"),
 		m_phyMode ("DsssRate11Mbps"),
 		m_mobility (1),
-		m_scenario (1),
+		m_scenario (2),
 		m_address ("10.1.255.255"),
 		m_port (9),
 		m_totalPacketReceived (0),
@@ -369,7 +369,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_packetPayloadSize (100),
 		m_startingNode (0),
 		m_CSVfileName ("manet-routing.output.csv"),
-		m_TotalSimTime (300.01)
+		m_TotalSimTime (990000.01)	// [DEBUG]
 {
 	srand (time (0));
 }
@@ -439,7 +439,7 @@ FBVanetExperiment::ConfigureMobility ()
 		// Set nodes position
 		for (uint32_t i = 0 ; i < m_nNodes; i++)
 		{
-			positionAlloc->Add (Vector (m_lineNodePositions[i], 0.0, 0.0));
+			positionAlloc->Add (m_fixNodePosition[i]);
 		}
 
 		// Install nodes in a constant velocity mobility model
@@ -591,27 +591,41 @@ FBVanetExperiment::SetupScenario ()
 
 	if (m_scenario == 1)
 	{
+		// straight line, nodes in a row
 		m_mobility = 1;
 		m_nNodes = 10;
 		m_startingNode = 8;
 
 		// Node positions (in meters) along the straight street (or line)
-		m_lineNodePositions.resize (10, 0);
-		m_lineNodePositions[0] = 100;
-		m_lineNodePositions[1] = 300;
-		m_lineNodePositions[2] = 500;
-		m_lineNodePositions[3] = 700;
-		m_lineNodePositions[4] = 900;
-		m_lineNodePositions[5] = 1000;
-		m_lineNodePositions[6] = 1100;
-		m_lineNodePositions[7] = 1500;
-		m_lineNodePositions[8] = 1700;
-		m_lineNodePositions[9] = 2000;
+		m_fixNodePosition.push_back( Vector (100.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (300.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (500.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (700.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (900.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (1000.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (1100.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (1500.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (1700.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (2000.0, 0.0, 0.0));
 	}
 	else if (m_scenario == 2)
 	{
+		// Grid layout
 		m_mobility = 1;
-		NS_LOG_ERROR ("Scenario 3 is not implemented yet.");
+
+		// Arrange nodes along the crossroads of the grid
+		uint32_t dist=12;
+		uint32_t block = 300;
+		m_nNodes = dist * dist;
+
+		// Start in the middle
+		m_startingNode = (m_nNodes / 2) - 1;
+
+		for (uint32_t i = 0; i < dist; i++) {
+			for (uint32_t j = 0; j < dist; j++) {
+					m_fixNodePosition.push_back (Vector (j*block, i*block, 0.0));
+			}
+		}
 	}
 	else if (m_scenario == 3)
 	{
@@ -655,15 +669,15 @@ FBVanetExperiment::Run ()
 
 	// Setup netanim config ?
 
-	std::cout << "[d] Parto. dovrei finire a " << m_TotalSimTime << std::endl;
-
 	Simulator::Stop (Seconds (m_TotalSimTime));
 	Simulator::Run ();
 
 	// [DEBUG] For intial debug
 	uint32_t cover = 1;
 	uint32_t circ = 0, circCont = 0;
-	uint32_t dist = 1;
+	uint32_t dist = 12;
+	uint32_t road = 3600;
+	uint32_t bord= (road/300)-1;
 	for (uint32_t i=0; i<m_nNodes; i++)
 	{
 		double distStart = CalculateDistance( GetNodeXPosition (m_adhocNodes.Get (i)),
@@ -698,7 +712,7 @@ FBVanetExperiment::Run ()
 
 	std::cout << circ << "/" << circCont <<": " << ((double)circ/(double)circCont) * 100 << "%" << std::endl;
 
-	for (uint32_t i = 0; i < m_nNodes; i++)
+	for (uint32_t i = 0; i < bord*4; i++)
 	{
 		std::cout << m_adhocNodes.Get (i)->GetNum() << " ";
 	}
