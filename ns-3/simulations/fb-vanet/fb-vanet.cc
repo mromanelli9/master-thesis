@@ -359,7 +359,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_rate ("2048bps"),
 		m_phyMode ("DsssRate11Mbps"),
 		m_mobility (1),
-		m_scenario (1),
+		m_scenario (2),
 		m_address ("10.1.255.255"),
 		m_port (9),
 		m_totalPacketReceived (0),
@@ -594,8 +594,6 @@ FBVanetExperiment::SetupScenario ()
 		m_nNodes = 700;
 		m_startingNode = (m_nNodes / 2) - 1;	// Start in the middle
 		m_actualRange = 300;
-		m_cwMin = 32;
-		m_cwMax = 1024;
 		uint32_t roadLength = 8000;
 		uint32_t distance = (roadLength / m_nNodes);
 
@@ -608,20 +606,33 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// Grid layout
 		m_mobility = 1;
+		m_actualRange = 300;
 
 		// Arrange nodes along the crossroads of the grid
-		uint32_t dist=12;
-		uint32_t block = 300;
-		m_nNodes = dist * dist;
+		uint32_t roadLength = 3600;	// (actually 4000x3900)
+		uint32_t nodeDistance = 12;	// distance between nodes (in meters)
+		uint32_t roadDistance = 300;	// distance between parallel roads (in meters)
 
-		// Start in the middle
-		m_startingNode = (m_nNodes / 2) - 1;
-
-		for (uint32_t i = 0; i < dist; i++) {
-			for (uint32_t j = 0; j < dist; j++) {
-					m_fixNodePosition.push_back (Vector (j*block, i*block, 0.0));
+		m_nNodes = 0;
+		for (uint32_t i = 0; i <= (roadLength / nodeDistance); i++) {
+			if ((i * nodeDistance) % roadDistance == 0)
+			{
+				for (uint32_t j = 0; j <= (roadLength / nodeDistance); j++)
+				{
+					m_fixNodePosition.push_back (Vector (j*nodeDistance, i*nodeDistance, 0.0));
+				}
+			}
+			else
+			{
+				for (uint32_t t = 0; t <= roadLength ; t += roadDistance)
+				{
+					m_fixNodePosition.push_back (Vector (t, i*nodeDistance, 0.0));
+				}
 			}
 		}
+
+		m_nNodes = m_fixNodePosition.size();
+		m_startingNode = (m_nNodes / 2) - 1;	// Start in the middle
 	}
 	else if (m_scenario == 3)
 	{
