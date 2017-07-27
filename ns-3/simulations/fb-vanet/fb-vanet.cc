@@ -359,7 +359,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_rate ("2048bps"),
 		m_phyMode ("DsssRate11Mbps"),
 		m_mobility (1),
-		m_scenario (2),
+		m_scenario (1),
 		m_address ("10.1.255.255"),
 		m_port (9),
 		m_totalPacketReceived (0),
@@ -381,8 +381,6 @@ FBVanetExperiment::~FBVanetExperiment ()
 void
 FBVanetExperiment::Simulate (int argc, char **argv)
 {
-	NS_LOG_INFO ("Enter 'FB Vanet Experiment' enviroment.");
-
 	// Initial configuration and parameters parsing
 	ParseCommandLineArguments (argc, argv);
 	ConfigureDefaults ();
@@ -593,20 +591,18 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// straight line, nodes in a row
 		m_mobility = 1;
-		m_nNodes = 10;
-		m_startingNode = 8;
+		m_nNodes = 700;
+		m_startingNode = (m_nNodes / 2) - 1;	// Start in the middle
+		m_actualRange = 300;
+		m_cwMin = 32;
+		m_cwMax = 1024;
+		uint32_t roadLength = 8000;
+		uint32_t distance = (roadLength / m_nNodes);
 
 		// Node positions (in meters) along the straight street (or line)
-		m_fixNodePosition.push_back( Vector (100.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (300.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (500.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (700.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (900.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (1000.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (1100.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (1500.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (1700.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (2000.0, 0.0, 0.0));
+		for (uint32_t i = 0; i < m_nNodes; i++) {
+			m_fixNodePosition.push_back( Vector (i * distance, 0.0, 0.0));
+		}
 	}
 	else if (m_scenario == 2)
 	{
