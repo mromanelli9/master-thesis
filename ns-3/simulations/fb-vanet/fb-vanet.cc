@@ -267,13 +267,6 @@ private:
 	void WaitAgain (Ptr<Node> node, int phase, uint32_t rs, std::vector<int> par);
 
 	/**
-	 * \brief Print node position
-	 * \param node node
-	 * \return none
-	 */
-	void PrintPosition (Ptr<Node> node);
-
-	/**
 	 * \brief Stop a node
 	 * \param node node
 	 * \return none
@@ -318,6 +311,12 @@ private:
 	 */
 	Ipv4Address GetAddress (Ptr<Node> node);
 
+	/**
+   * \brief Prints actual position and velocity when a course change event occurs
+   * \return none
+   */
+	static void
+	CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility);
 
 	double									m_txp;
 	uint32_t 								m_nNodes;
@@ -468,6 +467,11 @@ FBVanetExperiment::ConfigureMobility ()
 		ns2.Install (); // configure movements for each node, while reading trace file
 		// initially assume all nodes are not moving
 	}
+
+	// Configure callback for logging
+	std::ofstream m_os;
+	Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
+									 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
 }
 
 void
@@ -693,7 +697,7 @@ FBVanetExperiment::ProcessOutputs ()
 void
 FBVanetExperiment::Run ()
 {
-	NS_LOG_INFO ("Run simulation.");
+	NS_LOG_INFO ("Run simulation...");
 
 	// Setup netanim config ?
 
@@ -1042,12 +1046,24 @@ FBVanetExperiment::WaitAgain (Ptr<Node> node, int phase, uint32_t rs, std::vecto
 	}
 }
 
+// Prints actual position and velocity when a course change event occurs
 void
-FBVanetExperiment::PrintPosition (Ptr<Node> node)
+FBVanetExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility)
 {
-	Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
-	Vector pos = positionmodel->GetPosition ();
-	NS_LOG_INFO ("x = " << pos.x << "; y = " << pos.y << "; z = " << pos.z);
+  Vector pos = mobility->GetPosition (); // Get position
+  Vector vel = mobility->GetVelocity (); // Get velocity
+
+  pos.z = 1.5;
+
+  int nodeId = mobility->GetObject<Node> ()->GetId ();
+
+  NS_LOG_DEBUG ("Changing pos for node <" << nodeId << "> at " << Simulator::Now ()
+	 							<< "\n\tPOS: x=" << pos.x <<
+								", y=" << pos.y <<
+								", z=" << pos.z <<
+								";\n\tVEL:" << vel.x <<
+								", y=" << vel.y <<
+								", z=" << vel.z );
 }
 
 void
