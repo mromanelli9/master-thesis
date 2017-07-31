@@ -892,7 +892,7 @@ FBVanetExperiment::GenerateAlertTraffic (Ptr<Node> node)
 	// Current node address
 	Ipv4Address addr = GetAddress(node);
 
-	NS_LOG_INFO (addr<<": sending Alert");
+	NS_LOG_DEBUG (addr << ": sending Alert Message.");
 
 	sock->Send (p);
 	node->SetSent (true);
@@ -1001,8 +1001,8 @@ FBVanetExperiment::Broad (Ptr<Node> node, int phase, uint32_t rs, int sx, int sy
 
 		// My address
 		Ipv4Address addr = GetAddress (node);
-		// state = phase;	// [DEBUG]: what for?
-		NS_LOG_DEBUG (addr<<" (" << phase << "): forwarding alert.");
+		
+		NS_LOG_DEBUG (addr<<" (" << phase << "): forwarding Alert Message.");
 
 		sock->Send (p);
 		node->SetSent (true);
