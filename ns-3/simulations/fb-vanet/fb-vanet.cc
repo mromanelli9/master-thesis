@@ -345,6 +345,7 @@ private:
 	uint32_t								m_loadBuildings;
 	std::string							m_bldgFile;
 	std::string 						m_CSVfileName;
+	std::string							m_animationFileName;
 	double									m_TotalSimTime;
 };
 
@@ -376,7 +377,8 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_traceFile (""),
 		m_loadBuildings (0),
 		m_bldgFile (""),
-		m_CSVfileName ("manet-routing.output.csv"),
+		m_CSVfileName ("outputs/manet-routing.output.csv"),
+		m_animationFileName ("outputs/fb-vanet-animation.xml"),
 		m_TotalSimTime (990000.01)	// [DEBUG]
 {
 	srand (time (0));
@@ -501,6 +503,14 @@ FBVanetExperiment::SetupAdhocDevices ()
 	YansWifiChannelHelper wifiChannel;
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
 	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100));
+
+	// Propagation loss models are additive.  If Obstacle modeling is included,
+	// then we add obstacle-shadowing
+	if (m_loadBuildings != 0)
+	{
+		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel");
+	}
+
 	wifiPhy.SetChannel (wifiChannel.Create ());
 
 	//Add a mac and disable rate control
@@ -730,7 +740,13 @@ FBVanetExperiment::Run ()
 {
 	NS_LOG_INFO ("Run simulation...");
 
-	// Setup netanim config ?
+	// Create the animation object and configure for specified output
+	// AnimationInterface anim (m_animationFileName);
+	// anim.SetMobilityPollInterval (Seconds (0.250));
+	// anim.EnablePacketMetadata (true);
+	// anim.EnableIpv4L3ProtocolCounters (Seconds (0), Seconds (m_TotalSimTime));
+	// anim.EnableWifiMacCounters (Seconds (0), Seconds (m_TotalSimTime));
+	// anim.EnableWifiPhyCounters (Seconds (0), Seconds (m_TotalSimTime));
 
 	Simulator::Stop (Seconds (m_TotalSimTime));
 	Simulator::Run ();
@@ -1001,7 +1017,7 @@ FBVanetExperiment::Broad (Ptr<Node> node, int phase, uint32_t rs, int sx, int sy
 
 		// My address
 		Ipv4Address addr = GetAddress (node);
-		
+
 		NS_LOG_DEBUG (addr<<" (" << phase << "): forwarding Alert Message.");
 
 		sock->Send (p);
