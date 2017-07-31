@@ -702,9 +702,27 @@ FBVanetExperiment::RunSimulation ()
 void
 FBVanetExperiment::ProcessOutputs ()
 {
-	NS_LOG_INFO ("Process outputs.");
+	// NS_LOG_INFO ("Process outputs.");
 
-	// TODO
+	// Print some statistics
+	uint32_t received, sent = 0;
+
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		Ptr<Node> node = m_adhocNodes.Get (i);
+
+		if (node->GetReceived ())
+			received++;
+
+		if (node->GetSent ())
+			sent++;
+	}
+
+	NS_LOG_INFO ("Number of nodes that received a message: " << ((received/(double)m_nNodes) * 100) << "%.");
+	NS_LOG_INFO ("Number of nodes that send a message: " << ((sent/(double)m_nNodes) * 100) << "%.");
+
+	NS_LOG_INFO ("Total messages sent: " << m_totalPacketSent << ".");
+	NS_LOG_INFO ("Total messages received: " << m_totalPacketReceived << ".");
 }
 
 void
@@ -716,57 +734,6 @@ FBVanetExperiment::Run ()
 
 	Simulator::Stop (Seconds (m_TotalSimTime));
 	Simulator::Run ();
-
-	// [DEBUG] For intial debug
-	uint32_t cover = 1;
-	uint32_t circ = 0, circCont = 0;
-	uint32_t dist = 12;
-	uint32_t road = 3600;
-	uint32_t bord= (road/300)-1;
-	for (uint32_t i=0; i<m_nNodes; i++)
-	{
-		double distStart = CalculateDistance( GetNodeXPosition (m_adhocNodes.Get (i)),
-																					GetNodeYPosition (m_adhocNodes.Get (i)),
-																					GetNodeXPosition (m_adhocNodes.Get (m_startingNode)),
-																					GetNodeYPosition (m_adhocNodes.Get (m_startingNode)));
-
-		if ( i != m_startingNode && distStart > 0 &&  ((distStart - m_rCirc <= (dist / 2) && (distStart - m_rCirc) >= 0) || (m_rCirc - distStart <= (dist / 2) && distStart - m_rCirc <= 0)))
-		{
-			circCont++;
-
-			if (m_adhocNodes.Get (i)->GetReceived ())
-				circ++;
-		}
-
-		if (m_adhocNodes.Get (i)->GetReceived ())
-			cover++;
-		else
-		{
-			std::cout << i <<" didn't receive: (" << GetNodeXPosition (m_adhocNodes.Get (i)) << ";" << GetNodeYPosition (m_adhocNodes.Get (i)) << ")\n";
-		}
-
-		if (!m_adhocNodes.Get(i)->GetSent ())
-		{
-			std::cout<<i<<" didn't send: (" << GetNodeXPosition (m_adhocNodes.Get (i)) << ";" << GetNodeYPosition (m_adhocNodes.Get (i)) << ")" << std::endl;
-		}
-	}
-
-	std::cout << m_actualRange << " m/" << m_estimatedRange << " max/" << m_nNodes << " cars/" << std::endl;
-
-	std::cout << cover << "/" << m_nNodes << ": " << ((double) cover / (double) m_nNodes) * 100 << "%" << std::endl;
-
-	std::cout << circ << "/" << circCont <<": " << ((double)circ/(double)circCont) * 100 << "%" << std::endl;
-
-	for (uint32_t i = 0; i < bord*4; i++)
-	{
-		std::cout << m_adhocNodes.Get (i)->GetNum() << " ";
-	}
-	std::cout << std::endl;
-
-	std::cout<<"Messages sent: " << m_totalPacketSent << std::endl;
-
-	std::cout<<"Messages received: " << m_totalPacketReceived << std::endl;
-
 
 	Simulator::Destroy ();
 }
@@ -1035,7 +1002,7 @@ FBVanetExperiment::Broad (Ptr<Node> node, int phase, uint32_t rs, int sx, int sy
 		// My address
 		Ipv4Address addr = GetAddress (node);
 		// state = phase;	// [DEBUG]: what for?
-		NS_LOG_INFO (addr<<" (" << phase << "): forwarding alert.");
+		NS_LOG_DEBUG (addr<<" (" << phase << "): forwarding alert.");
 
 		sock->Send (p);
 		node->SetSent (true);
