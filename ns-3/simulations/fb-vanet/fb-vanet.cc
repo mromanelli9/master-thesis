@@ -44,6 +44,7 @@
 #include "ns3/dsdv-module.h"
 #include "ns3/dsr-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/topology.h"
 #include "ns3/netanim-module.h"
 
 using namespace ns3;
@@ -340,6 +341,9 @@ private:
 	uint32_t								m_cwMax;
 	uint32_t 								m_packetPayloadSize;
 	uint32_t								m_startingNode;
+	std::string							m_traceFile;
+	uint32_t								m_loadBuildings;
+	std::string							m_bldgFile;
 	std::string 						m_CSVfileName;
 	double									m_TotalSimTime;
 };
@@ -368,6 +372,9 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_cwMax (1024),
 		m_packetPayloadSize (100),
 		m_startingNode (0),
+		m_traceFile (""),
+		m_loadBuildings (0),
+		m_bldgFile (""),
 		m_CSVfileName ("manet-routing.output.csv"),
 		m_TotalSimTime (990000.01)	// [DEBUG]
 {
@@ -454,7 +461,12 @@ FBVanetExperiment::ConfigureMobility ()
 	}
 	else
 	{
-		NS_LOG_ERROR ("Mobility 2 is not implemented yet.");
+		// Create Ns2MobilityHelper with the specified trace log file as parameter
+		Ns2MobilityHelper ns2 = Ns2MobilityHelper (m_traceFile);
+		NS_LOG_UNCOND ("Loading ns2 mobility file \"" << m_traceFile << "\".");
+
+		ns2.Install (); // configure movements for each node, while reading trace file
+		// initially assume all nodes are not moving
 	}
 }
 
@@ -576,6 +588,9 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("scenario", "1=straight street, 2=grid layout, 3=real world", m_scenario);
 	cmd.AddValue ("address", "IP address", m_address);
 	cmd.AddValue ("port", "IP port", m_port);
+	cmd.AddValue ("traceFile", "Ns2 movement trace file", m_traceFile);
+	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
+	cmd.AddValue ("bldgFile", "Polyconvert obstacles file", m_bldgFile);
 	cmd.AddValue ("CSVfileName", "The name of the CSV output file name", m_CSVfileName);
 	cmd.AddValue ("totaltime", "Simulation end time", m_TotalSimTime);
 
@@ -593,7 +608,6 @@ FBVanetExperiment::SetupScenario ()
 		m_mobility = 1;
 		m_nNodes = 700;
 		m_startingNode = (m_nNodes / 2) - 1;	// Start in the middle
-		m_actualRange = 300;
 		uint32_t roadLength = 8000;
 		uint32_t distance = (roadLength / m_nNodes);
 
@@ -606,7 +620,6 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// Grid layout
 		m_mobility = 1;
-		m_actualRange = 300;
 
 		// Arrange nodes along the crossroads of the grid
 		uint32_t roadLength = 3600;	// (actually 4000x3900)
@@ -637,7 +650,15 @@ FBVanetExperiment::SetupScenario ()
 	else if (m_scenario == 3)
 	{
 		m_mobility = 2;
-		NS_LOG_ERROR ("Scenario 3 is not implemented yet.");
+		m_nNodes = 22;	// TODO: check value
+		m_traceFile = "inputs/Blocco-IME.ns2mobility.xml";
+		m_bldgFile = "inputs/Blocco-IME.poly.xml";
+
+		if (m_loadBuildings != 0)
+		{
+			NS_LOG_UNCOND ("Loading buildings file \"" << m_bldgFile << "\".");
+			Topology::LoadBuildings (m_bldgFile);
+		}
 	}
 }
 
