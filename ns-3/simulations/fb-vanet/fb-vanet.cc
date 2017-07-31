@@ -325,6 +325,7 @@ private:
 	Ipv4InterfaceContainer	m_adhocInterfaces;
 	uint32_t								m_actualRange;
 	uint32_t								m_estimatedRange;
+	uint32_t								m_estimationProtocol;
 	bool										m_flooding;
 	uint32_t								m_rCirc;
 	std::string 						m_rate;
@@ -357,6 +358,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_nNodes (10),
 		m_actualRange (300),
 		m_estimatedRange (0),
+		m_estimationProtocol (1),
 		m_flooding (true),
 		m_rCirc (1000),
 		m_rate ("2048bps"),
@@ -410,10 +412,21 @@ FBVanetExperiment::Simulate (int argc, char **argv)
 void
 FBVanetExperiment::ConfigureDefaults ()
 {
-
 	Config::SetDefault ("ns3::OnOffApplication::PacketSize",StringValue ("64"));
 	Config::SetDefault ("ns3::OnOffApplication::DataRate",  StringValue (m_rate));
 	Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (m_phyMode));
+
+	if (m_estimationProtocol == 1) {
+		m_estimatedRange = 0;
+	}
+	else if (m_estimationProtocol == 2)
+	{
+		m_estimatedRange = 300;
+	}
+	else if (m_estimationProtocol == 3)
+	{
+		m_estimatedRange = 1000;
+	}
 }
 
 void
@@ -582,7 +595,7 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("txp", "Transmit power (dB), e.g. txp=7.5", m_txp);
 	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
-	// cmd.AddValue ("estimatedRange", "Estimated transimision range (meters)", m_estimatedRange);	// disabled for now
+	cmd.AddValue ("estimationProtocol", "Estimantion protoco: 1=FB, 2=C300, 3=C1000", m_estimationProtocol);
 	cmd.AddValue ("flooding", "Enable flooding", m_flooding);
 	cmd.AddValue ("rCirc", "Vehicles transimision area" , m_rCirc);
 	cmd.AddValue ("rate", "Rate", m_rate);
