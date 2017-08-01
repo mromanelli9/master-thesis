@@ -364,7 +364,7 @@ private:
 
 FBVanetExperiment::FBVanetExperiment ()
 	: m_txp (7.5),
-		m_nNodes (10),
+		m_nNodes (0),	// random value, it will be set later
 		m_actualRange (300),
 		m_estimatedRange (0),
 		m_estimationProtocol (1),
@@ -373,7 +373,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_rate ("2048bps"),
 		m_phyMode ("DsssRate11Mbps"),
 		m_mobility (1),
-		m_scenario (2),
+		m_scenario (1),
 		m_address ("10.1.255.255"),
 		m_port (9),
 		m_totalPacketReceived (0),
@@ -383,14 +383,14 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_packetPayloadSize (100),
 		m_startingNode (0),
 		m_totalHelloMessages (1200),
-		m_helloPhaseStartTime (5),
-		m_alertPhaseStartTime (40000),
+		m_helloPhaseStartTime (5),	// [seconds]
+		m_alertPhaseStartTime (40000),	// [seconds]
 		m_traceFile (""),
 		m_loadBuildings (0),
 		m_bldgFile (""),
 		m_CSVfileName ("outputs/manet-routing.output.csv"),
 		m_animationFileName ("outputs/fb-vanet-animation.xml"),
-		m_TotalSimTime (990000.01)	// [DEBUG]
+		m_TotalSimTime (990000.01)	// TODO: this need to change
 {
 	srand (time (0));
 }
@@ -500,12 +500,12 @@ FBVanetExperiment::ConfigureMobility ()
 
 		ns2.Install (); // configure movements for each node, while reading trace file
 		// initially assume all nodes are not moving
-	}
 
-	// Configure callback for logging
-	std::ofstream m_os;
-	Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
-									 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
+		// Configure callback for logging
+		std::ofstream m_os;
+		Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
+										 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
+	}
 }
 
 void
@@ -755,7 +755,8 @@ FBVanetExperiment::ProcessOutputs ()
 	NS_LOG_INFO ("Print some statistics.");
 
 	// Print some statistics
-	uint32_t received, sent = 0;
+	uint32_t received = 0;
+	uint32_t sent = 0;
 
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
