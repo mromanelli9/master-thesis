@@ -23,7 +23,13 @@
 * Class Diagram:
 *   main()
 *     +--uses-- FBVanetExperiment
-*
+*/
+
+/*
+* Timeline (seconds): TODO
+*  + 5						start simulation
+*	 + 5-?					Hello messages (1200 messages)
+*	 + ?-						Alert messages
 */
 
 /* -----------------------------------------------------------------------------
@@ -35,6 +41,7 @@
 #include <iostream>
 
 #include "ns3/core-module.h"
+#include "ns3/node-list.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
@@ -214,10 +221,9 @@ private:
 
 	/**
 	 * \brief Send a Hello message to all nodes in its range
-	 * \param socket socket of the sender
 	 * \return none
 	 */
-	void GenerateHelloTraffic (Ptr<Socket> socket);
+	void GenerateHelloMessage ();
 
 	/**
 	 * \brief Send an Alert message to the nodes (in its range)
@@ -302,7 +308,7 @@ private:
 	 * \param count number of nodes that haven't send the message yet
 	 * \return none
 	 */
-	void Hello (int count);
+	void StartHelloPhase ();
 
 	/**
 	 * \brief Get the address of a node
@@ -341,6 +347,9 @@ private:
 	uint32_t								m_cwMax;
 	uint32_t 								m_packetPayloadSize;
 	uint32_t								m_startingNode;
+	uint32_t								m_totalHelloMessages;
+	uint32_t								m_helloPhaseStartTime;
+	uint32_t								m_alertPhaseStartTime;
 	std::string							m_traceFile;
 	uint32_t								m_loadBuildings;
 	std::string							m_bldgFile;
@@ -374,6 +383,9 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_cwMax (1024),
 		m_packetPayloadSize (100),
 		m_startingNode (0),
+		m_totalHelloMessages (1200),
+		m_helloPhaseStartTime (5),
+		m_alertPhaseStartTime (45000)
 		m_traceFile (""),
 		m_loadBuildings (0),
 		m_bldgFile (""),
@@ -586,14 +598,13 @@ void
 FBVanetExperiment::ScheduleFBProtocol ()
 {
 	// // Hello messages
-	if ( m_estimatedRange == 0)
+	if (m_estimationProtocol == 1)
 	{
-		Simulator::Schedule (Seconds (500), &FBVanetExperiment::Hello, this, 60);
+		Simulator::Schedule (Seconds (m_helloPhaseStartTime), &FBVanetExperiment::StartHelloPhase, this);
 	}
 
 	// Generate alert message
-	// TODO: this if for initial debug only
-	Simulator::ScheduleWithContext (m_adhocNodes.Get (m_startingNode)->GetId (), Seconds (45000), &FBVanetExperiment::GenerateAlertTraffic, this, m_adhocNodes.Get (m_startingNode));
+	Simulator::ScheduleWithContext (m_adhocNodes.Get (m_startingNode)->GetId (), Seconds (m_alertPhaseStartTime), &FBVanetExperiment::GenerateAlertTraffic, this, m_adhocNodes.Get (m_startingNode));
 }
 
 void
@@ -861,9 +872,11 @@ FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
 }
 
 void
-FBVanetExperiment::GenerateHelloTraffic (Ptr<Socket> socket)
+FBVanetExperiment::GenerateHelloMessage ()
 {
-	Ptr<Node> node= socket->GetNode();
+	Ptr<Node> node= NodeList::GetNode (Simulator::GetContext());
+
+	NS_LOG_DEBUG ("Generate Hello Message (node <" << node->GetId() << ">).");
 
 	// Create a packet with the correct parameters taken from the node
 	FBHeader header;
@@ -1096,30 +1109,28 @@ FBVanetExperiment::CalculateDistance (int x1, int y1, int x2, int y2)
 }
 
 void
-FBVanetExperiment::Hello (int count)
+FBVanetExperiment::StartHelloPhase ()
 {
-	std::vector<int> he;
-	uint32_t hel = 20;
-	int pos;
+	uint32_t timeMin = 10;
+	uint32_t timeMax = 30;
 
-	if (count > 0)
+	Ptr<Node> node;
+	uint32_t pos;
+	uint32_t wait = 0;
+
+	for (uint32_t i = 0; i < m_totalHelloMessages; i++)
 	{
-		for (uint32_t i = 0; i < hel; i++)
-		{
-			pos = rand() % m_nNodes;
-			he.push_back (pos);
+		// select a node randomly
+		pos = rand() % m_nNodes;
+		node = m_adhocNodes.Get (pos);
 
-			Ptr<Socket> sk =  m_adhocNodes.Get (pos)->getBroadcast ();
-			Simulator::ScheduleWithContext (m_adhocNodes.Get (pos)->GetId (),
-																			Seconds (i * 40),
-																			&FBVanetExperiment::GenerateHelloTraffic, this,
-																			sk);
-		}
+		// select a random time between <timeMin> and <timeMax> seconds
+		wait += (rand() % (timeMax-timeMin)) + timeMin;
 
-		// Other nodes must send Hello messages
-		Simulator::Schedule (Seconds (250),
-												&FBVanetExperiment::Hello, this,
-												count - 1);
+		// Schedule the generation of the current Hello message
+		Simulator::ScheduleWithContext (node->GetId (),
+																		Seconds (wait),
+																		&FBVanetExperiment::GenerateHelloMessage, this);
 	}
 }
 
