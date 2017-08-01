@@ -385,7 +385,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_startingNode (0),
 		m_totalHelloMessages (1200),
 		m_helloPhaseStartTime (5),
-		m_alertPhaseStartTime (45000)
+		m_alertPhaseStartTime (45000),
 		m_traceFile (""),
 		m_loadBuildings (0),
 		m_bldgFile (""),
@@ -426,6 +426,8 @@ FBVanetExperiment::Simulate (int argc, char **argv)
 void
 FBVanetExperiment::ConfigureDefaults ()
 {
+	NS_LOG_FUNCTION (this);
+
 	Config::SetDefault ("ns3::OnOffApplication::PacketSize",StringValue ("64"));
 	Config::SetDefault ("ns3::OnOffApplication::DataRate",  StringValue (m_rate));
 	Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (m_phyMode));
@@ -446,6 +448,8 @@ FBVanetExperiment::ConfigureDefaults ()
 void
 FBVanetExperiment::ParseCommandLineArguments (int argc, char **argv)
 {
+	NS_LOG_FUNCTION (this);
+
 	CommandSetup (argc, argv);
 	SetupScenario ();
 }
@@ -453,13 +457,17 @@ FBVanetExperiment::ParseCommandLineArguments (int argc, char **argv)
 void
 FBVanetExperiment::ConfigureNodes ()
 {
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Setup nodes.");
+
 	m_adhocNodes.Create (m_nNodes);
 }
 
 void
 FBVanetExperiment::ConfigureMobility ()
 {
-	NS_LOG_INFO ("Configure mobility (" << m_mobility << ").");
+	NS_LOG_FUNCTION (this << m_mobility);
+	NS_LOG_INFO ("Configure current mobility mode (" << m_mobility << ").");
 
 	if (m_mobility == 1)
 	{
@@ -504,6 +512,7 @@ FBVanetExperiment::ConfigureMobility ()
 void
 FBVanetExperiment::SetupAdhocDevices ()
 {
+	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure channels.");
 
 	// Setting up wifi phy and channel using helpers
@@ -540,7 +549,8 @@ FBVanetExperiment::SetupAdhocDevices ()
 void
 FBVanetExperiment::ConfigureConnections ()
 {
-	NS_LOG_INFO ("Configure Internet stack.");
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Configure connections.");
 
 	InternetStackHelper internet;
 	internet.Install (m_adhocNodes);
@@ -553,8 +563,6 @@ FBVanetExperiment::ConfigureConnections ()
 	OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address ());
 	onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
 	onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
-
-	NS_LOG_INFO ("Configure connections.");
 
 	// Set receiver (for each node)
 	for (uint32_t j = 0; j < m_nNodes; j++)
@@ -578,6 +586,9 @@ FBVanetExperiment::ConfigureConnections ()
 void
 FBVanetExperiment::SetupFBProtocol ()
 {
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Configure FB protocol parameters.");
+
 	// Configure FB protocol parameters for all nodes
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
@@ -588,6 +599,8 @@ FBVanetExperiment::SetupFBProtocol ()
 void
 FBVanetExperiment::ConfigureTracingAndLogging ()
 {
+	NS_LOG_FUNCTION (this);
+
 	// Enable logging from the ns2 helper
 	LogComponentEnable ("Ns2MobilityHelper", LOG_LEVEL_DEBUG);
 
@@ -597,6 +610,9 @@ FBVanetExperiment::ConfigureTracingAndLogging ()
 void
 FBVanetExperiment::ScheduleFBProtocol ()
 {
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Schedule FB protocol phases.");
+
 	// // Hello messages
 	if (m_estimationProtocol == 1)
 	{
@@ -610,6 +626,9 @@ FBVanetExperiment::ScheduleFBProtocol ()
 void
 FBVanetExperiment::CommandSetup (int argc, char **argv)
 {
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Parsing command line arguments.");
+
 	CommandLine cmd;
 
 	// allow command line overrides
@@ -638,7 +657,8 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 void
 FBVanetExperiment::SetupScenario ()
 {
-	NS_LOG_INFO ("Setup current scenario (" <<  m_scenario << ").");
+	NS_LOG_FUNCTION (this << m_scenario);
+	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
 
 	if (m_scenario == 1)
 	{
@@ -703,6 +723,8 @@ FBVanetExperiment::SetupScenario ()
 void
 FBVanetExperiment::SetupFBParameters (Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << node);
+
 	node->SetCMFR (m_estimatedRange);
 	node->SetLMFR (m_estimatedRange);
 	node->SetCMBR (m_estimatedRange);
@@ -717,13 +739,17 @@ FBVanetExperiment::SetupFBParameters (Ptr<Node> node)
 void
 FBVanetExperiment::RunSimulation ()
 {
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Run simulation...");
+
 	Run ();
 }
 
 void
 FBVanetExperiment::ProcessOutputs ()
 {
-	// NS_LOG_INFO ("Process outputs.");
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("\nPrint some statistics.");
 
 	// Print some statistics
 	uint32_t received, sent = 0;
@@ -749,7 +775,7 @@ FBVanetExperiment::ProcessOutputs ()
 void
 FBVanetExperiment::Run ()
 {
-	NS_LOG_INFO ("Run simulation...");
+	NS_LOG_FUNCTION (this);
 
 	// Create the animation object and configure for specified output
 	// AnimationInterface anim (m_animationFileName);
@@ -772,6 +798,8 @@ FBVanetExperiment::Run ()
 Ptr<Socket>
 FBVanetExperiment::SetupPacketReceive (Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << node);
+
 	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 	Ptr<Socket> sink = Socket::CreateSocket (node, tid);
 	InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
@@ -784,6 +812,8 @@ FBVanetExperiment::SetupPacketReceive (Ptr<Node> node)
 Ptr<Socket>
 FBVanetExperiment::SetupPacketSend (Ipv4Address addr, Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << addr << node);
+
 	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 	Ptr<Socket> sender = Socket::CreateSocket (node, tid);
 	InetSocketAddress remote = InetSocketAddress (addr, m_port);	// [DEBUG] why this way here and the other way above?
@@ -796,6 +826,8 @@ FBVanetExperiment::SetupPacketSend (Ipv4Address addr, Ptr<Node> node)
 void
 FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
 {
+	NS_LOG_FUNCTION (this << socket);
+
 	Ptr<Packet> packet;
 	Address senderAddress;
 	Ptr<Node> node= socket->GetNode();
@@ -874,6 +906,8 @@ FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
 void
 FBVanetExperiment::GenerateHelloMessage ()
 {
+	NS_LOG_FUNCTION (this);
+
 	Ptr<Node> node= NodeList::GetNode (Simulator::GetContext());
 
 	NS_LOG_DEBUG ("Generate Hello Message (node <" << node->GetId() << ">).");
@@ -897,6 +931,8 @@ FBVanetExperiment::GenerateHelloMessage ()
 void
 FBVanetExperiment::GenerateAlertTraffic (Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << node);
+
 	Ptr<Packet> p= Create<Packet> (m_packetPayloadSize);
 	uint32_t LMBR, CMBR, maxi;
 	// Create a packet with the correct parameters taken from the node
@@ -933,6 +969,8 @@ FBVanetExperiment::GenerateAlertTraffic (Ptr<Node> node)
 void
 FBVanetExperiment::HandleHello (Ptr<Socket> socket, FBHeader head)
 {
+	NS_LOG_FUNCTION (this << socket << head);
+
 	Ptr<Node> node = socket->GetNode ();
 
 	// CMFR received
@@ -962,6 +1000,8 @@ FBVanetExperiment::HandleHello (Ptr<Socket> socket, FBHeader head)
 void
 FBVanetExperiment::HandleAlert (Ptr<Socket> socket, FBHeader head, int distance, int phase)
 {
+	NS_LOG_FUNCTION (this << socket << head << distance << phase);
+
 	Ptr<Node> node= socket->GetNode ();
 	int myPhase = node->GetPhase ();
 
@@ -1005,6 +1045,8 @@ FBVanetExperiment::HandleAlert (Ptr<Socket> socket, FBHeader head, int distance,
 void
 FBVanetExperiment::Broad (Ptr<Node> node, int phase, uint32_t rs, int sx, int sy)
 {
+	NS_LOG_FUNCTION (this << node << phase << rs << sx << sy);
+
 	// If I'm the first to wake up, I must forward the message
 	if ((!m_flooding && phase >= node->GetPhase ()) || (m_flooding && !node->GetSent ()) )
 	{
@@ -1042,6 +1084,8 @@ FBVanetExperiment::Broad (Ptr<Node> node, int phase, uint32_t rs, int sx, int sy
 void
 FBVanetExperiment::WaitAgain (Ptr<Node> node, int phase, uint32_t rs, std::vector<int> par)
 {
+	NS_LOG_FUNCTION (this << node << phase << rs << &par);
+
 	if (phase >= node->GetPhase ())
 	{
 		uint32_t rnd = (rand() % 20) + 1;
@@ -1059,6 +1103,8 @@ FBVanetExperiment::WaitAgain (Ptr<Node> node, int phase, uint32_t rs, std::vecto
 void
 FBVanetExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility)
 {
+	NS_LOG_FUNCTION ( &os << foo << mobility);	// problem with the argument *os
+
   Vector pos = mobility->GetPosition (); // Get position
   Vector vel = mobility->GetVelocity (); // Get velocity
 
@@ -1078,6 +1124,8 @@ FBVanetExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const Mo
 void
 FBVanetExperiment::StopNode (Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << node);
+
 	Ptr<ConstantVelocityMobilityModel> mob = node->GetObject<ConstantVelocityMobilityModel> ();
 	mob->SetVelocity (Vector (0, 0, 0));
 }
@@ -1085,6 +1133,8 @@ FBVanetExperiment::StopNode (Ptr<Node> node)
 int
 FBVanetExperiment::GetNodeXPosition (Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << node);
+
 	Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
 	Vector pos = positionmodel->GetPosition ();
 	return pos.x;
@@ -1093,6 +1143,8 @@ FBVanetExperiment::GetNodeXPosition (Ptr<Node> node)
 int
 FBVanetExperiment::GetNodeYPosition (Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << node);
+
 	Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
 	Vector pos = positionmodel->GetPosition ();
 	return pos.y;
@@ -1101,6 +1153,8 @@ FBVanetExperiment::GetNodeYPosition (Ptr<Node> node)
 double
 FBVanetExperiment::CalculateDistance (int x1, int y1, int x2, int y2)
 {
+	NS_LOG_FUNCTION (this << x1 << y1 << x2 << y2);
+
 	int distancex = (x2 - x1) * (x2 - x1);
 	int distancey = (y2 - y1) * (y2 - y1);
 	double distance = sqrt (distancex + distancey);
@@ -1111,6 +1165,8 @@ FBVanetExperiment::CalculateDistance (int x1, int y1, int x2, int y2)
 void
 FBVanetExperiment::StartHelloPhase ()
 {
+	NS_LOG_FUNCTION (this);
+
 	uint32_t timeMin = 10;
 	uint32_t timeMax = 30;
 
@@ -1137,6 +1193,8 @@ FBVanetExperiment::StartHelloPhase ()
 Ipv4Address
 FBVanetExperiment::GetAddress (Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << node);
+
 	Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
 	Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1,0);
 	Ipv4Address addr = iaddr.GetLocal ();
@@ -1151,6 +1209,7 @@ FBVanetExperiment::GetAddress (Ptr<Node> node)
 
 int main (int argc, char *argv[])
 {
+	// NS_LOG_FUNCTION_NOARGS;
 	NS_LOG_UNCOND ("FB Vanet Experiment.");
 
 	FBVanetExperiment experiment;
