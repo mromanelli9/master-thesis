@@ -227,10 +227,9 @@ private:
 
 	/**
 	 * \brief Send an Alert message to the nodes (in its range)
-	 * \param node sender
 	 * \return none
 	 */
-	void GenerateAlertTraffic (Ptr<Node> node);
+	void GenerateAlertMessage ();
 
 	/**
 	 * \brief Procedure triggered when a Hello packet is received
@@ -385,7 +384,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_startingNode (0),
 		m_totalHelloMessages (1200),
 		m_helloPhaseStartTime (5),
-		m_alertPhaseStartTime (45000),
+		m_alertPhaseStartTime (40000),
 		m_traceFile (""),
 		m_loadBuildings (0),
 		m_bldgFile (""),
@@ -613,14 +612,18 @@ FBVanetExperiment::ScheduleFBProtocol ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Schedule FB protocol phases.");
 
+	uint32_t alertPhaseStartTimeUpdated = m_helloPhaseStartTime;
 	// // Hello messages
 	if (m_estimationProtocol == 1)
 	{
 		Simulator::Schedule (Seconds (m_helloPhaseStartTime), &FBVanetExperiment::StartHelloPhase, this);
+		alertPhaseStartTimeUpdated = m_alertPhaseStartTime;
 	}
 
 	// Generate alert message
-	Simulator::ScheduleWithContext (m_adhocNodes.Get (m_startingNode)->GetId (), Seconds (m_alertPhaseStartTime), &FBVanetExperiment::GenerateAlertTraffic, this, m_adhocNodes.Get (m_startingNode));
+	Simulator::ScheduleWithContext (m_adhocNodes.Get (m_startingNode)->GetId (),
+																	Seconds (alertPhaseStartTimeUpdated),
+																	&FBVanetExperiment::GenerateAlertMessage, this);
 }
 
 void
@@ -749,7 +752,7 @@ void
 FBVanetExperiment::ProcessOutputs ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("\nPrint some statistics.");
+	NS_LOG_INFO ("Print some statistics.");
 
 	// Print some statistics
 	uint32_t received, sent = 0;
@@ -908,7 +911,7 @@ FBVanetExperiment::GenerateHelloMessage ()
 {
 	NS_LOG_FUNCTION (this);
 
-	Ptr<Node> node= NodeList::GetNode (Simulator::GetContext());
+	Ptr<Node> node = NodeList::GetNode (Simulator::GetContext());
 
 	NS_LOG_DEBUG ("Generate Hello Message (node <" << node->GetId() << ">).");
 
@@ -929,9 +932,11 @@ FBVanetExperiment::GenerateHelloMessage ()
 }
 
 void
-FBVanetExperiment::GenerateAlertTraffic (Ptr<Node> node)
+FBVanetExperiment::GenerateAlertMessage ()
 {
-	NS_LOG_FUNCTION (this << node);
+	NS_LOG_FUNCTION (this);
+
+	Ptr<Node> node = NodeList::GetNode (Simulator::GetContext());
 
 	Ptr<Packet> p= Create<Packet> (m_packetPayloadSize);
 	uint32_t LMBR, CMBR, maxi;
@@ -1112,7 +1117,7 @@ FBVanetExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const Mo
 
   int nodeId = mobility->GetObject<Node> ()->GetId ();
 
-  NS_LOG_DEBUG ("Changing pos for node <" << nodeId << "> at " << Simulator::Now ()
+  NS_LOG_DEBUG ("Changing pos for node <" << nodeId << "> at " << Simulator::Now ().GetSeconds ()
 	 							<< "\n\tPOS: x=" << pos.x <<
 								", y=" << pos.y <<
 								", z=" << pos.z <<
