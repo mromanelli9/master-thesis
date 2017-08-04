@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Wed Jul 19 15:46:50 2017 by SUMO polyconvert Version 0.30.0
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/polyconvertConfiguration.xsd">
+
+    <input>
+        <net-file value="Blocco-IME.net.xml"/>
+        <osm-files value="Blocco-IME.osm.xml"/>
+        <osm.keep-full-type value="true"/>
+    </input>
+
+    <output>
+        <output-file value="Blocco-IME.poly.xml"/>
+    </output>
+
+    <processing>
+        <poi-layer-offset value="5"/>
+    </processing>
+
+</configuration>
+-->
+
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+    <location netOffset="-725860.17,-5032651.18" convBoundary="-0.00,0.00,215.19,137.65" origBoundary="11.886430,45.410860,11.889195,45.412129" projParameter="+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"/>
+
+    <poly id="39686452" type="amenity.university" color="237,199,199" fill="1" layer="-1.00" shape="132.62,90.37 154.98,48.65 138.70,39.98 116.33,81.70 132.62,90.37"/>
+    <poly id="39686452#1" type="building.yes" color="255,230,230" fill="1" layer="-1.00" shape="132.62,90.37 154.98,48.65 138.70,39.98 116.33,81.70 132.62,90.37"/>
+    <poly id="62332429" type="amenity.university" color="237,199,199" fill="1" layer="-1.00" shape="79.68,73.38 119.66,61.39 108.52,24.49 88.84,30.39 68.53,36.48 79.68,73.38"/>
+    <poly id="62332429#1" type="building.university" color="255,230,230" fill="1" layer="-1.00" shape="79.68,73.38 119.66,61.39 108.52,24.49 88.84,30.39 68.53,36.48 79.68,73.38"/>
+    <poly id="75620081" type="building.yes" color="255,230,230" fill="1" layer="-1.00" shape="94.16,87.88 86.02,103.93 41.90,83.18 50.37,66.62 94.16,87.88"/>
+</additional>
