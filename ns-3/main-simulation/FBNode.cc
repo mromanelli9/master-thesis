@@ -19,6 +19,9 @@
  */
 
  #include "FBNode.h"
+ #include "ns3/log.h"
+ #include "ns3/uinteger.h"
+ #include "ns3/object-vector.h"
 
  namespace ns3 {
 
@@ -26,20 +29,41 @@
 
  NS_OBJECT_ENSURE_REGISTERED (FBNode);
 
- /**
-  * \brief A global switch to enable all checksums for all protocols.
-  */
- static GlobalValue g_checksumEnabled  = GlobalValue ("ChecksumEnabled",
-                                                      "A global switch to enable all checksums for all protocols",
-                                                      BooleanValue (false),
-                                                      MakeBooleanChecker ());
+ TypeId FBNode::GetTypeId (void)
+ {
+	 static TypeId tid = TypeId ("ns3::FBNode")
+	 	.SetParent<Node> ()
+		.SetGroupName ("Network")
+		.AddConstructor<FBNode> ()
+		.AddAttribute ("CMFR", "The value for the Current Maximum Front Range of this node.",
+									 TypeId::ATTR_GET || TypeId::ATTR_SET,
+									 UintegerValue (0),
+									 MakeUintegerAccessor (&FBNode::m_CMFR),
+									 MakeUintegerChecker<uint32_t> ())
+		.AddAttribute ("LMFR", "The value for the Last Maximum Front Range of this node.",
+										TypeId::ATTR_GET || TypeId::ATTR_SET,
+										 UintegerValue (0),
+										 MakeUintegerAccessor (&FBNode::m_LMFR),
+										 MakeUintegerChecker<uint32_t> ())
+		.AddAttribute ("CMBR", "The value for the Current Maximum Back Range of this node.",
+										TypeId::ATTR_GET || TypeId::ATTR_SET,
+										UintegerValue (0),
+										MakeUintegerAccessor (&FBNode::m_CMBR),
+										MakeUintegerChecker<uint32_t> ())
+		.AddAttribute ("LMBR", "The value for the Last Maximum Back Range of this node.",
+									 TypeId::ATTR_GET || TypeId::ATTR_SET,
+									 UintegerValue (0),
+									 MakeUintegerAccessor (&FBNode::m_LMBR),
+									 MakeUintegerChecker<uint32_t> ());
+
+	  return tid;
+	}
 
 	FBNode::FBNode()
-	  : Node(),
-			CMFR (0),
-			LMFR (0),
-			CMBR (0),
-			LMBR (0)
+	  : m_CMFR (0),
+			m_LMFR (0),
+			m_CMBR (0),
+			m_LMBR (0)
 	{
 	  NS_LOG_FUNCTION (this);
 	}

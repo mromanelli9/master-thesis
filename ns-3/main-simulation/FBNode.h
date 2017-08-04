@@ -21,6 +21,7 @@
 #define FBNODE_H
 
 #include "ns3/node.h"
+#include "ns3/object.h"
 
 namespace ns3 {
 
@@ -28,9 +29,11 @@ namespace ns3 {
  * \ingroup network
  * \brief A special node used in Fast Broadcast protocol.
  */
-class FBNode: public Node
+class FBNode : public Node
 {
 public:
+	static TypeId GetTypeId (void);
+
 	FBNode();
 	virtual ~FBNode();
 
@@ -84,8 +87,6 @@ private:
 	uint32_t 	  m_CMBR;	// Current Maximum Back Range
 	uint32_t 	  m_LMBR; // Last Maximum Back Range
 };
-
-
 
 } // namespace ns3
 
