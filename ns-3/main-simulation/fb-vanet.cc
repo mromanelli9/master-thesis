@@ -40,6 +40,9 @@
 #include "ns3/applications-module.h"
 #include "ns3/topology.h"
 #include "ns3/netanim-module.h"
+#include "ns3/ocb-wifi-mac.h"
+#include "ns3/wifi-80211p-helper.h"
+#include "ns3/wave-mac-helper.h"
 
 using namespace ns3;
 
@@ -49,6 +52,23 @@ NS_LOG_COMPONENT_DEFINE ("fb-vanet");
 *			CLASS AND METHODS PROTOTIPES
 * ------------------------------------------------------------------------------
 */
+
+static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize,
+                             uint32_t pktCount, Time pktInterval )
+{
+	NS_LOG_FUNCTION ("GenerateTraffic");
+
+  if (pktCount > 0)
+    {
+      socket->Send (Create<Packet> (pktSize));
+      Simulator::Schedule (pktInterval, &GenerateTraffic,
+                           socket, pktSize,pktCount - 1, pktInterval);
+    }
+  else
+    {
+      socket->Close ();
+    }
+}
 
 /**
  * \ingroup obstacle
@@ -167,6 +187,13 @@ private:
 	static void
 	CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility);
 
+	/**
+	 * \brief Process a received routing packet
+	 * \param socket the receiving socket
+	 * \return none
+	 */
+	void ReceivePacket (Ptr<Socket> socket);
+
 	double									m_txp;
 	uint32_t 								m_nNodes;
 	NodeContainer						m_adhocNodes;
@@ -234,7 +261,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_bldgFile (""),
 		m_CSVfileName ("outputs/manet-routing.output.csv"),
 		m_animationFileName ("outputs/fb-vanet-animation.xml"),
-		m_TotalSimTime (990000.01)	// TODO: this need to change
+		m_TotalSimTime (10)
 {
 	srand (time (0));
 }
@@ -321,16 +348,9 @@ FBVanetExperiment::ConfigureMobility ()
 		}
 
 		// Install nodes in a constant velocity mobility model
-		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
+		mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
 		mobility.SetPositionAllocator (positionAlloc);
 		mobility.Install (m_adhocNodes);
-
-		// Set the velocity value (constant) to zero
-		for (uint32_t i = 0 ; i < m_nNodes; i++)
-		{
-			Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
-			mob->SetVelocity (Vector(0, 0, 0));
-		}
 	}
 	else
 	{
@@ -354,13 +374,11 @@ FBVanetExperiment::SetupAdhocDevices ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure channels.");
 
-	// Setting up wifi phy and channel using helpers
-	WifiHelper wifi;
-	wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
 
-	//Setting max range
-	YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
-	YansWifiChannelHelper wifiChannel;
+	// The below set of helpers will help us to put together the wifi NICs we want
+  YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
+  YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
+
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
 	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100));
 
@@ -371,18 +389,21 @@ FBVanetExperiment::SetupAdhocDevices ()
 		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel");
 	}
 
-	wifiPhy.SetChannel (wifiChannel.Create ());
+  Ptr<YansWifiChannel> channel = wifiChannel.Create ();
+  wifiPhy.SetChannel (channel);
 
-	//Add a mac and disable rate control
-	WifiMacHelper wifiMac;
-	//NqosWifiMacHelper wifiMac=NqosWifiMacHelper::Default();
-	wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-																"DataMode",StringValue (m_phyMode),
-																"ControlMode",StringValue (m_phyMode));
-	wifiPhy.Set ("TxPowerStart",DoubleValue (m_txp));
-	wifiPhy.Set ("TxPowerEnd", DoubleValue (m_txp));
-	wifiMac.SetType ("ns3::AdhocWifiMac");
-	m_adhocDevices = wifi.Install (wifiPhy, wifiMac, m_adhocNodes);
+	// ns-3 supports generate a pcap trace
+  wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);
+  NqosWaveMacHelper wifi80211pMac = NqosWaveMacHelper::Default ();
+  Wifi80211pHelper wifi80211p = Wifi80211pHelper::Default ();
+
+	wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
+                                      "DataMode", StringValue (m_phyMode),
+                                      "ControlMode", StringValue (m_phyMode));
+  NetDeviceContainer m_adhocDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, m_adhocNodes);
+
+	// Tracing
+  wifiPhy.EnablePcap ("wave-simple-80211p", m_adhocDevices);
 }
 
 void
@@ -396,12 +417,26 @@ FBVanetExperiment::ConfigureConnections ()
 
 	Ipv4AddressHelper addressAdhoc;
 	addressAdhoc.SetBase ("10.1.0.0", "255.255.0.0");	// TODO: make them variable
-
 	m_adhocInterfaces = addressAdhoc.Assign (m_adhocDevices);
 
-	OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address ());
-	onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
-	onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
+	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+  Ptr<Socket> recvSink = Socket::CreateSocket (m_adhocNodes.Get (0), tid);
+  InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
+  recvSink->Bind (local);
+  recvSink->SetRecvCallback (MakeCallback (&FBVanetExperiment::ReceivePacket, this));
+
+  Ptr<Socket> source = Socket::CreateSocket (m_adhocNodes.Get (1), tid);
+  InetSocketAddress remote = InetSocketAddress (Ipv4Address ("255.255.255.255"), 80);
+  source->SetAllowBroadcast (true);
+  source->Connect (remote);
+
+	Simulator::ScheduleWithContext (source->GetNode ()->GetId (),
+                                  Seconds (1.0), &GenerateTraffic,
+                                  source, 1000, 2, Seconds (1));
+	//
+	// OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address ());
+	// onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
+	// onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
 
 	// Set receiver (for each node)
 	// for (uint32_t j = 0; j < m_nNodes; j++)
@@ -429,6 +464,8 @@ FBVanetExperiment::ConfigureTracingAndLogging ()
 
 	// Enable logging from the ns2 helper
 	LogComponentEnable ("Ns2MobilityHelper", LOG_LEVEL_DEBUG);
+
+	// wifi80211p.EnableLogComponents ();	// TODO
 
 	Packet::EnablePrinting ();
 }
@@ -474,9 +511,9 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// straight line, nodes in a row
 		m_mobility = 1;
-		m_nNodes = 700;
+		m_nNodes = 10;
 		m_startingNode = (m_nNodes / 2) - 1;	// Start in the middle
-		uint32_t roadLength = 8000;
+		uint32_t roadLength = 1000;
 		uint32_t distance = (roadLength / m_nNodes);
 
 		// Node positions (in meters) along the straight street (or line)
@@ -585,6 +622,24 @@ FBVanetExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const Mo
 								";\n\tVEL:" << vel.x <<
 								", y=" << vel.y <<
 								", z=" << vel.z );
+}
+
+void
+FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
+{
+	NS_LOG_FUNCTION (this << socket);
+
+	std::ostringstream oss;
+  Ptr<Packet> packet;
+  Address srcAddress;
+  while (socket->Recv ())
+  {
+		oss << Simulator::Now ().GetSeconds () << " " << socket->GetNode ()->GetId ();
+
+		oss << " received one packet!";
+  }
+
+	NS_LOG_DEBUG (oss);
 }
 
 /* -----------------------------------------------------------------------------
