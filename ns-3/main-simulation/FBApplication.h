@@ -22,6 +22,9 @@
 #define FBAPPLICATION_H
 
 #include "ns3/application.h"
+#include "ns3/network-module.h"
+
+#include "FBNode.h"
 
 namespace ns3 {
 
@@ -44,7 +47,7 @@ public:
 	/**
 	 * \brief Configure the application
 	 */
-	// void Setup ();
+	void Setup ();
 
 private:
 	/**
@@ -65,7 +68,18 @@ private:
 	 */
   virtual void StopApplication (void);
 
+	// TODO: headers
+	void StartEstimationPhase (void);
+	void StartBroadcastPhase (void);
+	void StopEstimationPhase (void);
+	void StopBroadcastPhase (void);
+
+	void HandleHelloMessage (Ptr<FBNode> node, Ptr<Packet> packet);
+	void HandleAlertMessage (Ptr<FBNode> node, Ptr<Packet> packet);
+
+
 private:
+	uint32_t				m_nNodes;	// number of nodes
 	bool            m_estimationPhaseRunning;	// true if the estimation phase is running
 	bool            m_broadcastPhaseRunning;	// true if the broadcast phase is running
 	EventId         m_estimationPhaseEvent;	// event associated to the estimation phase
