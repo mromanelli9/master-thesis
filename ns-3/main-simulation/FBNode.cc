@@ -19,9 +19,13 @@
  */
 
  #include "FBNode.h"
+
  #include "ns3/log.h"
  #include "ns3/uinteger.h"
  #include "ns3/object-vector.h"
+ #include "ns3/node-list.h"
+ #include "ns3/mobility-model.h"
+
 
  namespace ns3 {
 
@@ -54,7 +58,12 @@
 									 TypeId::ATTR_GET || TypeId::ATTR_SET,
 									 UintegerValue (0),
 									 MakeUintegerAccessor (&FBNode::m_LMBR),
-									 MakeUintegerChecker<uint32_t> ());
+									 MakeUintegerChecker<uint32_t> ())
+		.AddAttribute ("Position", "The spatial location (gps) of the node.",
+										TypeId::ATTR_GET,
+										Vector3DValue (Vector (0,0,0)),
+										MakeVector3DAccessor (&FBNode::m_position),
+										MakeVector3DChecker ());
 
 	  return tid;
 	}
@@ -63,7 +72,8 @@
 	  : m_CMFR (0),
 			m_LMFR (0),
 			m_CMBR (0),
-			m_LMBR (0)
+			m_LMBR (0),
+			m_position (Vector (0, 0, 0))
 	{
 	  NS_LOG_FUNCTION (this);
 	}
@@ -101,6 +111,13 @@
 	  return m_LMBR;
 	}
 
+	Vector
+	FBNode::GetPosition (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_position;
+	}
+
 	void
 	FBNode::SetCMFR (uint32_t value)
 	{
@@ -127,6 +144,25 @@
 	{
 	  NS_LOG_FUNCTION (this);
 	  m_LMBR = value;
+	}
+
+	Vector
+	FBNode::UpdatePosition (void)
+	{
+		NS_LOG_FUNCTION (this);
+		std::cout << "1" << std::endl;
+		Ptr<MobilityModel> positionmodel = this->GetObject<MobilityModel> ();
+
+		// Check if a mobility model exists
+		if (positionmodel != 0)
+		{
+			std::cout << "2" << positionmodel << std::endl;
+			Vector pos = positionmodel->GetPosition ();
+			std::cout << "3" << std::endl;
+			m_position = pos;
+		}
+
+		return m_position;
 	}
 
 } // namespace ns3

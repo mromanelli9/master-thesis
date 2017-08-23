@@ -17,12 +17,13 @@
  *
  * Authors: Marco Romanelli <marco.romanelli.1@studenti.unipd.it>
  */
- 
+
 #ifndef FBNODE_H
 #define FBNODE_H
 
 #include "ns3/node.h"
 #include "ns3/object.h"
+#include "ns3/vector.h"
 
 namespace ns3 {
 
@@ -59,6 +60,11 @@ public:
 	uint32_t GetLMBR (void) const;
 
 	/**
+	 * \returns the position of the node
+	 */
+	Vector GetPosition (void) const;
+
+	/**
 	 * \brief set the value of the CMFR field
 	 * \param value new value of CMFR
 	 */
@@ -82,11 +88,19 @@ public:
 	 */
 	void SetLMBR (uint32_t value);
 
-private:
+	/**
+	 * \brief update it's (node) current position
+	 * \returns the new position of the node
+	 */
+	Vector UpdatePosition (void);
+
+
 	uint32_t 	  m_CMFR;	// Current Maximum Front Range
 	uint32_t 	  m_LMFR;	// Last Maximum Front Range
 	uint32_t 	  m_CMBR;	// Current Maximum Back Range
 	uint32_t 	  m_LMBR; // Last Maximum Back Range
+
+	Vector 			m_position;	// node current position
 };
 
 } // namespace ns3
