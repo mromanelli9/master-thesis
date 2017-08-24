@@ -25,6 +25,8 @@
  #include "ns3/object-vector.h"
  #include "ns3/node-list.h"
  #include "ns3/mobility-model.h"
+ #include "ns3/socket.h"
+ #include "ns3/packet.h"
 
 
  namespace ns3 {
@@ -133,6 +135,13 @@
 	}
 
 	void
+	FBNode::SetSocket (Ptr<Socket> socket)
+	{
+		NS_LOG_FUNCTION (this << socket);
+		m_socket = socket;
+	}
+
+	void
 	FBNode::SetCMFR (uint32_t value)
 	{
 	  NS_LOG_FUNCTION (this << value);
@@ -173,5 +182,13 @@
 		}
 
 		return m_position;
+	}
+
+	void
+	FBNode::Send (Ptr<Packet> packet)
+	{
+		NS_LOG_FUNCTION (this << packet);
+
+		m_socket->Send (packet);
 	}
 } // namespace ns3

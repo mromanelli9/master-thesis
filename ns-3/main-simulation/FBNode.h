@@ -24,6 +24,9 @@
 #include "ns3/node.h"
 #include "ns3/object.h"
 #include "ns3/vector.h"
+#include "ns3/socket.h"
+#include "ns3/packet.h"
+
 
 namespace ns3 {
 
@@ -76,6 +79,12 @@ public:
 	void SetNode (Ptr<Node> node);
 
 	/**
+	 * \brief set the socket of the node
+	 * \param socket internet socket
+	 */
+	void SetSocket (Ptr<Socket> socket);
+
+	/**
 	 * \brief set the value of the CMFR field
 	 * \param value new value of CMFR
 	 */
@@ -105,13 +114,19 @@ public:
 	 */
 	Vector UpdatePosition (void);
 
-	Ptr<Node>		m_node;	// ns-3 node
-	uint32_t 	  m_CMFR;	// Current Maximum Front Range
-	uint32_t 	  m_LMFR;	// Last Maximum Front Range
-	uint32_t 	  m_CMBR;	// Current Maximum Back Range
-	uint32_t 	  m_LMBR; // Last Maximum Back Range
+	/**
+	 * \brief send a packet
+	 * \param packet packet to send
+	 */
+	void Send (Ptr<Packet> packet);
 
-	Vector 			m_position;	// node current position
+	Ptr<Node>			m_node;	// ns-3 node
+	Ptr<Socket> 	m_socket; // ns-3 socket
+	uint32_t 	  	m_CMFR;	// Current Maximum Front Range
+	uint32_t 	  	m_LMFR;	// Last Maximum Front Range
+	uint32_t 	  	m_CMBR;	// Current Maximum Back Range
+	uint32_t 	  	m_LMBR; // Last Maximum Back Range
+	Vector 				m_position;	// node current position
 };
 
 } // namespace ns3
