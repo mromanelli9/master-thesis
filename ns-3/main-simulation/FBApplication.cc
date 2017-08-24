@@ -72,7 +72,8 @@ FBApplication::FBApplication ()
 		m_cwMax (1024),
 		m_flooding (true),
 		m_turn (1),
-		m_estimatedRange (0)
+		m_estimatedRange (0),
+		m_packetPayload (100)
 {
 	NS_LOG_FUNCTION (this);
 }
@@ -82,20 +83,37 @@ FBApplication::~FBApplication ()
   NS_LOG_FUNCTION (this);
 }
 
+// void
+// FBApplication::Setup (NodeContainer nodes)
+// {
+// 	NS_LOG_FUNCTION (this << &nodes);
+// 	NS_LOG_INFO ("Setup FB Application (" << this << ").");
+//
+// 	// m_nodes will contain all nodes in <nodes>
+// 	m_nodes.Add (nodes);
+// 	m_nNodes = m_nodes.GetN ();
+//
+// 	// Setup FBnode parameters for all the nodes in m_nodes
+// 	for (uint32_t i = 0; i < m_nNodes; i++)
+// 		Ptr<FBNode> current = m_nodes.Get (i);
+// 		SetupFBNode (current);
+// }
+
 void
-FBApplication::Setup (NodeContainer nodes)
+FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> socket)
 {
-	NS_LOG_FUNCTION (this << &nodes);
-	NS_LOG_INFO ("Setup FB Application (" << this << ").");
+	NS_LOG_FUNCTION (this << node);
 
-	// m_nodes will contain all nodes in <nodes>
-	m_nodes.Add (nodes);
-	m_nNodes = m_nodes.GetN ();
+	Ptr<FBNode> fbNode = CreateObject<FBNode> ();
+	fbNode->SetNode (node);
+	fbNode->SetSocket (socket);
+	fbNode->SetCMFR (m_estimatedRange);
+	fbNode->SetLMFR (m_estimatedRange);
+	fbNode->SetCMBR (m_estimatedRange);
+	fbNode->SetLMBR (m_estimatedRange);
+	fbNode->UpdatePosition ();
 
-	// Setup FBnode parameters for all the nodes in m_nodes
-	for (uint32_t i = 0; i < m_nNodes; i++)
-		Ptr<FBNode> current = m_nodes.Get (i);
-		SetupFBNode (current);
+	m_nodes.push_back (fbNode);
 }
 
 void
@@ -112,18 +130,6 @@ FBApplication::StopApplication (void)
 	// Stop both phases
 	StopEstimationPhase ();
   StopBroadcastPhase ();
-}
-
-void
-FBApplication::SetupFBNode (Ptr<FBNode> node)
-{
-	NS_LOG_FUNCTION (this << node);
-
-	node->SetCMFR (m_estimatedRange);
-	node->SetLMFR (m_estimatedRange);
-	node->SetCMBR (m_estimatedRange);
-	node->SetLMBR (m_estimatedRange);
-	node->UpdatePosition ();
 }
 
 void
@@ -164,40 +170,40 @@ FBApplication::StopBroadcastPhase (void)
 	}
 }
 
-void
-FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
-{
-	NS_LOG_FUNCTION (this << node << fbHeader);
-	NS_LOG_INFO ("Handle a Hello Message (" << node->GetId () << ").");
+// void
+// FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
+// {
+// 	NS_LOG_FUNCTION (this << node << fbHeader);
+// 	NS_LOG_INFO ("Handle a Hello Message (" << node->GetId () << ").");
+//
+// 	// Retrieve CMFR from the packet received and CMBR from the current node
+// 	uint32_t otherCMFR = fbHeader.GetMaxRange ();	// TODO: controllare che max_range sia il cmfr
+// 	uint32_t myCMBR = node->GetCMBR ();
+//
+// 	// Retrieve the position of the current node
+// 	Vector currentPosition = node->UpdatePosition ();
+//
+// 	// Retrieve the position of the starter node
+// 	Vector starterPosition = fbHeader.GetStarterPosition ();
+//
+// 	// Compute distance
+// 	uint32_t distance = CalculateDistance (starterPosition, currentPosition);
+//
+// 	// Update new values
+// 	uint32_t m0 = std::max (myCMBR, otherCMFR);
+// 	uint32_t maxi = std::max (m0, distance);
+//
+// 	node->SetCMBR (maxi);
+// 	node->SetLMBR (myCMBR);
+// }
 
-	// Retrieve CMFR from the packet received and CMBR from the current node
-	uint32_t otherCMFR = fbHeader.GetMaxRange ();	// TODO: controllare che max_range sia il cmfr
-	uint32_t myCMBR = node->GetCMBR ();
-
-	// Retrieve the position of the current node
-	Vector currentPosition = node->UpdatePosition ();
-
-	// Retrieve the position of the starter node
-	Vector starterPosition = fbHeader.GetStarterPosition ();
-
-	// Compute distance
-	uint32_t distance = CalculateDistance (starterPosition, currentPosition);
-
-	// Update new values
-	uint32_t m0 = std::max (myCMBR, otherCMFR);
-	uint32_t maxi = std::max (m0, distance);
-
-	node->SetCMBR (maxi);
-	node->SetLMBR (myCMBR);
-}
-
-void
-FBApplication::HandleAlertMessage (Ptr<FBNode> node, FBHeader fbHeader, uint32_t distance)
-{
-	// We assume that the message is coming from the front
-
-	NS_LOG_FUNCTION (this << node << fbHeader << distance);
-	NS_LOG_INFO ("Handle an Alert Message (" << node->GetId () << ").");
+// void
+// FBApplication::HandleAlertMessage (Ptr<FBNode> node, FBHeader fbHeader, uint32_t distance)
+// {
+// 	// We assume that the message is coming from the front
+//
+// 	NS_LOG_FUNCTION (this << node << fbHeader << distance);
+// 	NS_LOG_INFO ("Handle an Alert Message (" << node->GetId () << ").");
 
 	// // Compute the size of the contention window
 	// uint32_t cmbr = node->GetCMBR ();
@@ -215,35 +221,26 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> node, FBHeader fbHeader, uint32_t
 	// {
 	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (0), &FBApplication::ForwardAlertMessage, this, ...); // TODO: add arguments
 	// }
-}
-
-// void
-// FBApplication::GenerateHelloMessage (void)
-// {
-// 	NS_LOG_FUNCTION (this);
-//
-// 	Ptr<Node> node = NodeList::GetNode (Simulator::GetContext());
-//
-// 	NS_LOG_DEBUG ("Generate Hello Message (node <" << node->GetId() << ">).");
-//
-// 	// Create a packet with the correct parameters taken from the node
-// 	FBHeader fbHeader;
-// 	header.setCMFR (node->GetCMBR ());
-//
-//
-//
-// 	header.setStartXPosition (GetNodeXPosition (node));
-// 	header.setStartYPosition (GetNodeYPosition (node));
-// 	header.setSenderXPosition (GetNodeXPosition (node));
-// 	header.setSenderYPosition (GetNodeYPosition (node));
-// 	header.setType(1);
-//
-// 	Ptr<Packet> p = Create<Packet> (m_packetPayloadSize);
-// 	p->AddHeader (header);
-//
-// 	Ptr<Socket> sock = node->getBroadcast ();
-// 	sock->Send (p);
 // }
+
+void
+FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
+{
+	NS_LOG_FUNCTION (this);
+	NS_LOG_DEBUG ("Generate Hello Message (node <" << fbNode->GetNode ()->GetId () << ">).");
+
+	// Create a packet with the correct parameters taken from the node
+	Vector position = fbNode->UpdatePosition ();
+	FBHeader fbHeader;
+	fbHeader.SetMaxRange (fbNode->GetCMBR ());
+	fbHeader.SetStarterPosition (position);
+	fbHeader.SetPosition (position);
+
+	Ptr<Packet> packet = Create<Packet> (m_packetPayload);
+	packet->AddHeader (fbHeader);
+
+	fbNode->Send (packet);
+}
 
 uint32_t
 FBApplication::ComputeContetionWindow (uint32_t maxRange, uint32_t distance)

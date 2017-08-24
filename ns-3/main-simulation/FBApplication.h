@@ -46,9 +46,12 @@ public:
 	virtual ~FBApplication();
 
 	/**
-	 * \brief Configure the application
+	 * \brief Add a new node to the applicatin and set up protocol parameters
+	 * \param node node to add
+	 * \param socket socket of the node
+	 * \return none
 	 */
-	void Setup (NodeContainer nodes);
+	void AddNode (Ptr<Node> node, Ptr<Socket> socket);
 
 private:
 	/**
@@ -69,13 +72,6 @@ private:
 	 */
   virtual void StopApplication (void);
 
-	/**
-	 * \brief Set up Fast Broadcast protocol parameters for a single node
-	 * \param node node to configure
-	 * \return none
-	 */
-	void SetupFBNode (Ptr<FBNode> node);
-
 	// TODO: headers
 	void StartEstimationPhase (void);
 	void StartBroadcastPhase (void);
@@ -90,15 +86,15 @@ private:
 	 * \brief Send a Hello message to all nodes in its range
 	 * \return none
 	 */
-	void GenerateHelloMessage (void);
-	
+	void GenerateHelloMessage (Ptr<FBNode> fbNode);
+
 	uint32_t ComputeContetionWindow (uint32_t maxRange, uint32_t distance);
 
 	static double ComputeDistance (Vector a, Vector b);
 
 private:
-	uint32_t				m_nNodes;	// number of nodes
-	NodeContainer		m_nodes;	// nodes that run this application
+	uint32_t									m_nNodes;	// number of nodes
+	std::vector<Ptr<FBNode>>	m_nodes;	// nodes that run this application
 	bool            m_estimationPhaseRunning;	// true if the estimation phase is running
 	bool            m_broadcastPhaseRunning;	// true if the broadcast phase is running
 	EventId         m_estimationPhaseEvent;	// event associated to the estimation phase
@@ -108,6 +104,7 @@ private:
 	bool						m_flooding;	// used for control the flooding of the Alert messages
 	uint32_t				m_turn;	// duration of a single turn
 	uint32_t				m_estimatedRange;	// range of transmission to be estimated
+	uint32_t				m_packetPayload; // size of the packet payload
 };
 
 } // namespace ns3
