@@ -25,6 +25,7 @@
 #include "ns3/network-module.h"
 
 #include "FBNode.h"
+#include "FBHeader.h"
 
 namespace ns3 {
 
@@ -47,7 +48,7 @@ public:
 	/**
 	 * \brief Configure the application
 	 */
-	void Setup ();
+	void Setup (NodeContainer nodes);
 
 private:
 	/**
@@ -68,24 +69,45 @@ private:
 	 */
   virtual void StopApplication (void);
 
+	/**
+	 * \brief Set up Fast Broadcast protocol parameters for a single node
+	 * \param node node to configure
+	 * \return none
+	 */
+	void SetupFBNode (Ptr<FBNode> node);
+
 	// TODO: headers
 	void StartEstimationPhase (void);
 	void StartBroadcastPhase (void);
 	void StopEstimationPhase (void);
 	void StopBroadcastPhase (void);
 
-	void HandleHelloMessage (Ptr<FBNode> node, Ptr<Packet> packet);
-	void HandleAlertMessage (Ptr<FBNode> node, Ptr<Packet> packet);
+	void HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader);
+	void HandleAlertMessage (Ptr<FBNode> node, FBHeader fbHeader, uint32_t distance);
+	// void KeepWaiting (Ptr<FBNode> node)
+
+	/**
+	 * \brief Send a Hello message to all nodes in its range
+	 * \return none
+	 */
+	void GenerateHelloMessage (void);
+	
+	uint32_t ComputeContetionWindow (uint32_t maxRange, uint32_t distance);
 
 	static double ComputeDistance (Vector a, Vector b);
 
-
 private:
 	uint32_t				m_nNodes;	// number of nodes
+	NodeContainer		m_nodes;	// nodes that run this application
 	bool            m_estimationPhaseRunning;	// true if the estimation phase is running
 	bool            m_broadcastPhaseRunning;	// true if the broadcast phase is running
 	EventId         m_estimationPhaseEvent;	// event associated to the estimation phase
 	EventId         m_broadcastPhaseEvent;	// event associated to the broadcast phase
+	uint32_t				m_cwMin;	// min size of the contention window (in slot)
+	uint32_t				m_cwMax;	// max size of the contention window (in slot)
+	bool						m_flooding;	// used for control the flooding of the Alert messages
+	uint32_t				m_turn;	// duration of a single turn
+	uint32_t				m_estimatedRange;	// range of transmission to be estimated
 };
 
 } // namespace ns3

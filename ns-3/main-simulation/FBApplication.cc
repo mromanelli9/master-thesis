@@ -63,11 +63,16 @@ FBApplication::GetTypeId (void)
 }
 
 FBApplication::FBApplication ()
-	:	m_nNodes (1),
+	:	m_nNodes (0),
 		m_estimationPhaseRunning (false),
 		m_broadcastPhaseRunning (false),
 		m_estimationPhaseEvent (),
-		m_broadcastPhaseEvent ()
+		m_broadcastPhaseEvent (),
+		m_cwMin (32),
+		m_cwMax (1024),
+		m_flooding (true),
+		m_turn (1),
+		m_estimatedRange (0)
 {
 	NS_LOG_FUNCTION (this);
 }
@@ -78,9 +83,19 @@ FBApplication::~FBApplication ()
 }
 
 void
-FBApplication::Setup (void)
+FBApplication::Setup (NodeContainer nodes)
 {
-	NS_LOG_FUNCTION (this);
+	NS_LOG_FUNCTION (this << &nodes);
+	NS_LOG_INFO ("Setup FB Application (" << this << ").");
+
+	// m_nodes will contain all nodes in <nodes>
+	m_nodes.Add (nodes);
+	m_nNodes = m_nodes.GetN ();
+
+	// Setup FBnode parameters for all the nodes in m_nodes
+	for (uint32_t i = 0; i < m_nNodes; i++)
+		Ptr<FBNode> current = m_nodes.Get (i);
+		SetupFBNode (current);
 }
 
 void
@@ -97,6 +112,18 @@ FBApplication::StopApplication (void)
 	// Stop both phases
 	StopEstimationPhase ();
   StopBroadcastPhase ();
+}
+
+void
+FBApplication::SetupFBNode (Ptr<FBNode> node)
+{
+	NS_LOG_FUNCTION (this << node);
+
+	node->SetCMFR (m_estimatedRange);
+	node->SetLMFR (m_estimatedRange);
+	node->SetCMBR (m_estimatedRange);
+	node->SetLMBR (m_estimatedRange);
+	node->UpdatePosition ();
 }
 
 void
@@ -138,14 +165,10 @@ FBApplication::StopBroadcastPhase (void)
 }
 
 void
-FBApplication::HandleHelloMessage (Ptr<FBNode> node, Ptr<Packet> packet)
+FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
 {
-	NS_LOG_FUNCTION (this);
+	NS_LOG_FUNCTION (this << node << fbHeader);
 	NS_LOG_INFO ("Handle a Hello Message (" << node->GetId () << ").");
-
-	// Extract FB header from the packet
-	FBHeader fbHeader;
-	packet->RemoveHeader (fbHeader);
 
 	// Retrieve CMFR from the packet received and CMBR from the current node
 	uint32_t otherCMFR = fbHeader.GetMaxRange ();	// TODO: controllare che max_range sia il cmfr
@@ -168,10 +191,78 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> node, Ptr<Packet> packet)
 	node->SetLMBR (myCMBR);
 }
 
+void
+FBApplication::HandleAlertMessage (Ptr<FBNode> node, FBHeader fbHeader, uint32_t distance)
+{
+	// We assume that the message is coming from the front
+
+	NS_LOG_FUNCTION (this << node << fbHeader << distance);
+	NS_LOG_INFO ("Handle an Alert Message (" << node->GetId () << ").");
+
+	// // Compute the size of the contention window
+	// uint32_t cmbr = node->GetCMBR ();
+	// uint32_t cwnd = ComputeContetionWindow (cmbr, distance);
+	//
+	// // Compute a random waiting time (1 <= waitingTime <= cwnd)
+	// uint32_t waitingTime = (rand () % cwnd) + 1;
+
+	//
+	// if (!m_flooding)
+	// {
+	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (rs), &FBApplication::KeepWaiting, this, ...); // TODO: add arguments
+	// }
+	// else
+	// {
+	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (0), &FBApplication::ForwardAlertMessage, this, ...); // TODO: add arguments
+	// }
+}
+
+// void
+// FBApplication::GenerateHelloMessage (void)
+// {
+// 	NS_LOG_FUNCTION (this);
+//
+// 	Ptr<Node> node = NodeList::GetNode (Simulator::GetContext());
+//
+// 	NS_LOG_DEBUG ("Generate Hello Message (node <" << node->GetId() << ">).");
+//
+// 	// Create a packet with the correct parameters taken from the node
+// 	FBHeader fbHeader;
+// 	header.setCMFR (node->GetCMBR ());
+//
+//
+//
+// 	header.setStartXPosition (GetNodeXPosition (node));
+// 	header.setStartYPosition (GetNodeYPosition (node));
+// 	header.setSenderXPosition (GetNodeXPosition (node));
+// 	header.setSenderYPosition (GetNodeYPosition (node));
+// 	header.setType(1);
+//
+// 	Ptr<Packet> p = Create<Packet> (m_packetPayloadSize);
+// 	p->AddHeader (header);
+//
+// 	Ptr<Socket> sock = node->getBroadcast ();
+// 	sock->Send (p);
+// }
+
+uint32_t
+FBApplication::ComputeContetionWindow (uint32_t maxRange, uint32_t distance)
+{
+	// NB: distance is always >= 0 (its type is uint32_t)
+	NS_LOG_FUNCTION (this << maxRange << distance);
+
+	double cwnd = 0;
+
+	double rapp = (maxRange - distance) / (double) maxRange;
+	cwnd = (rapp * (m_cwMax - m_cwMin)) + m_cwMin;
+
+	return std::floor (cwnd);
+}
+
 double
 FBApplication::ComputeDistance (Vector a, Vector b)
 {
-	NS_LOG_FUNCTION ( "ComputeDistance" << a << b);
+	NS_LOG_FUNCTION ("ComputeDistance" << a << b);
 	double distance = 0;
 
 	uint32_t diffx = (b.x - a.x) * (b.x - a.x);
@@ -181,6 +272,5 @@ FBApplication::ComputeDistance (Vector a, Vector b)
 
 	return distance;
 }
-
 
 } // namespace ns3
