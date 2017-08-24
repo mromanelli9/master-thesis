@@ -36,34 +36,34 @@
  TypeId FBNode::GetTypeId (void)
  {
 	 static TypeId tid = TypeId ("ns3::FBNode")
-	 	.SetParent<Node> ()
+	 	.SetParent<Object> ()
 		.SetGroupName ("Network")
-		.AddConstructor<FBNode> ()
-		.AddAttribute ("CMFR", "The value for the Current Maximum Front Range of this node.",
-									 TypeId::ATTR_GET || TypeId::ATTR_SET,
-									 UintegerValue (0),
-									 MakeUintegerAccessor (&FBNode::m_CMFR),
-									 MakeUintegerChecker<uint32_t> ())
-		.AddAttribute ("LMFR", "The value for the Last Maximum Front Range of this node.",
-										TypeId::ATTR_GET || TypeId::ATTR_SET,
-										 UintegerValue (0),
-										 MakeUintegerAccessor (&FBNode::m_LMFR),
-										 MakeUintegerChecker<uint32_t> ())
-		.AddAttribute ("CMBR", "The value for the Current Maximum Back Range of this node.",
-										TypeId::ATTR_GET || TypeId::ATTR_SET,
-										UintegerValue (0),
-										MakeUintegerAccessor (&FBNode::m_CMBR),
-										MakeUintegerChecker<uint32_t> ())
-		.AddAttribute ("LMBR", "The value for the Last Maximum Back Range of this node.",
-									 TypeId::ATTR_GET || TypeId::ATTR_SET,
-									 UintegerValue (0),
-									 MakeUintegerAccessor (&FBNode::m_LMBR),
-									 MakeUintegerChecker<uint32_t> ())
-		.AddAttribute ("Position", "The spatial location (gps) of the node.",
-										TypeId::ATTR_GET,
-										Vector3DValue (Vector (0,0,0)),
-										MakeVector3DAccessor (&FBNode::m_position),
-										MakeVector3DChecker ());
+		.AddConstructor<FBNode> ();
+		// .AddAttribute ("CMFR", "The value for the Current Maximum Front Range of this node.",
+		// 							 TypeId::ATTR_GET || TypeId::ATTR_SET,
+		// 							 UintegerValue (0),
+		// 							 MakeUintegerAccessor (&FBNode::m_CMFR),
+		// 							 MakeUintegerChecker<uint32_t> ())
+		// .AddAttribute ("LMFR", "The value for the Last Maximum Front Range of this node.",
+		// 								TypeId::ATTR_GET || TypeId::ATTR_SET,
+		// 								 UintegerValue (0),
+		// 								 MakeUintegerAccessor (&FBNode::m_LMFR),
+		// 								 MakeUintegerChecker<uint32_t> ())
+		// .AddAttribute ("CMBR", "The value for the Current Maximum Back Range of this node.",
+		// 								TypeId::ATTR_GET || TypeId::ATTR_SET,
+		// 								UintegerValue (0),
+		// 								MakeUintegerAccessor (&FBNode::m_CMBR),
+		// 								MakeUintegerChecker<uint32_t> ())
+		// .AddAttribute ("LMBR", "The value for the Last Maximum Back Range of this node.",
+		// 							 TypeId::ATTR_GET || TypeId::ATTR_SET,
+		// 							 UintegerValue (0),
+		// 							 MakeUintegerAccessor (&FBNode::m_LMBR),
+		// 							 MakeUintegerChecker<uint32_t> ())
+		// .AddAttribute ("Position", "The spatial location (gps) of the node.",
+		// 								TypeId::ATTR_GET,
+		// 								Vector3DValue (Vector (0,0,0)),
+		// 								MakeVector3DAccessor (&FBNode::m_position),
+		// 								MakeVector3DChecker ());
 
 	  return tid;
 	}
@@ -81,6 +81,13 @@
 	FBNode::~FBNode ()
 	{
 	  NS_LOG_FUNCTION (this);
+	}
+
+	Ptr<Node>
+	FBNode::GetNode (void) const
+	{
+		NS_LOG_FUNCTION (this);
+	 return m_node;
 	}
 
 	uint32_t
@@ -119,30 +126,37 @@
 	}
 
 	void
+	FBNode::SetNode (Ptr<Node> node)
+	{
+		NS_LOG_FUNCTION (this << node);
+	  m_node = node;
+	}
+
+	void
 	FBNode::SetCMFR (uint32_t value)
 	{
-	  NS_LOG_FUNCTION (this);
+	  NS_LOG_FUNCTION (this << value);
 	  m_CMFR = value;
 	}
 
 	void
 	FBNode::SetLMFR (uint32_t value)
 	{
-	  NS_LOG_FUNCTION (this);
+	  NS_LOG_FUNCTION (this << value);
 	  m_LMFR = value;
 	}
 
 	void
 	FBNode::SetCMBR (uint32_t value)
 	{
-	  NS_LOG_FUNCTION (this);
+	  NS_LOG_FUNCTION (this << value);
 	  m_CMBR = value;
 	}
 
 	void
 	FBNode::SetLMBR (uint32_t value)
 	{
-	  NS_LOG_FUNCTION (this);
+	  NS_LOG_FUNCTION (this << value);
 	  m_LMBR = value;
 	}
 
@@ -150,19 +164,14 @@
 	FBNode::UpdatePosition (void)
 	{
 		NS_LOG_FUNCTION (this);
-		std::cout << "1" << std::endl;
-		Ptr<MobilityModel> positionmodel = this->GetObject<MobilityModel> ();
+		Ptr<MobilityModel> positionmodel = m_node->GetObject<MobilityModel> ();
 
 		// Check if a mobility model exists
 		if (positionmodel != 0)
 		{
-			std::cout << "2" << positionmodel << std::endl;
-			Vector pos = positionmodel->GetPosition ();
-			std::cout << "3" << std::endl;
-			m_position = pos;
+			m_position = positionmodel->GetPosition ();
 		}
 
 		return m_position;
 	}
-
 } // namespace ns3

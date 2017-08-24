@@ -31,13 +31,18 @@ namespace ns3 {
  * \ingroup network
  * \brief A special node used in Fast Broadcast protocol.
  */
-class FBNode : public Node
+class FBNode : public Object
 {
 public:
 	static TypeId GetTypeId (void);
 
 	FBNode();
 	virtual ~FBNode();
+
+	/**
+	 * \returns the node included in the FBNode
+	 */
+	Ptr<Node> GetNode (void) const;
 
 	/**
    * \returns the value of the CMFR field
@@ -63,6 +68,12 @@ public:
 	 * \returns the position of the node
 	 */
 	Vector GetPosition (void) const;
+
+	/**
+	 * \brief set the node
+	 * \param node ns-3 node
+	 */
+	void SetNode (Ptr<Node> node);
 
 	/**
 	 * \brief set the value of the CMFR field
@@ -94,7 +105,7 @@ public:
 	 */
 	Vector UpdatePosition (void);
 
-
+	Ptr<Node>		m_node;	// ns-3 node
 	uint32_t 	  m_CMFR;	// Current Maximum Front Range
 	uint32_t 	  m_LMFR;	// Last Maximum Front Range
 	uint32_t 	  m_CMBR;	// Current Maximum Back Range
