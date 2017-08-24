@@ -77,6 +77,8 @@ private:
 	void HandleHelloMessage (Ptr<FBNode> node, Ptr<Packet> packet);
 	void HandleAlertMessage (Ptr<FBNode> node, Ptr<Packet> packet);
 
+	static double ComputeDistance (Vector a, Vector b);
+
 
 private:
 	uint32_t				m_nNodes;	// number of nodes

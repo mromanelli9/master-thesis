@@ -141,7 +141,7 @@ void
 FBApplication::HandleHelloMessage (Ptr<FBNode> node, Ptr<Packet> packet)
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Handle an Hello Message (" << node->GetId () << ").");
+	NS_LOG_INFO ("Handle a Hello Message (" << node->GetId () << ").");
 
 	// Extract FB header from the packet
 	FBHeader fbHeader;
@@ -158,13 +158,29 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> node, Ptr<Packet> packet)
 	Vector starterPosition = fbHeader.GetStarterPosition ();
 
 	// Compute distance
-	// double distance = CalculateDistance (starterPosition, currentPosition);
+	uint32_t distance = CalculateDistance (starterPosition, currentPosition);
 
 	// Update new values
 	uint32_t m0 = std::max (myCMBR, otherCMFR);
 	uint32_t maxi = std::max (m0, distance);
+
 	node->SetCMBR (maxi);
 	node->SetLMBR (myCMBR);
 }
+
+double
+FBApplication::ComputeDistance (Vector a, Vector b)
+{
+	NS_LOG_FUNCTION ( "ComputeDistance" << a << b);
+	double distance = 0;
+
+	uint32_t diffx = (b.x - a.x) * (b.x - a.x);
+	uint32_t diffy = (b.y - a.y) * (b.y - a.y);
+
+	distance = sqrt (diffx + diffy);
+
+	return distance;
+}
+
 
 } // namespace ns3
