@@ -53,6 +53,7 @@ NS_LOG_COMPONENT_DEFINE ("fb-vanet");
 * ------------------------------------------------------------------------------
 */
 
+// DEBUG
 static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize,
                              uint32_t pktCount, Time pktInterval )
 {
@@ -202,7 +203,10 @@ private:
 	std::string							m_rate;
 	std::string							m_phyMode;
 	uint32_t								m_actualRange;
+	uint32_t								m_mobility;
+	uint32_t								m_scenario;
 	uint32_t								m_loadBuildings;
+	uint32_t								m_animation;
 	std::string							m_animationFileName;
 	double									m_TotalSimTime;
 };
@@ -218,7 +222,10 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_rate ("2048bps"),
 		m_phyMode ("OfdmRate6MbpsBW10MHz"),
 		m_actualRange (300),
+		m_mobility (1),
+		m_scenario (1),
 		m_loadBuildings (0),
+		m_animation (0),
 		m_animationFileName ("outputs/fb-vanet-animation.xml"),
 		m_TotalSimTime (10)
 {
@@ -280,7 +287,7 @@ void
 FBVanetExperiment::ConfigureMobility ()
 {
 	NS_LOG_FUNCTION (this);
-	// NS_LOG_INFO ("Configure current mobility mode (" << m_mobility << ").");
+	NS_LOG_INFO ("Configure current mobility mode (" << m_mobility << ").");
 
 	// [DEBUG]
 	MobilityHelper mobility;
@@ -370,6 +377,12 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 
 	// allow command line overrides
 	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
+	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
+	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
+	cmd.AddValue ("scenario", "1=straight street, 2=grid layout, 3=real world", m_scenario);
+	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
+	cmd.AddValue ("animation", "Enable netanim animation.", m_animation);
+	cmd.AddValue ("totaltime", "Simulation end time", m_TotalSimTime);
 
 	cmd.Parse (argc, argv);
 }
@@ -378,7 +391,7 @@ void
 FBVanetExperiment::SetupScenario ()
 {
 	NS_LOG_FUNCTION (this);
-	// NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
+	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
 
 }
 
@@ -404,15 +417,19 @@ FBVanetExperiment::Run ()
 {
 	NS_LOG_FUNCTION (this);
 
-	// Create the animation object and configure for specified output
-	// AnimationInterface anim (m_animationFileName);
-	// anim.SetMobilityPollInterval (Seconds (0.250));
-	// anim.EnablePacketMetadata (true);
-	// anim.EnableIpv4L3ProtocolCounters (Seconds (0), Seconds (m_TotalSimTime));
-	// anim.EnableWifiMacCounters (Seconds (0), Seconds (m_TotalSimTime));
-	// anim.EnableWifiPhyCounters (Seconds (0), Seconds (m_TotalSimTime));
+	if (m_animation != 0)
+	{
+		// Create the animation object and configure for specified output
+		AnimationInterface anim (m_animationFileName);
+		anim.SetMobilityPollInterval (Seconds (0.250));
+		anim.EnablePacketMetadata (true);
+		anim.EnableIpv4L3ProtocolCounters (Seconds (0), Seconds (m_TotalSimTime));
+		anim.EnableWifiMacCounters (Seconds (0), Seconds (m_TotalSimTime));
+		anim.EnableWifiPhyCounters (Seconds (0), Seconds (m_TotalSimTime));
 
-	// Simulator::Stop (Seconds (m_TotalSimTime));
+		Simulator::Stop (Seconds (m_TotalSimTime));
+	}
+
 	Simulator::Run ();
 
 	Simulator::Destroy ();
@@ -452,22 +469,6 @@ FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
   }
 }
 
-// {
-// 	NS_LOG_FUNCTION (this << socket);
-//
-// 	std::ostringstream oss;
-//   Ptr<Packet> packet;
-//   Address srcAddress;
-//   while (socket->Recv ())
-//   {
-// 		oss << Simulator::Now ().GetSeconds () << " " << socket->GetNode ()->GetId ();
-//
-// 		oss << " received one packet!";
-//   }
-//
-// 	NS_LOG_INFO (oss);
-// }
-
 /* -----------------------------------------------------------------------------
 *			MAIN
 * ------------------------------------------------------------------------------
@@ -475,7 +476,6 @@ FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
 
 int main (int argc, char *argv[])
 {
-	// NS_LOG_FUNCTION_NOARGS;
 	NS_LOG_UNCOND ("FB Vanet Experiment.");
 
 	FBVanetExperiment experiment;
