@@ -28,7 +28,7 @@
 namespace ns3 {
 
 static const uint8_t HELLO_MESSAGE = 0;
-static const uint8_t ALERT_MESSAGE = 0;
+static const uint8_t ALERT_MESSAGE = 1;
 
 /**
  * \ingroup network
