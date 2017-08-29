@@ -130,10 +130,10 @@ namespace ns3 {
 	{
 		// Vector3D = 24
 		// uint32_t = 4
-		// uint8_t = 1
+
 		NS_LOG_FUNCTION (this);
 
-		uint32_t length = 53;
+		uint32_t length = 56;
 		return  length;
 	}
 
@@ -150,7 +150,7 @@ namespace ns3 {
 		i.WriteU64(m_starterPosition.y);
 		i.WriteU64(m_starterPosition.z);
 		i.WriteU32(m_maxRange);
-		i.WriteU8(m_type);
+		i.WriteU32(m_type);
 	}
 
 	uint32_t
@@ -158,11 +158,18 @@ namespace ns3 {
 	{
 		NS_LOG_FUNCTION (this);
 		Buffer::Iterator i = start;
+		uint32_t x, y, z;
 
-		m_position = Vector (i.ReadU64 (), i.ReadU64 (), i.ReadU64 ());
-		m_starterPosition = Vector (i.ReadU64 (), i.ReadU64 (), i.ReadU64 ());
+		x = i.ReadU64 ();
+		y = i.ReadU64 ();
+		z = i.ReadU64 ();
+		m_position = Vector (x, y, z);
+		x = i.ReadU64 ();
+		y = i.ReadU64 ();
+		z = i.ReadU64 ();
+		m_starterPosition = Vector (x, y, z);
 		m_maxRange = i.ReadU32 ();
-		m_type = i.ReadU8 ();
+		m_type = i.ReadU32 ();
 
 		return  GetSerializedSize  ();
 	}
@@ -171,8 +178,8 @@ namespace ns3 {
 	FBHeader::Print (std::ostream &os) const
 	{
 		NS_LOG_FUNCTION (this);
-		os << "m_position (" << m_position.x << "," << m_position.y << "," << m_position.z << ") "
-			<< "m_starterPosition (" << m_starterPosition.x << "," << m_starterPosition.y << "," << m_starterPosition.z << ") "
+		os << "m_position (" << m_position << ") "
+			<< "m_starterPosition (" << m_starterPosition << ") "
 			<< "m_maxRange " << m_maxRange << " "
 			<< "m_type " << m_type << std::endl;
 	}

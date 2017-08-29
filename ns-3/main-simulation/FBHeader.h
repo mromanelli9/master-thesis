@@ -27,8 +27,8 @@
 
 namespace ns3 {
 
-static const uint8_t HELLO_MESSAGE = 0;
-static const uint8_t ALERT_MESSAGE = 1;
+static const uint32_t HELLO_MESSAGE = 0;
+static const uint32_t ALERT_MESSAGE = 1;
 
 /**
  * \ingroup network
@@ -159,7 +159,7 @@ private:
 	Vector 				m_position;
 	Vector 				m_starterPosition;
 	uint32_t			m_maxRange;
-	uint8_t				m_type;
+	uint32_t			m_type;
 };
 
 } // namespace ns3
