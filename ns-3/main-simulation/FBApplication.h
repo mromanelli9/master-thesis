@@ -88,6 +88,13 @@ private:
 	 */
 	void GenerateHelloMessage (Ptr<FBNode> fbNode);
 
+	/**
+   * \brief Process a received packet
+   * \param socket the receiving socket
+   * \return none
+   */
+	void ReceivePacket (Ptr<Socket> socket);
+
 	uint32_t ComputeContetionWindow (uint32_t maxRange, uint32_t distance);
 
 	static double ComputeDistance (Vector a, Vector b);

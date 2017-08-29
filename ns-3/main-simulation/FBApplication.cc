@@ -83,22 +83,6 @@ FBApplication::~FBApplication ()
   NS_LOG_FUNCTION (this);
 }
 
-// void
-// FBApplication::Setup (NodeContainer nodes)
-// {
-// 	NS_LOG_FUNCTION (this << &nodes);
-// 	NS_LOG_INFO ("Setup FB Application (" << this << ").");
-//
-// 	// m_nodes will contain all nodes in <nodes>
-// 	m_nodes.Add (nodes);
-// 	m_nNodes = m_nodes.GetN ();
-//
-// 	// Setup FBnode parameters for all the nodes in m_nodes
-// 	for (uint32_t i = 0; i < m_nNodes; i++)
-// 		Ptr<FBNode> current = m_nodes.Get (i);
-// 		SetupFBNode (current);
-// }
-
 void
 FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> socket)
 {
@@ -107,6 +91,7 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> socket)
 	Ptr<FBNode> fbNode = CreateObject<FBNode> ();
 	fbNode->SetNode (node);
 	fbNode->SetSocket (socket);
+	socket->SetRecvCallback (MakeCallback (&FBApplication::ReceivePacket, this));
 	fbNode->SetCMFR (m_estimatedRange);
 	fbNode->SetLMFR (m_estimatedRange);
 	fbNode->SetCMBR (m_estimatedRange);
@@ -120,6 +105,9 @@ void
 FBApplication::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
+
+	// DEBUG
+	this->GenerateHelloMessage (m_nodes.at (0));
 }
 
 void
@@ -240,6 +228,18 @@ FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 	packet->AddHeader (fbHeader);
 
 	fbNode->Send (packet);
+}
+
+void
+FBApplication::ReceivePacket (Ptr<Socket> socket)
+{
+	NS_LOG_FUNCTION (this << socket);
+
+  Ptr<Packet> packet;
+  while (socket->Recv ())
+  {
+		NS_LOG_DEBUG ("Packet received: " << Simulator::Now ().GetSeconds () << " " << socket->GetNode ()->GetId ());
+  }
 }
 
 uint32_t
