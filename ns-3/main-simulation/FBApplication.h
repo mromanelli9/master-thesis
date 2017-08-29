@@ -78,10 +78,6 @@ private:
 	void StopEstimationPhase (void);
 	void StopBroadcastPhase (void);
 
-	void HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader);
-	void HandleAlertMessage (Ptr<FBNode> node, FBHeader fbHeader, uint32_t distance);
-	// void KeepWaiting (Ptr<FBNode> node)
-
 	/**
 	 * \brief Send a Hello message to all nodes in its range
 	 * \return none
@@ -89,11 +85,20 @@ private:
 	void GenerateHelloMessage (Ptr<FBNode> fbNode);
 
 	/**
+	 * \brief Send a Alert message
+	 * \return none
+	 */
+	void GenerateAlertMessage (Ptr<FBNode> fbNode);
+
+	/**
    * \brief Process a received packet
    * \param socket the receiving socket
    * \return none
    */
 	void ReceivePacket (Ptr<Socket> socket);
+	void HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader);
+	void HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32_t distance);
+	void ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader);
 
 	Ptr<FBNode> GetFBNode (Ptr<Node> node);
 
@@ -117,6 +122,7 @@ private:
 	uint32_t				m_actualRange;	// real transmission range
 	uint32_t				m_estimatedRange;	// range of transmission to be estimated
 	uint32_t				m_packetPayload; // size of the packet payload
+	uint32_t				m_slot;	// value of a slot (milliseconds)
 };
 
 } // namespace ns3

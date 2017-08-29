@@ -73,8 +73,9 @@ FBApplication::FBApplication ()
 		m_flooding (true),
 		m_turn (1),
 		m_actualRange (300),
-		m_estimatedRange (0),
-		m_packetPayload (100)
+		m_estimatedRange (300),	// DEBUG --> TODO change it!!!
+		m_packetPayload (100),
+		m_slot (20)
 {
 	NS_LOG_FUNCTION (this);
 }
@@ -111,7 +112,7 @@ FBApplication::StartApplication (void)
   NS_LOG_FUNCTION (this);
 
 	// DEBUG
-	this->GenerateHelloMessage (m_nodes.at (0));
+	this->GenerateAlertMessage (m_nodes.at (0));
 }
 
 void
@@ -134,6 +135,10 @@ void
 FBApplication::StartBroadcastPhase (void)
 {
 	NS_LOG_FUNCTION (this);
+
+	// TODO
+	// stop node x
+	// GenerateAlertMessage (node x)
 }
 
 void
@@ -163,63 +168,9 @@ FBApplication::StopBroadcastPhase (void)
 }
 
 void
-FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
-{
-	NS_LOG_FUNCTION (this << node << fbHeader);
-	NS_LOG_INFO ("Handle a Hello Message (" << node->GetNode ()->GetId () << ").");
-
-	// Retrieve CMFR from the packet received and CMBR from the current node
-	uint32_t otherCMFR = fbHeader.GetMaxRange ();	// TODO: controllare che max_range sia il cmfr
-	uint32_t myCMBR = node->GetCMBR ();
-
-	// Retrieve the position of the current node
-	Vector currentPosition = node->UpdatePosition ();
-
-	// Retrieve the position of the starter node
-	Vector starterPosition = fbHeader.GetStarterPosition ();
-
-	// Compute distance
-	double distance_double = CalculateDistance (starterPosition, currentPosition);
-	uint32_t distance = std::abs (std::floor (distance_double));
-
-	// Update new values
-	uint32_t m0 = std::max (myCMBR, otherCMFR);
-	uint32_t maxi = std::max (m0, distance);
-
-	node->SetCMBR (maxi);
-	node->SetLMBR (myCMBR);
-}
-
-// void
-// FBApplication::HandleAlertMessage (Ptr<FBNode> node, FBHeader fbHeader, uint32_t distance)
-// {
-// 	// We assume that the message is coming from the front
-//
-// 	NS_LOG_FUNCTION (this << node << fbHeader << distance);
-// 	NS_LOG_INFO ("Handle an Alert Message (" << node->GetId () << ").");
-
-	// // Compute the size of the contention window
-	// uint32_t cmbr = node->GetCMBR ();
-	// uint32_t cwnd = ComputeContetionWindow (cmbr, distance);
-	//
-	// // Compute a random waiting time (1 <= waitingTime <= cwnd)
-	// uint32_t waitingTime = (rand () % cwnd) + 1;
-
-	//
-	// if (!m_flooding)
-	// {
-	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (rs), &FBApplication::KeepWaiting, this, ...); // TODO: add arguments
-	// }
-	// else
-	// {
-	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (0), &FBApplication::ForwardAlertMessage, this, ...); // TODO: add arguments
-	// }
-// }
-
-void
 FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 {
-	NS_LOG_FUNCTION (this);
+	NS_LOG_FUNCTION (this << fbNode);
 	NS_LOG_DEBUG ("Generate Hello Message (node <" << fbNode->GetNode ()->GetId () << ">).");
 
 	// Create a packet with the correct parameters taken from the node
@@ -227,6 +178,31 @@ FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 	FBHeader fbHeader;
 	fbHeader.SetType (HELLO_MESSAGE);
 	fbHeader.SetMaxRange (fbNode->GetCMBR ());
+	fbHeader.SetStarterPosition (position);
+	fbHeader.SetPosition (position);
+
+	Ptr<Packet> packet = Create<Packet> (m_packetPayload);
+	packet->AddHeader (fbHeader);
+
+	fbNode->Send (packet);
+}
+
+void
+FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
+{
+	NS_LOG_FUNCTION (this << fbNode);
+	NS_LOG_DEBUG ("Generate Alert Message (node <" << fbNode->GetNode ()->GetId () << ">).");
+
+	// Create a packet with the correct parameters taken from the node
+	uint32_t LMBR, CMBR, maxi;
+	LMBR = fbNode->GetLMBR ();
+	CMBR = fbNode->GetCMBR ();
+	maxi = std::max (LMBR, CMBR);
+
+	Vector position = fbNode->UpdatePosition ();
+	FBHeader fbHeader;
+	fbHeader.SetType (ALERT_MESSAGE);
+	fbHeader.SetMaxRange (maxi);
 	fbHeader.SetStarterPosition (position);
 	fbHeader.SetPosition (position);
 
@@ -266,19 +242,110 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 
 		// Compute the distance between the sender and the node who received the message
 	 	double distanceSenderToCurrent = ComputeDistance(senderPosition, currentPosition);
+		uint32_t distanceSenderToCurrent_uint = std::abs (std::floor (distanceSenderToCurrent));
 
-		// If it's a Hello message
-		if (messageType == HELLO_MESSAGE)
+		// If the node is in range
+		if (distanceSenderToCurrent_uint < m_actualRange)
 		{
-			uint32_t distance = std::abs (std::floor (distanceSenderToCurrent));
-
-			// If the node is in range
-			if (distance < m_actualRange)
-			{
+			if (messageType == HELLO_MESSAGE)
 				HandleHelloMessage (fbNode, fbHeader);
+			else if (messageType == ALERT_MESSAGE)
+			{
+				// Compute the two different distances
+				Vector starterPosition = fbHeader.GetStarterPosition ();
+				double distanceStarterToSender = ComputeDistance(starterPosition, senderPosition);
+				double distanceStarterToCurrent = ComputeDistance(starterPosition, currentPosition);
+
+				if (distanceStarterToSender < distanceStarterToCurrent)
+					HandleAlertMessage (fbNode, fbHeader, distanceSenderToCurrent_uint);
 			}
 		}
   }
+}
+
+void
+FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
+{
+	NS_LOG_FUNCTION (this << node << fbHeader);
+	NS_LOG_INFO ("Handle a Hello Message (" << node->GetNode ()->GetId () << ").");
+
+	// Retrieve CMFR from the packet received and CMBR from the current node
+	uint32_t otherCMFR = fbHeader.GetMaxRange ();	// TODO: controllare che max_range sia il cmfr
+	uint32_t myCMBR = node->GetCMBR ();
+
+	// Retrieve the position of the current node
+	Vector currentPosition = node->UpdatePosition ();
+
+	// Retrieve the position of the starter node
+	Vector starterPosition = fbHeader.GetStarterPosition ();
+
+	// Compute distance
+	double distance_double = CalculateDistance (starterPosition, currentPosition);
+	uint32_t distance = std::abs (std::floor (distance_double));
+
+	// Update new values
+	uint32_t m0 = std::max (myCMBR, otherCMFR);
+	uint32_t maxi = std::max (m0, distance);
+
+	node->SetCMBR (maxi);
+	node->SetLMBR (myCMBR);
+}
+
+void
+FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32_t distance)
+{
+	// We assume that the message is coming from the front
+	NS_LOG_FUNCTION (this << fbNode << fbHeader << distance);
+	NS_LOG_INFO ("Handle an Alert Message (" << fbNode->GetNode ()->GetId () << ").");
+
+	// Compute the size of the contention window
+	uint32_t cmbr = fbNode->GetCMBR ();
+	uint32_t cwnd = ComputeContetionWindow (cmbr, distance);
+
+	// Compute a random waiting time (1 <= waitingTime <= cwnd)
+	uint32_t waitingTime = (rand () % cwnd) + 1;
+
+	// TODO: e se qualcosa arriva nel frattempo?
+	// Wait <waitingTime> milliseconds and then forward the message
+	Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (), MilliSeconds (waitingTime * m_slot), &FBApplication::ForwardAlertMessage, this, fbNode, fbHeader);
+
+
+	// if (!m_flooding)
+	// {
+	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (rs), &FBApplication::KeepWaiting, this, ...); // TODO: add arguments
+	// }
+	// else
+	// {
+	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (0), &FBApplication::ForwardAlertMessage, this, ...); // TODO: add arguments
+	// }
+}
+
+void
+FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader)
+{
+	NS_LOG_FUNCTION (this << fbNode << oldFBHeader);
+	NS_LOG_DEBUG ("Forwarding Alert Message (node <" << fbNode->GetNode ()->GetId () << ">).");
+
+	// Create a packet with the correct parameters taken from the node
+	uint32_t LMBR, CMBR, maxi;
+	LMBR = fbNode->GetLMBR ();
+	CMBR = fbNode->GetCMBR ();
+	maxi = std::max (LMBR, CMBR);
+
+	Vector position = fbNode->UpdatePosition ();
+	Vector starterPosition = oldFBHeader.GetStarterPosition ();
+
+	FBHeader fbHeader;
+	fbHeader.SetType (ALERT_MESSAGE);
+	fbHeader.SetMaxRange (maxi);
+	fbHeader.SetStarterPosition (starterPosition);
+	fbHeader.SetPosition (position);
+
+	Ptr<Packet> packet = Create<Packet> (m_packetPayload);
+	packet->AddHeader (fbHeader);
+
+	// Forward
+	fbNode->Send (packet);
 }
 
 Ptr<FBNode>
