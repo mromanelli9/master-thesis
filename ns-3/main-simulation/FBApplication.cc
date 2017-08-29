@@ -66,23 +66,30 @@ FBApplication::FBApplication ()
 	:	m_nNodes (0),
 		m_estimationPhaseRunning (false),
 		m_broadcastPhaseRunning (false),
-		m_estimationPhaseEvent (),
-		m_broadcastPhaseEvent (),
+		m_broadcastPhaseStart (0),
 		m_cwMin (32),
 		m_cwMax (1024),
 		m_flooding (true),
-		m_turn (1),
+		m_turn (1000),
 		m_actualRange (300),
 		m_estimatedRange (300),	// DEBUG --> TODO change it!!!
 		m_packetPayload (100),
 		m_slot (20)
 {
 	NS_LOG_FUNCTION (this);
+
+	srand (time (0));
 }
 
 FBApplication::~FBApplication ()
 {
   NS_LOG_FUNCTION (this);
+}
+
+void
+FBApplication::Setup (uint32_t broadcastPhaseStart)
+{
+	m_broadcastPhaseStart = broadcastPhaseStart;
 }
 
 void
@@ -111,8 +118,12 @@ FBApplication::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
 
-	// DEBUG
-	this->GenerateAlertMessage (m_nodes.at (0));
+	// Start Estimation Phase
+	m_estimationPhaseRunning = true;
+	GenerateHelloTraffic ();
+
+	// Schedule Broadcast Phase
+	Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
 }
 
 void
@@ -126,19 +137,49 @@ FBApplication::StopApplication (void)
 }
 
 void
-FBApplication::StartEstimationPhase (void)
+FBApplication::GenerateHelloTraffic (void)
 {
 	NS_LOG_FUNCTION (this);
+
+	// Stop the generation of hello messages
+	if (!m_estimationPhaseRunning)
+		return;
+
+	// For each node ...
+	for (uint32_t j = 0; j < m_nNodes; j++)
+	{
+		Ptr<FBNode> fbNode = m_nodes.at (j);
+
+		// Compute a random time
+		// problem: how much time?
+		uint32_t waitingTime = rand () % m_slot;
+
+		std::cout << "waitingTime " << waitingTime << std::endl;
+
+		// Schedule the generation of a Hello Message for the current node
+		Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (),
+																		MilliSeconds (waitingTime * m_slot),
+																		&FBApplication::GenerateHelloMessage, this,
+																		fbNode);
+	}
+
+	// Schedule another turn
+	Simulator::Schedule (MilliSeconds (m_turn), &FBApplication::GenerateHelloTraffic, this);
 }
 
 void
 FBApplication::StartBroadcastPhase (void)
 {
 	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Start Broadcast Phase.");
 
-	// TODO
-	// stop node x
-	// GenerateAlertMessage (node x)
+	m_estimationPhaseRunning = false;
+	m_broadcastPhaseRunning = true;
+
+	// // Select the starting node that will generate the first alert
+	// Ptr<FBNode> fbNode = m_nodes.at (m_startingNode);
+	// // To be sure that there will be no hello message, wait two turns
+	// Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (), MilliSeconds (m_turn * 2), &FBApplication::GenerateAlertMessage, this, fbNode);
 }
 
 void
@@ -147,11 +188,6 @@ FBApplication::StopEstimationPhase (void)
 	NS_LOG_FUNCTION (this);
 
 	m_estimationPhaseRunning = false;
-
-	if (m_estimationPhaseEvent.IsRunning ())
-	{
-		Simulator::Cancel (m_estimationPhaseEvent);
-	}
 }
 
 void
@@ -160,11 +196,6 @@ FBApplication::StopBroadcastPhase (void)
 	NS_LOG_FUNCTION (this);
 
 	m_broadcastPhaseRunning = false;
-
-	if (m_broadcastPhaseEvent.IsRunning ())
-	{
-		Simulator::Cancel (m_broadcastPhaseEvent);
-	}
 }
 
 void

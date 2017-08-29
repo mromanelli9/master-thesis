@@ -46,6 +46,13 @@ public:
 	virtual ~FBApplication();
 
 	/**
+	 * \brief Set up some application parameters
+	 * \param broadcastPhaseStart broadcast phase start time (seconds)
+	 * \return none
+	 */
+	void Setup (uint32_t broadcastPhaseStart);
+
+	/**
 	 * \brief Add a new node to the applicatin and set up protocol parameters
 	 * \param node node to add
 	 * \param socket socket of the node
@@ -73,7 +80,7 @@ private:
   virtual void StopApplication (void);
 
 	// TODO: headers
-	void StartEstimationPhase (void);
+	void GenerateHelloTraffic (void);
 	void StartBroadcastPhase (void);
 	void StopEstimationPhase (void);
 	void StopBroadcastPhase (void);
@@ -110,15 +117,15 @@ private:
 private:
 	uint32_t									m_nNodes;	// number of nodes
 	std::vector<Ptr<FBNode>>	m_nodes;	// nodes that run this application
+	uint32_t									m_startingNode; // index of the node that will generate the Alert Message
 	std::map<uint32_t, uint32_t> m_nodesMap;	// map nodes and FBNodes
 	bool            m_estimationPhaseRunning;	// true if the estimation phase is running
 	bool            m_broadcastPhaseRunning;	// true if the broadcast phase is running
-	EventId         m_estimationPhaseEvent;	// event associated to the estimation phase
-	EventId         m_broadcastPhaseEvent;	// event associated to the broadcast phase
+	uint32_t				m_broadcastPhaseStart;	// broadcast phase start time (seconds)
 	uint32_t				m_cwMin;	// min size of the contention window (in slot)
 	uint32_t				m_cwMax;	// max size of the contention window (in slot)
 	bool						m_flooding;	// used for control the flooding of the Alert messages
-	uint32_t				m_turn;	// duration of a single turn
+	uint32_t				m_turn;	// duration of a single turn (milliseconds)
 	uint32_t				m_actualRange;	// real transmission range
 	uint32_t				m_estimatedRange;	// range of transmission to be estimated
 	uint32_t				m_packetPayload; // size of the packet payload
