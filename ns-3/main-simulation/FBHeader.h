@@ -27,6 +27,9 @@
 
 namespace ns3 {
 
+static const uint8_t HELLO_MESSAGE = 0;
+static const uint8_t ALERT_MESSAGE = 0;
+
 /**
  * \ingroup network
  * \brief A special header used in Fast Broadcast protocol.
@@ -60,6 +63,12 @@ public:
 	void SetMaxRange (uint32_t value);
 
 	/**
+	 * \brief set the type of the message
+	 * \param value type of the message
+	 */
+	void SetType (uint8_t value);
+
+	/**
 	 * \returns the spatial location (gps) of the sender
 	 */
 	Vector GetPosition (void) const;
@@ -73,6 +82,11 @@ public:
 	 * \returns the maximum range
 	 */
 	uint32_t GetMaxRange (void) const;
+
+	/**
+	 * \returns the type of the message
+	 */
+	uint8_t GetType (void) const;
 
 	/**
    * Get the most derived TypeId for this Object.
@@ -145,6 +159,7 @@ private:
 	Vector 				m_position;
 	Vector 				m_starterPosition;
 	uint32_t			m_maxRange;
+	uint8_t				m_type;
 };
 
 } // namespace ns3

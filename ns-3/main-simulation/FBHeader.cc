@@ -48,7 +48,12 @@ namespace ns3 {
 										TypeId::ATTR_GET || TypeId::ATTR_SET,
 										UintegerValue (0),
 										MakeUintegerAccessor (&FBHeader::m_maxRange),
-										MakeUintegerChecker<uint32_t> ());
+										MakeUintegerChecker<uint32_t> ())
+			.AddAttribute ("Type", "The type of the message (alert or hello).",
+										TypeId::ATTR_GET || TypeId::ATTR_SET,
+										UintegerValue (0),
+										MakeUintegerAccessor (&FBHeader::m_type),
+										MakeUintegerChecker<uint8_t> ());
 
 	  return tid;
 	}
@@ -79,6 +84,13 @@ namespace ns3 {
 		m_maxRange = value;
 	}
 
+	void
+	FBHeader::SetType (uint8_t value)
+	{
+		NS_LOG_FUNCTION (this);
+		m_type = value;
+	}
+
 	Vector
 	FBHeader::GetPosition (void) const
 	{
@@ -100,6 +112,13 @@ namespace ns3 {
 		return m_maxRange;
 	}
 
+	uint8_t
+	FBHeader::GetType (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_type;
+	}
+
 	TypeId
 	FBHeader::GetInstanceTypeId (void) const
 	{
@@ -111,9 +130,10 @@ namespace ns3 {
 	{
 		// Vector3D = 24
 		// uint32_t = 4
+		// uint8_t = 1
 		NS_LOG_FUNCTION (this);
 
-		uint32_t  length = 52;
+		uint32_t length = 53;
 		return  length;
 	}
 
@@ -130,6 +150,7 @@ namespace ns3 {
 		i.WriteU64(m_starterPosition.y);
 		i.WriteU64(m_starterPosition.z);
 		i.WriteU32(m_maxRange);
+		i.WriteU8(m_type);
 	}
 
 	uint32_t
@@ -141,6 +162,7 @@ namespace ns3 {
 		m_position = Vector (i.ReadU64 (), i.ReadU64 (), i.ReadU64 ());
 		m_starterPosition = Vector (i.ReadU64 (), i.ReadU64 (), i.ReadU64 ());
 		m_maxRange = i.ReadU32 ();
+		m_type = i.ReadU8 ();
 
 		return  GetSerializedSize  ();
 	}
@@ -151,7 +173,8 @@ namespace ns3 {
 		NS_LOG_FUNCTION (this);
 		os << "m_position (" << m_position.x << "," << m_position.y << "," << m_position.z << ") "
 			<< "m_starterPosition (" << m_starterPosition.x << "," << m_starterPosition.y << "," << m_starterPosition.z << ") "
-			<< "m_maxRange " << m_maxRange << std::endl;
+			<< "m_maxRange " << m_maxRange << " "
+			<< "m_type " << m_type << std::endl;
 	}
 
 } // namespace ns3
