@@ -33,16 +33,18 @@
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/wifi-module.h"
-#include "ns3/aodv-module.h"
-#include "ns3/olsr-module.h"
-#include "ns3/dsdv-module.h"
-#include "ns3/dsr-module.h"
+// #include "ns3/aodv-module.h"
+// #include "ns3/olsr-module.h"
+// #include "ns3/dsdv-module.h"
+// #include "ns3/dsr-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/topology.h"
-#include "ns3/netanim-module.h"
-#include "ns3/ocb-wifi-mac.h"
+// #include "ns3/ocb-wifi-mac.h"
 #include "ns3/wifi-80211p-helper.h"
 #include "ns3/wave-mac-helper.h"
+#include "ns3/netanim-module.h"
+
+#include "FBApplication.h"
 
 using namespace ns3;
 
@@ -52,24 +54,6 @@ NS_LOG_COMPONENT_DEFINE ("fb-vanet");
 *			CLASS AND METHODS PROTOTIPES
 * ------------------------------------------------------------------------------
 */
-
-// DEBUG
-static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize,
-                             uint32_t pktCount, Time pktInterval )
-{
-	NS_LOG_FUNCTION ("GenerateTraffic" << socket << pktSize << pktCount << pktInterval);
-
-  if (pktCount > 0)
-    {
-      socket->Send (Create<Packet> (pktSize));
-      Simulator::Schedule (pktInterval, &GenerateTraffic,
-                           socket, pktSize,pktCount - 1, pktInterval);
-    }
-  else
-    {
-      socket->Close ();
-    }
-}
 
 /**
  * \ingroup obstacle
@@ -151,6 +135,12 @@ protected:
 	void ConfigureTracingAndLogging ();
 
 	/**
+	 * \brief Configure the FB application
+	 * \return none
+	 */
+	void ConfigureFBApplication ();
+
+	/**
 	 * \brief Run the simulation
 	 * \return none
 	 */
@@ -182,29 +172,42 @@ private:
 	void SetupScenario ();
 
 	/**
+	 * \brief Set up receivers socket
+	 * \param node node to configure
+	 * \return socket created
+	 */
+	Ptr<Socket> SetupPacketReceive (Ptr<Node> node);
+
+	/**
+	 * \brief Set up senders socket
+	 * \param addr address of the node
+	 * \param node node to configure
+	 * \return socket created
+	 */
+	Ptr<Socket> SetupPacketSend (Ipv4Address addr, Ptr<Node> node);
+
+	/**
    * \brief Prints actual position and velocity when a course change event occurs
    * \return none
    */
 	static void
 	CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility);
 
-	/**
-	 * \brief Process a received routing packet
-	 * \param socket the receiving socket
-	 * \return none
-	 */
-	void ReceivePacket (Ptr<Socket> socket);
 
 	uint32_t 								m_nNodes;
 	NodeContainer						m_adhocNodes;
 	NetDeviceContainer			m_adhocDevices;
 	Ipv4InterfaceContainer	m_adhocInterfaces;
+	std::vector <Ptr<Socket>>		m_adhocSources;
+	std::vector <Ptr<Socket>>		m_adhocSinks;
 	std::string							m_packetSize;
 	std::string							m_rate;
 	std::string							m_phyMode;
 	uint32_t								m_actualRange;
+	uint32_t								m_startingNode;
 	uint32_t								m_mobility;
 	uint32_t								m_scenario;
+	std::vector <Vector>		m_fixNodePosition;
 	uint32_t								m_loadBuildings;
 	uint32_t								m_animation;
 	std::string							m_animationFileName;
@@ -222,6 +225,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_rate ("2048bps"),
 		m_phyMode ("OfdmRate6MbpsBW10MHz"),
 		m_actualRange (300),
+		m_startingNode (0),
 		m_mobility (1),
 		m_scenario (1),
 		m_loadBuildings (0),
@@ -249,6 +253,9 @@ FBVanetExperiment::Simulate (int argc, char **argv)
 	SetupAdhocDevices ();
 	ConfigureConnections ();
 	ConfigureTracingAndLogging ();
+
+	// Configure FB Application
+	ConfigureFBApplication ();
 
 	// Run simulation and print some results
 	RunSimulation ();
@@ -278,7 +285,7 @@ void
 FBVanetExperiment::ConfigureNodes ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Setup nodes.");
+	NS_LOG_INFO ("Setup nodes (" << m_nNodes << ").");
 
 	m_adhocNodes.Create (m_nNodes);
 }
@@ -289,14 +296,28 @@ FBVanetExperiment::ConfigureMobility ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current mobility mode (" << m_mobility << ").");
 
-	// [DEBUG]
-	MobilityHelper mobility;
-	Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-	positionAlloc->Add (Vector (0.0, 0.0, 0.0));
-	positionAlloc->Add (Vector (5.0, 0.0, 0.0));
-	mobility.SetPositionAllocator (positionAlloc);
-	mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-	mobility.Install (m_adhocNodes);
+	if (m_mobility == 1)
+	{
+		MobilityHelper mobility;
+		Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+
+		for (uint32_t i = 0 ; i < m_nNodes; i++)
+		{
+			positionAlloc->Add (m_fixNodePosition[i]);
+		}
+
+		// Install nodes in a constant velocity mobility model
+		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
+		mobility.SetPositionAllocator (positionAlloc);
+		mobility.Install (m_adhocNodes);
+
+		// Set the velocity value (constant) to zero
+		for (uint32_t i = 0 ; i < m_nNodes; i++)
+		{
+			Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
+			mob->SetVelocity (Vector(0, 0, 0));
+		}
+	}
 }
 
 void
@@ -306,10 +327,11 @@ FBVanetExperiment::SetupAdhocDevices ()
 	NS_LOG_INFO ("Configure channels.");
 
 	YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
-	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
+	//YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
+	YansWifiChannelHelper wifiChannel;
 
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100));
+	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange));	// not know why, but it works
 
 	if (m_loadBuildings != 0)
 	{
@@ -339,24 +361,42 @@ FBVanetExperiment::ConfigureConnections ()
 	internet.Install (m_adhocNodes);
 
 	Ipv4AddressHelper ipv4;
-	NS_LOG_INFO ("Assign IP Addresses.");
 	ipv4.SetBase ("10.1.0.0", "255.255.0.0");
-	Ipv4InterfaceContainer i = ipv4.Assign (m_adhocDevices);
+	m_adhocInterfaces = ipv4.Assign (m_adhocDevices);
 
-	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-	Ptr<Socket> recvSink = Socket::CreateSocket (m_adhocNodes.Get (0), tid);
-	InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
-	recvSink->Bind (local);
-	recvSink->SetRecvCallback (MakeCallback (&FBVanetExperiment::ReceivePacket, this));
+	// TODO
+	// OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address ());
+	// onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
+	// onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
 
-	Ptr<Socket> source = Socket::CreateSocket (m_adhocNodes.Get (1), tid);
-	InetSocketAddress remote = InetSocketAddress (Ipv4Address ("255.255.255.255"), 80);
-	source->SetAllowBroadcast (true);
-	source->Connect (remote);
 
-	Simulator::ScheduleWithContext (source->GetNode ()->GetId (),
-																	Seconds (1.0), &GenerateTraffic,
-																	source, 1000, 1, Seconds (1.0));
+	// Set receiver (for each node in the application)
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		SetupPacketReceive (m_adhocNodes.Get (i));
+		// AddressValue remoteAddress (InetSocketAddress (ns3::Ipv4Address::GetAny (), 80));
+		// onoff1.SetAttribute ("Remote", remoteAddress);
+	}
+
+	std::cout << "" << std::endl;
+
+	// Set unicast sender (for each node in the application)
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		SetupPacketSend (ns3::Ipv4Address("255.255.255.255"),  m_adhocNodes.Get (i));
+	}
+
+	// TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+	// Ptr<Socket> recvSink = Socket::CreateSocket (m_adhocNodes.Get (0), tid);
+	// InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
+	// recvSink->Bind (local);
+	// recvSink->SetRecvCallback (MakeCallback (&FBVanetExperiment::ReceivePacket, this));
+	//
+	// Ptr<Socket> source = Socket::CreateSocket (m_adhocNodes.Get (1), tid);
+	// InetSocketAddress remote = InetSocketAddress (Ipv4Address ("255.255.255.255"), 80);
+	// source->SetAllowBroadcast (true);
+	// source->Connect (remote);
+
 }
 
 void
@@ -365,6 +405,27 @@ FBVanetExperiment::ConfigureTracingAndLogging ()
 	NS_LOG_FUNCTION (this);
 
 	Packet::EnablePrinting ();
+}
+
+void
+FBVanetExperiment::ConfigureFBApplication ()
+{
+	NS_LOG_FUNCTION (this);
+
+	// Create the application and schedule start and end time
+	Ptr<FBApplication> app = CreateObject<FBApplication> ();
+	app->Setup (0, 5);	// DEBUG
+	app->SetStartTime (Seconds (1));
+	app->SetStopTime (Seconds (m_TotalSimTime));
+
+	// Add the desired nodes to the application
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		app->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
+	}
+
+	// Add the application to a node
+	m_adhocNodes.Get (m_startingNode)->AddApplication (app);
 }
 
 void
@@ -393,6 +454,21 @@ FBVanetExperiment::SetupScenario ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
 
+	if (m_scenario == 1)
+	{
+		// straight line, nodes in a row
+		m_mobility = 1;
+		m_nNodes = 4;
+		m_startingNode = 0;
+
+		// DEBUG
+		m_fixNodePosition.push_back( Vector (0.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (100.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (230.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (250.0, 0.0, 0.0));
+	}
+	else
+		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
 }
 
 void
@@ -456,18 +532,39 @@ FBVanetExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const Mo
 								", z=" << vel.z );
 }
 
-void
-FBVanetExperiment::ReceivePacket (Ptr<Socket> socket)
+Ptr<Socket>
+FBVanetExperiment::SetupPacketReceive (Ptr<Node> node)
 {
-	NS_LOG_FUNCTION (this << socket);
+	NS_LOG_FUNCTION (this << node);
 
-  Ptr<Packet> packet;
-  Address srcAddress;
-  while (socket->Recv ())
-  {
-		NS_LOG_DEBUG ("Packet received: " << Simulator::Now ().GetSeconds () << " " << socket->GetNode ()->GetId ());
-  }
+	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+	Ptr<Socket> sink = Socket::CreateSocket (node, tid);
+	InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
+	sink->Bind (local);
+
+	// Store socket
+	m_adhocSinks.push_back (sink);
+
+	return sink;
 }
+
+Ptr<Socket>
+FBVanetExperiment::SetupPacketSend (Ipv4Address addr, Ptr<Node> node)
+{
+	NS_LOG_FUNCTION (this << addr << node);
+
+	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+	Ptr<Socket> sender = Socket::CreateSocket (node, tid);
+	InetSocketAddress remote = InetSocketAddress (addr, 80);
+	sender->SetAllowBroadcast (true);
+	sender->Connect (remote);
+
+	// Store socket
+	m_adhocSources.push_back (sender);
+
+	return sender;
+}
+
 
 /* -----------------------------------------------------------------------------
 *			MAIN

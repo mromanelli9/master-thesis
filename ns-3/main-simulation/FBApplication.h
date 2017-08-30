@@ -47,18 +47,20 @@ public:
 
 	/**
 	 * \brief Set up some application parameters
+	 * \param startingNode index of the node that will generate the Alert Message
 	 * \param broadcastPhaseStart broadcast phase start time (seconds)
 	 * \return none
 	 */
-	void Setup (uint32_t broadcastPhaseStart);
+	void Setup (uint32_t startingNode, uint32_t broadcastPhaseStart);
 
 	/**
 	 * \brief Add a new node to the applicatin and set up protocol parameters
 	 * \param node node to add
-	 * \param socket socket of the node
+	 * \param source source socket of the node
+	 * \param sink sink socket of the node
 	 * \return none
 	 */
-	void AddNode (Ptr<Node> node, Ptr<Socket> socket);
+	void AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink);
 
 private:
 	/**

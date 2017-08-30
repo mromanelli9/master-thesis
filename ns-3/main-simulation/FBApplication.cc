@@ -64,6 +64,7 @@ FBApplication::GetTypeId (void)
 
 FBApplication::FBApplication ()
 	:	m_nNodes (0),
+		m_startingNode (0),
 		m_estimationPhaseRunning (false),
 		m_broadcastPhaseRunning (false),
 		m_broadcastPhaseStart (0),
@@ -72,7 +73,7 @@ FBApplication::FBApplication ()
 		m_flooding (true),
 		m_turn (1000),
 		m_actualRange (300),
-		m_estimatedRange (300),	// DEBUG --> TODO change it!!!
+		m_estimatedRange (0),
 		m_packetPayload (100),
 		m_slot (20)
 {
@@ -87,20 +88,21 @@ FBApplication::~FBApplication ()
 }
 
 void
-FBApplication::Setup (uint32_t broadcastPhaseStart)
+FBApplication::Setup (uint32_t startingNode, uint32_t broadcastPhaseStart)
 {
 	m_broadcastPhaseStart = broadcastPhaseStart;
+	m_startingNode = startingNode;
 }
 
 void
-FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> socket)
+FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 {
 	NS_LOG_FUNCTION (this << node);
 
 	Ptr<FBNode> fbNode = CreateObject<FBNode> ();
 	fbNode->SetNode (node);
-	fbNode->SetSocket (socket);
-	socket->SetRecvCallback (MakeCallback (&FBApplication::ReceivePacket, this));
+	fbNode->SetSocket (source);
+	sink->SetRecvCallback (MakeCallback (&FBApplication::ReceivePacket, this));
 	fbNode->SetCMFR (m_estimatedRange);
 	fbNode->SetLMFR (m_estimatedRange);
 	fbNode->SetCMBR (m_estimatedRange);
@@ -118,12 +120,16 @@ FBApplication::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
 
-	// Start Estimation Phase
-	m_estimationPhaseRunning = true;
-	GenerateHelloTraffic ();
+	// DEBUG
+	Ptr<FBNode> fbNode = m_nodes.at (m_startingNode);
+	GenerateHelloMessage (fbNode);
 
-	// Schedule Broadcast Phase
-	Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
+	// // Start Estimation Phase
+	// m_estimationPhaseRunning = true;
+	// GenerateHelloTraffic ();
+	//
+	// // Schedule Broadcast Phase
+	// Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
 }
 
 void
@@ -202,7 +208,7 @@ void
 FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 {
 	NS_LOG_FUNCTION (this << fbNode);
-	NS_LOG_DEBUG ("Generate Hello Message (node <" << fbNode->GetNode ()->GetId () << ">).");
+	NS_LOG_DEBUG ("Generate Hello Message (node " << fbNode->GetNode ()->GetId () << ").");
 
 	// Create a packet with the correct parameters taken from the node
 	Vector position = fbNode->UpdatePosition ();
@@ -222,7 +228,7 @@ void
 FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 {
 	NS_LOG_FUNCTION (this << fbNode);
-	NS_LOG_DEBUG ("Generate Alert Message (node <" << fbNode->GetNode ()->GetId () << ">).");
+	NS_LOG_DEBUG ("Generate Alert Message (node " << fbNode->GetNode ()->GetId () << ").");
 
 	// Create a packet with the correct parameters taken from the node
 	uint32_t LMBR, CMBR, maxi;
@@ -257,7 +263,7 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 
   while ((packet = socket->RecvFrom (senderAddress)))
   {
-		NS_LOG_DEBUG ("Packet received: " << Simulator::Now ().GetSeconds () << " (node <" << node->GetId () << ">).");
+		NS_LOG_DEBUG ("Packet received: " << Simulator::Now ().GetSeconds () << " (node " << node->GetId () << ").");
 
 		FBHeader fbHeader;
 		packet->RemoveHeader (fbHeader);
