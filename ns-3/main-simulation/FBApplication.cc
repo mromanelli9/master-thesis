@@ -65,6 +65,7 @@ FBApplication::GetTypeId (void)
 FBApplication::FBApplication ()
 	:	m_nNodes (0),
 		m_startingNode (0),
+		m_staticProtocol (false),
 		m_estimationPhaseRunning (false),
 		m_broadcastPhaseRunning (false),
 		m_broadcastPhaseStart (0),
@@ -121,17 +122,32 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 }
 
 void
+FBApplication::DisableEstimationPhase (void)
+{
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Estimation Phase disabled.");
+
+	m_staticProtocol = true;
+	m_estimatedRange = m_actualRange;
+}
+
+void
 FBApplication::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
 
-	// Start Estimation Phase
-	NS_LOG_INFO ("Start Estimation Phase.");
-	m_estimationPhaseRunning = true;
-	GenerateHelloTraffic ();
+	if (!m_staticProtocol)
+	{
+		// Start Estimation Phase
+		NS_LOG_INFO ("Start Estimation Phase.");
+		m_estimationPhaseRunning = true;
+		GenerateHelloTraffic ();
 
-	// Schedule Broadcast Phase
-	Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
+		// Schedule Broadcast Phase
+		Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
+	}
+	else
+		StartBroadcastPhase ();
 }
 
 void

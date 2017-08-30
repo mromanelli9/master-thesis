@@ -416,6 +416,9 @@ FBVanetExperiment::ConfigureFBApplication ()
 	m_fbApplication->SetStartTime (Seconds (1));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
+	// DEBUG: for testing
+	m_fbApplication->DisableEstimationPhase ();
+
 	// Add the desired nodes to the application
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
@@ -460,10 +463,10 @@ FBVanetExperiment::SetupScenario ()
 		m_startingNode = 0;
 
 		m_fixNodePosition.push_back( Vector (100.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (200.0, 0.0, 0.0));
 		m_fixNodePosition.push_back( Vector (300.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (400.0, 0.0, 0.0));
 		m_fixNodePosition.push_back( Vector (500.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (700.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (900.0, 0.0, 0.0));
 		// m_fixNodePosition.push_back( Vector (1000.0, 0.0, 0.0));
 		// m_fixNodePosition.push_back( Vector (1100.0, 0.0, 0.0));
 		// m_fixNodePosition.push_back( Vector (1500.0, 0.0, 0.0));

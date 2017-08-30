@@ -63,6 +63,12 @@ public:
 	void AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink);
 
 	/**
+	 * \brief Disable the estimation phase of the protocol
+	 * \return none
+	 */
+	void DisableEstimationPhase (void);
+
+	/**
 	 * \brief Print value of some useful field
 	 * \return none
 	 */
@@ -127,7 +133,8 @@ private:
 	std::vector<Ptr<FBNode>>								m_nodes;	// nodes that run this application
 	uint32_t																m_startingNode; // index of the node that will generate the Alert Message
 	std::map<uint32_t, uint32_t> 						m_nodesMap;	// map nodes and FBNodes
-	std::map<uint32_t, bool>							m_broadcastForwardCheck;	// used to check if a node has already schedule to forward an alert message
+	bool																		m_staticProtocol;	// true if static protocol is used
+	std::map<uint32_t, bool>								m_broadcastForwardCheck;	// used to check if a node has already schedule to forward an alert message
 	std::map<uint32_t, EventId>							m_broadcastForwardEvent;	// used to store the forward event of an alert message
 	bool           										 			m_estimationPhaseRunning;	// true if the estimation phase is running
 	bool            									 			m_broadcastPhaseRunning;	// true if the broadcast phase is running
