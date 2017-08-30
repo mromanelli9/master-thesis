@@ -111,8 +111,11 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 	fbNode->SetLMBR (m_estimatedRange);
 	fbNode->UpdatePosition ();
 
+	// misc stuff
 	m_nodes.push_back (fbNode);
 	m_nodesMap.insert (std::pair<uint32_t, uint32_t> (node->GetId (), m_nNodes));
+
+	m_broadcastForwardCheck.insert (std::pair<uint32_t, bool> (node->GetId (), false));
 
 	m_nNodes++;
 }
@@ -297,7 +300,18 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 				if (distanceStarterToSender < distanceStarterToCurrent)
 					HandleAlertMessage (fbNode, fbHeader, distanceSenderToCurrent_uint);
 				else
+				{
 					NS_LOG_DEBUG ("Node " << node->GetId () << " has dropped an Alert Message.");
+
+					// Check if this node has already a forwarding procedure pending
+					// If true, delete the pending event
+					// TODO: check if it's true
+					if (m_broadcastForwardCheck.at (node->GetId ()) == true)
+					{
+						NS_LOG_DEBUG ("Another forwarding procedure is pending so the previous one will be deleted (" << node->GetId () << ").");
+						Simulator::Cancel (m_broadcastForwardEvent.at (node->GetId ()));
+					}
+				}
 			}
 		}
   }
@@ -336,15 +350,23 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 {
 	// We assume that the message is coming from the front
 	NS_LOG_FUNCTION (this << fbNode << fbHeader << distance);
-	NS_LOG_INFO ("Handle an Alert Message (" << fbNode->GetNode ()->GetId () << ").");
-
-	// Increase the hop counter
-	m_totalHops++;
+	uint32_t nodeId = fbNode->GetNode ()->GetId ();
+	NS_LOG_DEBUG ("Handle an Alert Message (" << nodeId << ").");
 
 	// If I'm the last car in the platoon then the broadcast phase needs to end, goal reached
-	if (fbNode->GetNode ()->GetId () == m_nodes.at (m_nNodes-1)->GetNode ()->GetId ())	// DEBUG: maybe this can be optimized
+	// TODO: doesn't work
+	if (nodeId == m_nodes.at (m_nNodes-1)->GetNode ()->GetId ())	// DEBUG: maybe this can be optimized
 	{
+		NS_LOG_DEBUG ("Broadcast Phase has reached the last node.");
 		StopBroadcastPhase ();
+	}
+
+	// Check if this node has already a forwarding procedure pending
+	// If true, delete the pending event
+	if (m_broadcastForwardCheck.at (nodeId) == true)
+	{
+		NS_LOG_DEBUG ("Another forwarding procedure is pending so the previous one will be deleted (" << nodeId << ").");
+		Simulator::Cancel (m_broadcastForwardEvent.at (nodeId));
 	}
 
 	// Compute the size of the contention window
@@ -356,7 +378,11 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 
 	// TODO: e se qualcosa arriva nel frattempo?
 	// Wait <waitingTime> milliseconds and then forward the message
-	Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (), MilliSeconds (waitingTime * m_slot), &FBApplication::ForwardAlertMessage, this, fbNode, fbHeader);
+	EventId event = Simulator::Schedule (MilliSeconds (waitingTime * m_slot), &FBApplication::ForwardAlertMessage, this, fbNode, fbHeader);
+
+	// Store the event for further use
+	m_broadcastForwardEvent.insert (std::pair<uint32_t, EventId> (nodeId, event));
+	m_broadcastForwardCheck.at (nodeId) = true;
 }
 
 void
@@ -385,6 +411,9 @@ FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader)
 
 	// Forward
 	fbNode->Send (packet);
+
+	// Increase the hop counter
+	m_totalHops++;
 }
 
 Ptr<FBNode>
