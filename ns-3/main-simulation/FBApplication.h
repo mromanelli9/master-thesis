@@ -139,6 +139,7 @@ private:
 	uint32_t				m_packetPayload; // size of the packet payload
 	uint32_t				m_slot;	// value of a slot (milliseconds)
 	uint32_t				m_totalHelloMessages;	// number of hello messages sent
+	uint32_t				m_totalHops;	// total number of hop in the broadcast phase
 };
 
 } // namespace ns3

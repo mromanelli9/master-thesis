@@ -75,7 +75,9 @@ FBApplication::FBApplication ()
 		m_actualRange (300),
 		m_estimatedRange (0),
 		m_packetPayload (100),
-		m_slot (20)
+		m_slot (20),
+		m_totalHelloMessages (0),
+		m_totalHops (0)
 {
 	NS_LOG_FUNCTION (this);
 
@@ -259,7 +261,7 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 
   while ((packet = socket->RecvFrom (senderAddress)))
   {
-		NS_LOG_DEBUG ("Packet received: " << Simulator::Now ().GetSeconds () << " (node " << node->GetId () << ").");
+		NS_LOG_DEBUG ("Packet received by node " << node->GetId () << ".");
 
 		FBHeader fbHeader;
 		packet->RemoveHeader (fbHeader);
@@ -289,8 +291,13 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 				double distanceStarterToSender = ComputeDistance(starterPosition, senderPosition);
 				double distanceStarterToCurrent = ComputeDistance(starterPosition, currentPosition);
 
+				// If starter-to-sender distance is less than starter-to-current distance,
+				// then the message is coming from the front and it needs to be menaged,
+				// otherwise do nothing
 				if (distanceStarterToSender < distanceStarterToCurrent)
 					HandleAlertMessage (fbNode, fbHeader, distanceSenderToCurrent_uint);
+				else
+					NS_LOG_DEBUG ("Node " << node->GetId () << " has dropped an Alert Message.");
 			}
 		}
   }
@@ -331,6 +338,15 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	NS_LOG_FUNCTION (this << fbNode << fbHeader << distance);
 	NS_LOG_INFO ("Handle an Alert Message (" << fbNode->GetNode ()->GetId () << ").");
 
+	// Increase the hop counter
+	m_totalHops++;
+
+	// If I'm the last car in the platoon then the broadcast phase needs to end, goal reached
+	if (fbNode->GetNode ()->GetId () == m_nodes.at (m_nNodes-1)->GetNode ()->GetId ())	// DEBUG: maybe this can be optimized
+	{
+		StopBroadcastPhase ();
+	}
+
 	// Compute the size of the contention window
 	uint32_t cmbr = fbNode->GetCMBR ();
 	uint32_t cwnd = ComputeContetionWindow (cmbr, distance);
@@ -341,16 +357,6 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	// TODO: e se qualcosa arriva nel frattempo?
 	// Wait <waitingTime> milliseconds and then forward the message
 	Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (), MilliSeconds (waitingTime * m_slot), &FBApplication::ForwardAlertMessage, this, fbNode, fbHeader);
-
-
-	// if (!m_flooding)
-	// {
-	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (rs), &FBApplication::KeepWaiting, this, ...); // TODO: add arguments
-	// }
-	// else
-	// {
-	// 	Simulator::ScheduleWithContext (node->GetId (), MilliSeconds (0), &FBApplication::ForwardAlertMessage, this, ...); // TODO: add arguments
-	// }
 }
 
 void
@@ -397,6 +403,7 @@ FBApplication::PrintStats (void)
 
 	NS_LOG_UNCOND ("Total Hello Messages sent: " << m_totalHelloMessages << ".");
 	NS_LOG_UNCOND ("Estimated transimision range: " << m_nodes.at (m_startingNode)->GetCMBR () << " meters (actual range: " << m_actualRange << " m).");
+	NS_LOG_UNCOND ("Total number of hops (Broadcast Phase): " << m_totalHops << ".");
 }
 
 uint32_t

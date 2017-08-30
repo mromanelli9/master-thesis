@@ -456,7 +456,7 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// straight line, nodes in a row
 		m_mobility = 1;
-		m_nNodes = 10;
+		m_nNodes = 5;
 		m_startingNode = 0;
 
 		m_fixNodePosition.push_back( Vector (100.0, 0.0, 0.0));
@@ -464,11 +464,11 @@ FBVanetExperiment::SetupScenario ()
 		m_fixNodePosition.push_back( Vector (500.0, 0.0, 0.0));
 		m_fixNodePosition.push_back( Vector (700.0, 0.0, 0.0));
 		m_fixNodePosition.push_back( Vector (900.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (1000.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (1100.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (1500.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (1700.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (2000.0, 0.0, 0.0));
+		// m_fixNodePosition.push_back( Vector (1000.0, 0.0, 0.0));
+		// m_fixNodePosition.push_back( Vector (1100.0, 0.0, 0.0));
+		// m_fixNodePosition.push_back( Vector (1500.0, 0.0, 0.0));
+		// m_fixNodePosition.push_back( Vector (1700.0, 0.0, 0.0));
+		// m_fixNodePosition.push_back( Vector (2000.0, 0.0, 0.0));
 
 	}
 	else
