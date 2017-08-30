@@ -232,7 +232,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_loadBuildings (0),
 		m_animation (0),
 		m_animationFileName ("outputs/fb-vanet-animation.xml"),
-		m_TotalSimTime (10)
+		m_TotalSimTime (30)
 {
 	srand (time (0));
 }
@@ -412,7 +412,7 @@ FBVanetExperiment::ConfigureFBApplication ()
 
 	// Create the application and schedule start and end time
 	m_fbApplication = CreateObject<FBApplication> ();
-	m_fbApplication->Setup (0, 5);
+	m_fbApplication->SetupBroadcastPhase (0, 7);
 	m_fbApplication->SetStartTime (Seconds (1));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 

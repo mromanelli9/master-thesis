@@ -51,7 +51,7 @@ public:
 	 * \param broadcastPhaseStart broadcast phase start time (seconds)
 	 * \return none
 	 */
-	void Setup (uint32_t startingNode, uint32_t broadcastPhaseStart);
+	void SetupBroadcastPhase (uint32_t startingNode, uint32_t broadcastPhaseStart);
 
 	/**
 	 * \brief Add a new node to the applicatin and set up protocol parameters

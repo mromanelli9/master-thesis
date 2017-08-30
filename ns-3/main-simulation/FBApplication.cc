@@ -88,7 +88,7 @@ FBApplication::~FBApplication ()
 }
 
 void
-FBApplication::Setup (uint32_t startingNode, uint32_t broadcastPhaseStart)
+FBApplication::SetupBroadcastPhase (uint32_t startingNode, uint32_t broadcastPhaseStart)
 {
 	m_broadcastPhaseStart = broadcastPhaseStart;
 	m_startingNode = startingNode;
@@ -125,8 +125,8 @@ FBApplication::StartApplication (void)
 	m_estimationPhaseRunning = true;
 	GenerateHelloTraffic ();
 
-	// // Schedule Broadcast Phase
-	// Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
+	// Schedule Broadcast Phase
+	Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
 }
 
 void
@@ -177,10 +177,9 @@ FBApplication::StartBroadcastPhase (void)
 	m_estimationPhaseRunning = false;
 	m_broadcastPhaseRunning = true;
 
-	// // Select the starting node that will generate the first alert
-	// Ptr<FBNode> fbNode = m_nodes.at (m_startingNode);
-	// // To be sure that there will be no hello message, wait two turns
-	// Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (), MilliSeconds (m_turn * 2), &FBApplication::GenerateAlertMessage, this, fbNode);
+	// Select the starting node that will generate the first alert
+	Ptr<FBNode> fbNode = m_nodes.at (m_startingNode);
+	GenerateAlertMessage (fbNode);
 }
 
 void
@@ -358,7 +357,7 @@ void
 FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader)
 {
 	NS_LOG_FUNCTION (this << fbNode << oldFBHeader);
-	NS_LOG_DEBUG ("Forwarding Alert Message (node <" << fbNode->GetNode ()->GetId () << ">).");
+	NS_LOG_DEBUG ("Forwarding Alert Message (node " << fbNode->GetNode ()->GetId () << ").");
 
 	// Create a packet with the correct parameters taken from the node
 	uint32_t LMBR, CMBR, maxi;
