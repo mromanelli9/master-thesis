@@ -120,14 +120,11 @@ FBApplication::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
 
-	// DEBUG
-	Ptr<FBNode> fbNode = m_nodes.at (m_startingNode);
-	GenerateHelloMessage (fbNode);
+	// Start Estimation Phase
+	NS_LOG_INFO ("Start Estimation Phase.");
+	m_estimationPhaseRunning = true;
+	GenerateHelloTraffic ();
 
-	// // Start Estimation Phase
-	// m_estimationPhaseRunning = true;
-	// GenerateHelloTraffic ();
-	//
 	// // Schedule Broadcast Phase
 	// Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
 }
@@ -159,8 +156,6 @@ FBApplication::GenerateHelloTraffic (void)
 		// Compute a random time
 		// problem: how much time?
 		uint32_t waitingTime = rand () % m_slot;
-
-		std::cout << "waitingTime " << waitingTime << std::endl;
 
 		// Schedule the generation of a Hello Message for the current node
 		Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (),
@@ -222,6 +217,8 @@ FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 	packet->AddHeader (fbHeader);
 
 	fbNode->Send (packet);
+
+	m_totalHelloMessages++;
 }
 
 void
@@ -304,7 +301,7 @@ void
 FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
 {
 	NS_LOG_FUNCTION (this << node << fbHeader);
-	NS_LOG_INFO ("Handle a Hello Message (" << node->GetNode ()->GetId () << ").");
+	NS_LOG_DEBUG ("Handle a Hello Message (" << node->GetNode ()->GetId () << ").");
 
 	// Retrieve CMFR from the packet received and CMBR from the current node
 	uint32_t otherCMFR = fbHeader.GetMaxRange ();	// TODO: controllare che max_range sia il cmfr
@@ -392,6 +389,15 @@ FBApplication::GetFBNode (Ptr<Node> node)
 	uint32_t index = m_nodesMap.at (id);
 
 	return m_nodes.at (index);
+}
+
+void
+FBApplication::PrintStats (void)
+{
+	NS_LOG_FUNCTION (this);
+
+	NS_LOG_UNCOND ("Total Hello Messages sent: " << m_totalHelloMessages << ".");
+	NS_LOG_UNCOND ("Estimated transimision range: " << m_nodes.at (m_startingNode)->GetCMBR () << " meters (actual range: " << m_actualRange << " m).");
 }
 
 uint32_t

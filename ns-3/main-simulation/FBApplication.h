@@ -62,6 +62,12 @@ public:
 	 */
 	void AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink);
 
+	/**
+	 * \brief Print value of some useful field
+	 * \return none
+	 */
+	void PrintStats (void);
+
 private:
 	/**
 	 * \brief Application specific startup code
@@ -132,6 +138,7 @@ private:
 	uint32_t				m_estimatedRange;	// range of transmission to be estimated
 	uint32_t				m_packetPayload; // size of the packet payload
 	uint32_t				m_slot;	// value of a slot (milliseconds)
+	uint32_t				m_totalHelloMessages;	// number of hello messages sent
 };
 
 } // namespace ns3

@@ -194,6 +194,7 @@ private:
 	CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility);
 
 
+	Ptr<FBApplication>			m_fbApplication;
 	uint32_t 								m_nNodes;
 	NodeContainer						m_adhocNodes;
 	NetDeviceContainer			m_adhocDevices;
@@ -365,20 +366,17 @@ FBVanetExperiment::ConfigureConnections ()
 	m_adhocInterfaces = ipv4.Assign (m_adhocDevices);
 
 	// TODO
-	// OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address ());
-	// onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
-	// onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
-
+	OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address ());
+	onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
+	onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
 
 	// Set receiver (for each node in the application)
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
 		SetupPacketReceive (m_adhocNodes.Get (i));
-		// AddressValue remoteAddress (InetSocketAddress (ns3::Ipv4Address::GetAny (), 80));
-		// onoff1.SetAttribute ("Remote", remoteAddress);
+		AddressValue remoteAddress (InetSocketAddress (ns3::Ipv4Address::GetAny (), 80));
+		onoff1.SetAttribute ("Remote", remoteAddress);
 	}
-
-	std::cout << "" << std::endl;
 
 	// Set unicast sender (for each node in the application)
 	for (uint32_t i = 0; i < m_nNodes; i++)
@@ -413,19 +411,19 @@ FBVanetExperiment::ConfigureFBApplication ()
 	NS_LOG_FUNCTION (this);
 
 	// Create the application and schedule start and end time
-	Ptr<FBApplication> app = CreateObject<FBApplication> ();
-	app->Setup (0, 5);	// DEBUG
-	app->SetStartTime (Seconds (1));
-	app->SetStopTime (Seconds (m_TotalSimTime));
+	m_fbApplication = CreateObject<FBApplication> ();
+	m_fbApplication->Setup (0, 5);
+	m_fbApplication->SetStartTime (Seconds (1));
+	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
 	// Add the desired nodes to the application
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
-		app->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
+		m_fbApplication->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
 	}
 
 	// Add the application to a node
-	m_adhocNodes.Get (m_startingNode)->AddApplication (app);
+	m_adhocNodes.Get (m_startingNode)->AddApplication (m_fbApplication);
 }
 
 void
@@ -458,14 +456,20 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// straight line, nodes in a row
 		m_mobility = 1;
-		m_nNodes = 4;
+		m_nNodes = 10;
 		m_startingNode = 0;
 
-		// DEBUG
-		m_fixNodePosition.push_back( Vector (0.0, 0.0, 0.0));
 		m_fixNodePosition.push_back( Vector (100.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (230.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (250.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (300.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (500.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (700.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (900.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (1000.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (1100.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (1500.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (1700.0, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (2000.0, 0.0, 0.0));
+
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
@@ -484,8 +488,9 @@ void
 FBVanetExperiment::ProcessOutputs ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Print some statistics.");
+	NS_LOG_INFO ("----------------------------------------\nPrint some statistics.");
 
+	m_fbApplication->PrintStats ();
 }
 
 void
