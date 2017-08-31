@@ -124,6 +124,13 @@ private:
 	void HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32_t distance);
 	void ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader);
 
+	/**
+	 * \brief Stop a node
+	 * \param fbNode node to be stopped
+	 * \return none
+	 */
+	void StopNode (Ptr<FBNode> fbNode);
+
 	Ptr<FBNode> GetFBNode (Ptr<Node> node);
 
 	uint32_t ComputeContetionWindow (uint32_t maxRange, uint32_t distance);

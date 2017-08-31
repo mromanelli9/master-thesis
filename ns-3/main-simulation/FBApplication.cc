@@ -24,6 +24,8 @@
 #include "ns3/object-ptr-container.h"
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
+#include "ns3/constant-velocity-mobility-model.h"
+#include "ns3/mobility-module.h"
 
 #include "FBApplication.h"
 #include "FBHeader.h"
@@ -221,8 +223,12 @@ FBApplication::StartBroadcastPhase (void)
 	m_estimationPhaseRunning = false;
 	m_broadcastPhaseRunning = true;
 
-	// Select the starting node that will generate the first alert
 	Ptr<FBNode> fbNode = m_nodes.at (m_startingNode);
+	// Simulate the event (that will cause the generation of an alert)
+	// by stopping the node
+	StopNode (fbNode);
+
+	// Generate the first alert message
 	GenerateAlertMessage (fbNode);
 }
 
@@ -322,6 +328,7 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 		uint32_t distanceSenderToCurrent_uint = std::abs (std::floor (distanceSenderToCurrent));
 
 		// If the node is in range
+		// TODO check if actual range or the estimated range
 		if (distanceSenderToCurrent_uint < m_actualRange)
 		{
 			if (messageType == HELLO_MESSAGE)
@@ -363,7 +370,7 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
 	NS_LOG_DEBUG ("Handle a Hello Message (" << node->GetNode ()->GetId () << ").");
 
 	// Retrieve CMFR from the packet received and CMBR from the current node
-	uint32_t otherCMFR = fbHeader.GetMaxRange ();	// TODO: controllare che max_range sia il cmfr
+	uint32_t otherCMFR = fbHeader.GetMaxRange ();
 	uint32_t myCMBR = node->GetCMBR ();
 
 	// Retrieve the position of the current node
@@ -415,7 +422,6 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	// Compute a random waiting time (1 <= waitingTime <= cwnd)
 	uint32_t waitingTime = (rand () % cwnd) + 1;
 
-	// TODO: e se qualcosa arriva nel frattempo?
 	// Wait <waitingTime> milliseconds and then forward the message
 	EventId event = Simulator::Schedule (MilliSeconds (waitingTime * m_slot), &FBApplication::ForwardAlertMessage, this, fbNode, fbHeader);
 
@@ -455,9 +461,22 @@ FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader)
 	m_totalHops++;
 }
 
+void
+FBApplication::StopNode (Ptr<FBNode> fbNode)
+{
+	NS_LOG_FUNCTION (this);
+
+	Ptr<Node> node = fbNode->GetNode ();
+
+	Ptr<ConstantVelocityMobilityModel> mob = node->GetObject<ConstantVelocityMobilityModel>();
+	mob->SetVelocity (Vector (0, 0, 0));
+}
+
 Ptr<FBNode>
 FBApplication::GetFBNode (Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this);
+
 	uint32_t id = node->GetId ();
 	uint32_t index = m_nodesMap.at (id);
 
