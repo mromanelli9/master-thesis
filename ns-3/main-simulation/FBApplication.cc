@@ -329,7 +329,7 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 
 		// If the node is in range
 		// TODO check if actual range or the estimated range
-		if (distanceSenderToCurrent_uint < m_actualRange)
+		if (distanceSenderToCurrent_uint <= m_actualRange)
 		{
 			if (messageType == HELLO_MESSAGE)
 				HandleHelloMessage (fbNode, fbHeader);
@@ -376,16 +376,15 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
 	// Retrieve the position of the current node
 	Vector currentPosition = node->UpdatePosition ();
 
-	// Retrieve the position of the starter node
-	Vector starterPosition = fbHeader.GetStarterPosition ();
+	// Retrieve the position of the sender node
+	Vector senderPosition = fbHeader.GetPosition ();
 
 	// Compute distance
-	double distance_double = CalculateDistance (starterPosition, currentPosition);
+	double distance_double = CalculateDistance (senderPosition, currentPosition);
 	uint32_t distance = std::abs (std::floor (distance_double));
 
 	// Update new values
-	uint32_t m0 = std::max (myCMBR, otherCMFR);
-	uint32_t maxi = std::max (m0, distance);
+	uint32_t maxi = std::max (std::max (myCMBR, otherCMFR), distance);
 
 	node->SetCMBR (maxi);
 	node->SetLMBR (myCMBR);
@@ -400,11 +399,11 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	NS_LOG_DEBUG ("Handle an Alert Message (" << nodeId << ").");
 
 	// If I'm the last car in the platoon then the broadcast phase needs to end, goal reached
-	// TODO: doesn't work
 	if (nodeId == m_nodes.at (m_nNodes-1)->GetNode ()->GetId ())	// DEBUG: maybe this can be optimized
 	{
 		NS_LOG_DEBUG ("Broadcast Phase has reached the last node.");
 		StopBroadcastPhase ();
+		return;
 	}
 
 	// Check if this node has already a forwarding procedure pending
@@ -488,11 +487,14 @@ FBApplication::PrintStats (void)
 {
 	NS_LOG_FUNCTION (this);
 
-	NS_LOG_INFO ("Total Hello Messages sent: " << m_totalHelloMessages << ".");
-	if (!m_staticProtocol)
+	if (!m_staticProtocol) {
+		NS_LOG_INFO ("Total Hello Messages sent: " << m_totalHelloMessages << ".");
 		NS_LOG_INFO ("Estimated transimision range: " << m_nodes.at (m_startingNode)->GetCMBR () << " meters (actual range: " << m_actualRange << " m).");
+	}
 	else
-		NS_LOG_INFO ("Estimation Phase disabled (static protocol); actual range: " << m_actualRange << " meters.");
+	{
+		NS_LOG_INFO ("Estimation Phase disabled (static protocol); estimated range: " << m_actualRange << " meters.");
+	}
 	NS_LOG_INFO ("Total number of hops (Broadcast Phase): " << m_totalHops << ".");
 }
 
