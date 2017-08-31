@@ -204,6 +204,7 @@ private:
 	std::string							m_packetSize;
 	std::string							m_rate;
 	std::string							m_phyMode;
+	uint32_t								m_txp;
 	uint32_t								m_actualRange;
 	uint32_t								m_startingNode;
 	uint32_t								m_staticProtocol;
@@ -223,10 +224,11 @@ private:
 */
 
 FBVanetExperiment::FBVanetExperiment ()
-	:	m_nNodes (2),	// random value, it will be set later
+	:	m_nNodes (0),	// random value, it will be set later
 		m_packetSize ("64"),
 		m_rate ("2048bps"),
 		m_phyMode ("OfdmRate6MbpsBW10MHz"),
+		m_txp (20),
 		m_actualRange (300),
 		m_startingNode (0),
 		m_staticProtocol (1),
@@ -343,7 +345,8 @@ FBVanetExperiment::SetupAdhocDevices ()
 	YansWifiChannelHelper wifiChannel;
 
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange));	// not know why, but it works
+	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange));
+	// wifiChannel.AddPropagationLoss ("ns3::TwoRayGroundPropagationLossModel", "Frequency", DoubleValue (5.9e9), "HeightAboveZ", DoubleValue (1.5));
 
 	if (m_loadBuildings != 0)
 	{
@@ -353,6 +356,10 @@ FBVanetExperiment::SetupAdhocDevices ()
 	Ptr<YansWifiChannel> channel = wifiChannel.Create ();
 	wifiPhy.SetChannel (channel);
 	wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);
+
+	// Set Tx Power
+  wifiPhy.Set ("TxPowerStart",DoubleValue (m_txp));
+  wifiPhy.Set ("TxPowerEnd", DoubleValue (m_txp));
 
 	NqosWaveMacHelper wifi80211pMac = NqosWaveMacHelper::Default ();
 	Wifi80211pHelper wifi80211p = Wifi80211pHelper::Default ();
@@ -385,7 +392,7 @@ FBVanetExperiment::ConfigureConnections ()
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
 		SetupPacketReceive (m_adhocNodes.Get (i));
-		AddressValue remoteAddress (InetSocketAddress (ns3::Ipv4Address::GetAny (), 80));
+		AddressValue remoteAddress (InetSocketAddress (ns3::Ipv4Address::GetAny (), 9));
 		onoff1.SetAttribute ("Remote", remoteAddress);
 	}
 
@@ -456,11 +463,10 @@ FBVanetExperiment::SetupScenario ()
 
 	if (m_scenario == 1)
 	{
-		// straight line, nodes in a row
 		m_mobility = 1;
 
-		// if user didn't set it
-		if (m_nNodes == 2)
+		// Default value for this scenario
+		if (m_nNodes == 0)
 			m_nNodes = 500;
 
 		uint32_t roadLength = 8000;	// in meters
@@ -469,6 +475,17 @@ FBVanetExperiment::SetupScenario ()
 		for (uint32_t i = 0; i < m_nNodes; i++)
 			m_fixNodePosition.push_back( Vector (i*distance, 0.0, 0.0));
 
+	}
+	else if (m_scenario == 2)
+	{
+		m_mobility = 1;
+
+		// DEBUG
+		m_nNodes = 3;
+
+		m_fixNodePosition.push_back( Vector (350,350, 0.0));
+		m_fixNodePosition.push_back( Vector (0,350, 0.0));
+		m_fixNodePosition.push_back( Vector (360,46,0.0));
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
@@ -543,7 +560,7 @@ FBVanetExperiment::SetupPacketReceive (Ptr<Node> node)
 
 	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 	Ptr<Socket> sink = Socket::CreateSocket (node, tid);
-	InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
+	InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 9);
 	sink->Bind (local);
 
 	// Store socket
@@ -559,7 +576,7 @@ FBVanetExperiment::SetupPacketSend (Ipv4Address addr, Ptr<Node> node)
 
 	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 	Ptr<Socket> sender = Socket::CreateSocket (node, tid);
-	InetSocketAddress remote = InetSocketAddress (addr, 80);
+	InetSocketAddress remote = InetSocketAddress (addr, 9);
 	sender->SetAllowBroadcast (true);
 	sender->Connect (remote);
 
