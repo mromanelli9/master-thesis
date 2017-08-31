@@ -29,6 +29,10 @@
 
 namespace ns3 {
 
+static const uint32_t PROTOCOL_FB = 0;
+static const uint32_t PROTOCOL_STATIC_300 = 1;
+static const uint32_t PROTOCOL_STATIC_1000 = 2;
+
 /**
  * \ingroup network
  * \brief A special application that implements Fast Broadcast protocol.
@@ -47,11 +51,10 @@ public:
 
 	/**
 	 * \brief Set up some application parameters
-	 * \param startingNode index of the node that will generate the Alert Message
-	 * \param broadcastPhaseStart broadcast phase start time (seconds)
+	 * \param TODO
 	 * \return none
 	 */
-	void SetupBroadcastPhase (uint32_t startingNode, uint32_t broadcastPhaseStart);
+	void Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t cwMin, uint32_t cwMax, uint32_t turn, uint32_t slot);
 
 	/**
 	 * \brief Add a new node to the applicatin and set up protocol parameters

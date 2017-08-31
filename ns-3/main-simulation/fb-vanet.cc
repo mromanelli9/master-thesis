@@ -206,6 +206,7 @@ private:
 	std::string							m_phyMode;
 	uint32_t								m_actualRange;
 	uint32_t								m_startingNode;
+	uint32_t								m_staticProtocol;
 	uint32_t								m_mobility;
 	uint32_t								m_scenario;
 	std::vector <Vector>		m_fixNodePosition;
@@ -227,6 +228,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_phyMode ("OfdmRate6MbpsBW10MHz"),
 		m_actualRange (300),
 		m_startingNode (0),
+		m_staticProtocol (1),
 		m_mobility (1),
 		m_scenario (1),
 		m_loadBuildings (0),
@@ -271,6 +273,13 @@ FBVanetExperiment::ConfigureDefaults ()
 	Config::SetDefault ("ns3::OnOffApplication::PacketSize",StringValue (m_packetSize));
 	Config::SetDefault ("ns3::OnOffApplication::DataRate",  StringValue (m_rate));
 	Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (m_phyMode));
+
+	if (m_staticProtocol == 1)
+		m_staticProtocol = PROTOCOL_FB;
+	else if (m_staticProtocol == 2)
+		m_staticProtocol = PROTOCOL_STATIC_300;
+	else if (m_staticProtocol == 3)
+		m_staticProtocol = PROTOCOL_STATIC_1000;
 }
 
 void
@@ -409,15 +418,13 @@ void
 FBVanetExperiment::ConfigureFBApplication ()
 {
 	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Configure main application.");
 
 	// Create the application and schedule start and end time
 	m_fbApplication = CreateObject<FBApplication> ();
-	m_fbApplication->SetupBroadcastPhase (0, 7);
+	m_fbApplication->Setup (m_staticProtocol, 0, 15, m_actualRange, 32, 1024, 1000, 20);
 	m_fbApplication->SetStartTime (Seconds (1));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
-
-	// DEBUG: for testing
-	m_fbApplication->DisableEstimationPhase ();
 
 	// Add the desired nodes to the application
 	for (uint32_t i = 0; i < m_nNodes; i++)
@@ -440,6 +447,7 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	// allow command line overrides
 	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
+	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C1000", m_staticProtocol);
 	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
 	cmd.AddValue ("scenario", "1=straight street, 2=grid layout, 3=real world", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
@@ -459,20 +467,14 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// straight line, nodes in a row
 		m_mobility = 1;
-		m_nNodes = 5;
+		m_nNodes = 10;
 		m_startingNode = 0;
 
-		m_fixNodePosition.push_back( Vector (100.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (200.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (300.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (400.0, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (500.0, 0.0, 0.0));
-		// m_fixNodePosition.push_back( Vector (1000.0, 0.0, 0.0));
-		// m_fixNodePosition.push_back( Vector (1100.0, 0.0, 0.0));
-		// m_fixNodePosition.push_back( Vector (1500.0, 0.0, 0.0));
-		// m_fixNodePosition.push_back( Vector (1700.0, 0.0, 0.0));
-		// m_fixNodePosition.push_back( Vector (2000.0, 0.0, 0.0));
+		uint32_t roadLength = 500;	// in meters
+		uint32_t distance = roadLength / m_nNodes;
 
+		for (uint32_t i = 0; i < m_nNodes; i++)
+			m_fixNodePosition.push_back( Vector (i*distance, 0.0, 0.0));
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");

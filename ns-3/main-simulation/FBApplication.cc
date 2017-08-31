@@ -91,10 +91,33 @@ FBApplication::~FBApplication ()
 }
 
 void
-FBApplication::SetupBroadcastPhase (uint32_t startingNode, uint32_t broadcastPhaseStart)
+FBApplication::Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t cwMin, uint32_t cwMax, uint32_t turn, uint32_t slot)
 {
-	m_broadcastPhaseStart = broadcastPhaseStart;
+	if (protocol == PROTOCOL_FB)
+	{
+		m_estimatedRange = 0;
+		m_staticProtocol = false;
+	}
+	else if (protocol == PROTOCOL_STATIC_300)
+	{
+		m_estimatedRange = 300;
+		m_staticProtocol = true;
+	}
+	else if (protocol == PROTOCOL_STATIC_1000)
+	{
+		m_estimatedRange = 1000;
+		m_staticProtocol = true;
+	}
+	else
+		NS_LOG_ERROR ("Protocol not found.");
+
 	m_startingNode = startingNode;
+	m_broadcastPhaseStart = broadcastPhaseStart;
+	m_actualRange = actualRange;
+	m_cwMin = cwMin;
+	m_cwMax	= cwMax;
+	m_turn = turn;
+	m_slot = slot;
 }
 
 void
@@ -446,9 +469,12 @@ FBApplication::PrintStats (void)
 {
 	NS_LOG_FUNCTION (this);
 
-	NS_LOG_UNCOND ("Total Hello Messages sent: " << m_totalHelloMessages << ".");
-	NS_LOG_UNCOND ("Estimated transimision range: " << m_nodes.at (m_startingNode)->GetCMBR () << " meters (actual range: " << m_actualRange << " m).");
-	NS_LOG_UNCOND ("Total number of hops (Broadcast Phase): " << m_totalHops << ".");
+	NS_LOG_INFO ("Total Hello Messages sent: " << m_totalHelloMessages << ".");
+	if (!m_staticProtocol)
+		NS_LOG_INFO ("Estimated transimision range: " << m_nodes.at (m_startingNode)->GetCMBR () << " meters (actual range: " << m_actualRange << " m).");
+	else
+		NS_LOG_INFO ("Estimation Phase disabled (static protocol); actual range: " << m_actualRange << " meters.");
+	NS_LOG_INFO ("Total number of hops (Broadcast Phase): " << m_totalHops << ".");
 }
 
 uint32_t
