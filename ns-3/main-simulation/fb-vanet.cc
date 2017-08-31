@@ -207,6 +207,7 @@ private:
 	uint32_t								m_actualRange;
 	uint32_t								m_startingNode;
 	uint32_t								m_staticProtocol;
+	uint32_t								m_alertGeneration;
 	uint32_t								m_mobility;
 	uint32_t								m_scenario;
 	std::vector <Vector>		m_fixNodePosition;
@@ -229,6 +230,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_actualRange (300),
 		m_startingNode (0),
 		m_staticProtocol (1),
+		m_alertGeneration (20),
 		m_mobility (1),
 		m_scenario (1),
 		m_loadBuildings (0),
@@ -392,18 +394,6 @@ FBVanetExperiment::ConfigureConnections ()
 	{
 		SetupPacketSend (ns3::Ipv4Address("255.255.255.255"),  m_adhocNodes.Get (i));
 	}
-
-	// TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-	// Ptr<Socket> recvSink = Socket::CreateSocket (m_adhocNodes.Get (0), tid);
-	// InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
-	// recvSink->Bind (local);
-	// recvSink->SetRecvCallback (MakeCallback (&FBVanetExperiment::ReceivePacket, this));
-	//
-	// Ptr<Socket> source = Socket::CreateSocket (m_adhocNodes.Get (1), tid);
-	// InetSocketAddress remote = InetSocketAddress (Ipv4Address ("255.255.255.255"), 80);
-	// source->SetAllowBroadcast (true);
-	// source->Connect (remote);
-
 }
 
 void
@@ -422,7 +412,7 @@ FBVanetExperiment::ConfigureFBApplication ()
 
 	// Create the application and schedule start and end time
 	m_fbApplication = CreateObject<FBApplication> ();
-	m_fbApplication->Setup (m_staticProtocol, 0, 15, m_actualRange, 32, 1024, 1000, 20);
+	m_fbApplication->Setup (m_staticProtocol, 0, m_alertGeneration, m_actualRange, 32, 1024, 1000, 20);
 	m_fbApplication->SetStartTime (Seconds (1));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
@@ -448,11 +438,12 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
 	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C1000", m_staticProtocol);
+	cmd.AddValue ("alertGeneration", "Time at which the first Alert Message should be generated.", m_alertGeneration);
 	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
 	cmd.AddValue ("scenario", "1=straight street, 2=grid layout, 3=real world", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
 	cmd.AddValue ("animation", "Enable netanim animation.", m_animation);
-	cmd.AddValue ("totaltime", "Simulation end time", m_TotalSimTime);
+	cmd.AddValue ("totalTime", "Simulation end time", m_TotalSimTime);
 
 	cmd.Parse (argc, argv);
 }
@@ -467,14 +458,17 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// straight line, nodes in a row
 		m_mobility = 1;
-		m_nNodes = 10;
-		m_startingNode = 0;
 
-		uint32_t roadLength = 500;	// in meters
+		// if user didn't set it
+		if (m_nNodes == 2)
+			m_nNodes = 500;
+
+		uint32_t roadLength = 8000;	// in meters
 		uint32_t distance = roadLength / m_nNodes;
 
 		for (uint32_t i = 0; i < m_nNodes; i++)
 			m_fixNodePosition.push_back( Vector (i*distance, 0.0, 0.0));
+
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
