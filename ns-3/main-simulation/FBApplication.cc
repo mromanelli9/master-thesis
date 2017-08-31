@@ -143,6 +143,8 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 
 	m_broadcastForwardCheck.insert (std::pair<uint32_t, bool> (node->GetId (), false));
 
+	m_helloMessageDisabled.push_back (false);
+
 	m_nNodes++;
 }
 
@@ -194,6 +196,9 @@ FBApplication::GenerateHelloTraffic (void)
 	if (!m_estimationPhaseRunning)
 		return;
 
+	// Clear all node
+	std::fill(m_helloMessageDisabled.begin(), m_helloMessageDisabled.end(), false);
+
 	// For each node ...
 	for (uint32_t j = 0; j < m_nNodes; j++)
 	{
@@ -201,13 +206,11 @@ FBApplication::GenerateHelloTraffic (void)
 
 		// Compute a random time
 		// problem: how much time?
-		uint32_t waitingTime = rand () % m_slot;
+		uint32_t waitingTime = rand () % (m_turn / 4);
 
 		// Schedule the generation of a Hello Message for the current node
-		Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (),
-																		MilliSeconds (waitingTime * m_slot),
-																		&FBApplication::GenerateHelloMessage, this,
-																		fbNode);
+		uint32_t nodeId = fbNode->GetNode ()->GetId ();
+		Simulator::ScheduleWithContext (nodeId, MilliSeconds (waitingTime * m_slot), &FBApplication::GenerateHelloMessage, this, fbNode);
 	}
 
 	// Schedule another turn
@@ -252,7 +255,17 @@ void
 FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 {
 	NS_LOG_FUNCTION (this << fbNode);
-	NS_LOG_DEBUG ("Generate Hello Message (node " << fbNode->GetNode ()->GetId () << ").");
+
+	// Check if this node can send a hello message (in this turn)
+	uint32_t nodeId = fbNode->GetNode ()->GetId ();
+	uint32_t fbNodeId = m_nodesMap.at (nodeId);
+	if (m_helloMessageDisabled.at (fbNodeId))
+	{
+		// if so, do not generate a hello message
+		return;
+	}
+
+	NS_LOG_DEBUG ("Generate Hello Message (node " << nodeId << ").");
 
 	// Create a packet with the correct parameters taken from the node
 	Vector position = fbNode->UpdatePosition ();
@@ -364,17 +377,26 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 }
 
 void
-FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
+FBApplication::HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader)
 {
-	NS_LOG_FUNCTION (this << node << fbHeader);
-	NS_LOG_DEBUG ("Handle a Hello Message (" << node->GetNode ()->GetId () << ").");
+	NS_LOG_FUNCTION (this << fbNode << fbHeader);
+	uint32_t nodeId = fbNode->GetNode ()->GetId ();
+	NS_LOG_DEBUG ("Handle a Hello Message (" << nodeId << ").");
+
+	// I have received a hello message, so in this turn i won't send another
+	uint32_t fbNodeId = m_nodesMap.at (nodeId);
+	m_helloMessageDisabled.at (fbNodeId) = true;
+
+	// Override the old values
+	fbNode->SetLMFR (fbNode->GetCMFR ());
+	fbNode->SetLMBR (fbNode->GetCMBR ());
 
 	// Retrieve CMFR from the packet received and CMBR from the current node
 	uint32_t otherCMFR = fbHeader.GetMaxRange ();
-	uint32_t myCMBR = node->GetCMBR ();
+	uint32_t myCMBR = fbNode->GetCMBR ();
 
 	// Retrieve the position of the current node
-	Vector currentPosition = node->UpdatePosition ();
+	Vector currentPosition = fbNode->UpdatePosition ();
 
 	// Retrieve the position of the sender node
 	Vector senderPosition = fbHeader.GetPosition ();
@@ -386,8 +408,7 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> node, FBHeader fbHeader)
 	// Update new values
 	uint32_t maxi = std::max (std::max (myCMBR, otherCMFR), distance);
 
-	node->SetCMBR (maxi);
-	node->SetLMBR (myCMBR);
+	fbNode->SetCMBR (maxi);
 }
 
 void

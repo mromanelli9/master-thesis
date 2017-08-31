@@ -146,6 +146,7 @@ private:
 	bool																		m_staticProtocol;	// true if static protocol is used
 	std::map<uint32_t, bool>								m_broadcastForwardCheck;	// used to check if a node has already schedule to forward an alert message
 	std::map<uint32_t, EventId>							m_broadcastForwardEvent;	// used to store the forward event of an alert message
+	std::vector<bool>												m_helloMessageDisabled;	// disable the generation of a hello message
 	bool           										 			m_estimationPhaseRunning;	// true if the estimation phase is running
 	bool            									 			m_broadcastPhaseRunning;	// true if the broadcast phase is running
 	uint32_t													 			m_broadcastPhaseStart;	// broadcast phase start time (seconds)
