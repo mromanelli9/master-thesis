@@ -43,6 +43,11 @@ public:
 	virtual ~FBNode();
 
 	/**
+	 * \returns the FBNode identifier
+	 */
+	uint32_t GetId (void) const;
+
+	/**
 	 * \returns the node included in the FBNode
 	 */
 	Ptr<Node> GetNode (void) const;
@@ -120,13 +125,15 @@ public:
 	 */
 	void Send (Ptr<Packet> packet);
 
-	Ptr<Node>			m_node;	// ns-3 node
-	Ptr<Socket> 	m_socket; // ns-3 socket
-	uint32_t 	  	m_CMFR;	// Current Maximum Front Range
-	uint32_t 	  	m_LMFR;	// Last Maximum Front Range
-	uint32_t 	  	m_CMBR;	// Current Maximum Back Range
-	uint32_t 	  	m_LMBR; // Last Maximum Back Range
-	Vector 				m_position;	// node current position
+	uint32_t					m_id;	// node id
+	static uint32_t		g_idCounter;	// global id counter
+	Ptr<Node>					m_node;	// ns-3 node
+	Ptr<Socket> 			m_socket; // ns-3 socket
+	uint32_t 	  			m_CMFR;	// Current Maximum Front Range
+	uint32_t 	  			m_LMFR;	// Last Maximum Front Range
+	uint32_t 	  			m_CMBR;	// Current Maximum Back Range
+	uint32_t 	  			m_LMBR; // Last Maximum Back Range
+	Vector 						m_position;	// node current position
 };
 
 } // namespace ns3

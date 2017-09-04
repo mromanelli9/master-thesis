@@ -31,6 +31,8 @@
 
  namespace ns3 {
 
+ uint32_t FBNode::g_idCounter = 0;
+
  NS_LOG_COMPONENT_DEFINE ("FBNode");
 
  NS_OBJECT_ENSURE_REGISTERED (FBNode);
@@ -41,37 +43,13 @@
 	 	.SetParent<Object> ()
 		.SetGroupName ("Network")
 		.AddConstructor<FBNode> ();
-		// .AddAttribute ("CMFR", "The value for the Current Maximum Front Range of this node.",
-		// 							 TypeId::ATTR_GET || TypeId::ATTR_SET,
-		// 							 UintegerValue (0),
-		// 							 MakeUintegerAccessor (&FBNode::m_CMFR),
-		// 							 MakeUintegerChecker<uint32_t> ())
-		// .AddAttribute ("LMFR", "The value for the Last Maximum Front Range of this node.",
-		// 								TypeId::ATTR_GET || TypeId::ATTR_SET,
-		// 								 UintegerValue (0),
-		// 								 MakeUintegerAccessor (&FBNode::m_LMFR),
-		// 								 MakeUintegerChecker<uint32_t> ())
-		// .AddAttribute ("CMBR", "The value for the Current Maximum Back Range of this node.",
-		// 								TypeId::ATTR_GET || TypeId::ATTR_SET,
-		// 								UintegerValue (0),
-		// 								MakeUintegerAccessor (&FBNode::m_CMBR),
-		// 								MakeUintegerChecker<uint32_t> ())
-		// .AddAttribute ("LMBR", "The value for the Last Maximum Back Range of this node.",
-		// 							 TypeId::ATTR_GET || TypeId::ATTR_SET,
-		// 							 UintegerValue (0),
-		// 							 MakeUintegerAccessor (&FBNode::m_LMBR),
-		// 							 MakeUintegerChecker<uint32_t> ())
-		// .AddAttribute ("Position", "The spatial location (gps) of the node.",
-		// 								TypeId::ATTR_GET,
-		// 								Vector3DValue (Vector (0,0,0)),
-		// 								MakeVector3DAccessor (&FBNode::m_position),
-		// 								MakeVector3DChecker ());
 
 	  return tid;
 	}
 
 	FBNode::FBNode()
-	  : m_CMFR (0),
+	  : m_id (g_idCounter++),
+			m_CMFR (0),
 			m_LMFR (0),
 			m_CMBR (0),
 			m_LMBR (0),
@@ -83,6 +61,13 @@
 	FBNode::~FBNode ()
 	{
 	  NS_LOG_FUNCTION (this);
+	}
+
+	uint32_t
+	FBNode::GetId (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_id;
 	}
 
 	Ptr<Node>
