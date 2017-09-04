@@ -123,11 +123,13 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 
 	// misc stuff
 	m_nodes.push_back (fbNode);
-	m_nodesMap.insert (std::pair<uint32_t, uint32_t> (node->GetId (), m_nNodes));
+	m_nodesMap.insert (std::pair<uint32_t, uint32_t> (node->GetId (), fbNode->GetId ()));
 
-	m_broadcastForwardCheck.insert (std::pair<uint32_t, bool> (node->GetId (), false));
+	m_broadcastForwardCheck.insert (std::pair<uint32_t, bool> (fbNode->GetId (), false));
 
 	m_helloMessageDisabled.push_back (false);
+
+	m_alertReceived.push_back (false);
 
 	m_nNodes++;
 }
@@ -249,7 +251,7 @@ FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 		return;
 	}
 
-	NS_LOG_DEBUG ("Generate Hello Message (node " << nodeId << ").");
+	NS_LOG_DEBUG ("Generate Hello Message (" << nodeId << ").");
 
 	// Create a packet with the correct parameters taken from the node
 	Vector position = fbNode->UpdatePosition ();
@@ -349,10 +351,10 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 					// Check if this node has already a forwarding procedure pending
 					// If true, delete the pending event
 					// TODO: check if it's true
-					if (m_broadcastForwardCheck.at (node->GetId ()) == true)
+					if (m_broadcastForwardCheck.at (fbNode->GetId ()) == true)
 					{
 						NS_LOG_DEBUG ("Another forwarding procedure is pending so the previous one will be deleted (" << node->GetId () << ").");
-						Simulator::Cancel (m_broadcastForwardEvent.at (node->GetId ()));
+						Simulator::Cancel (m_broadcastForwardEvent.at (fbNode->GetId ()));
 					}
 				}
 			}
@@ -401,10 +403,17 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	// We assume that the message is coming from the front
 	NS_LOG_FUNCTION (this << fbNode << fbHeader << distance);
 	uint32_t nodeId = fbNode->GetNode ()->GetId ();
-	NS_LOG_DEBUG ("Handle an Alert Message (" << nodeId << ").");
+	uint32_t fbNodeId = fbNode->GetId ();
+
+	if (!m_alertReceived.at (fbNodeId))
+	{
+		NS_LOG_DEBUG ("Alert. Stop node  (" << nodeId << ").");
+		StopNode (fbNode);
+		m_alertReceived.at (fbNodeId) = true;
+	}
 
 	// If I'm the last car in the platoon then the broadcast phase needs to end, goal reached
-	if (nodeId == m_nodes.at (m_nNodes-1)->GetNode ()->GetId ())	// DEBUG: maybe this can be optimized
+	if (fbNodeId == m_nNodes-1)
 	{
 		NS_LOG_DEBUG ("Broadcast Phase has reached the last node.");
 		StopBroadcastPhase ();
@@ -413,11 +422,13 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 
 	// Check if this node has already a forwarding procedure pending
 	// If true, delete the pending event
-	if (m_broadcastForwardCheck.at (nodeId) == true)
+	if (m_broadcastForwardCheck.at (fbNodeId) == true)
 	{
-		NS_LOG_DEBUG ("Another forwarding procedure is pending so the previous one will be deleted (" << nodeId << ").");
-		Simulator::Cancel (m_broadcastForwardEvent.at (nodeId));
+		NS_LOG_DEBUG ("Another forwarding procedure is pending so it will be deleted (" << nodeId << ").");
+		Simulator::Cancel (m_broadcastForwardEvent.at (fbNodeId));
 	}
+
+	NS_LOG_DEBUG ("Handle an Alert Message (" << nodeId << ").");
 
 	// Compute the size of the contention window
 	uint32_t cmbr = fbNode->GetCMBR ();
@@ -430,15 +441,15 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	EventId event = Simulator::Schedule (MilliSeconds (waitingTime * m_slot), &FBApplication::ForwardAlertMessage, this, fbNode, fbHeader);
 
 	// Store the event for further use
-	m_broadcastForwardEvent.insert (std::pair<uint32_t, EventId> (nodeId, event));
-	m_broadcastForwardCheck.at (nodeId) = true;
+	m_broadcastForwardEvent.insert (std::pair<uint32_t, EventId> (fbNodeId, event));
+	m_broadcastForwardCheck.at (fbNodeId) = true;
 }
 
 void
 FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader)
 {
 	NS_LOG_FUNCTION (this << fbNode << oldFBHeader);
-	NS_LOG_DEBUG ("Forwarding Alert Message (node " << fbNode->GetNode ()->GetId () << ").");
+	NS_LOG_DEBUG ("Forwarding Alert Message (" << fbNode->GetNode ()->GetId () << ").");
 
 	// Create a packet with the correct parameters taken from the node
 	uint32_t LMBR, CMBR, maxi;
