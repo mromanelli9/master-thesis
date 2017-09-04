@@ -331,7 +331,7 @@ FBVanetExperiment::ConfigureMobility ()
 			mob->SetVelocity (Vector(0, 0, 0));
 		}
 	}
-	else if (m_mobility == 1)
+	else if (m_mobility == 2)
 	{
 		// Create Ns2MobilityHelper with the specified trace log file as parameter
 		Ns2MobilityHelper ns2 = Ns2MobilityHelper (m_traceFile);
@@ -561,9 +561,10 @@ FBVanetExperiment::Run ()
 		AnimationInterface anim (m_animationFileName);
 		anim.SetMobilityPollInterval (Seconds (0.250));
 		anim.EnablePacketMetadata (true);
-		anim.EnableIpv4L3ProtocolCounters (Seconds (0), Seconds (m_TotalSimTime));
-		// anim.EnableWifiMacCounters (Seconds (0), Seconds (m_TotalSimTime));
-		// anim.EnableWifiPhyCounters (Seconds (0), Seconds (m_TotalSimTime));
+		// TODO: this will cause a SIGSEGV
+		// anim.EnableIpv4L3ProtocolCounters (Seconds (1), Seconds (m_TotalSimTime));
+		// anim.EnableWifiMacCounters (Seconds (1), Seconds (m_TotalSimTime));
+		// anim.EnableWifiPhyCounters (Seconds (1), Seconds (m_TotalSimTime));
 
 		Simulator::Stop (Seconds (m_TotalSimTime));
 	}
