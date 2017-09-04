@@ -33,13 +33,8 @@
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/wifi-module.h"
-// #include "ns3/aodv-module.h"
-// #include "ns3/olsr-module.h"
-// #include "ns3/dsdv-module.h"
-// #include "ns3/dsr-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/topology.h"
-// #include "ns3/ocb-wifi-mac.h"
 #include "ns3/wifi-80211p-helper.h"
 #include "ns3/wave-mac-helper.h"
 #include "ns3/netanim-module.h"
@@ -214,6 +209,8 @@ private:
 	std::vector <Vector>		m_fixNodePosition;
 	uint32_t								m_loadBuildings;
 	uint32_t								m_animation;
+	std::string							m_traceFile;
+	std::string							m_bldgFile;
 	std::string							m_animationFileName;
 	double									m_TotalSimTime;
 };
@@ -237,6 +234,8 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_scenario (1),
 		m_loadBuildings (0),
 		m_animation (0),
+		m_traceFile (""),
+		m_bldgFile (""),
 		m_animationFileName ("outputs/fb-vanet-animation.xml"),
 		m_TotalSimTime (30)
 {
@@ -332,6 +331,21 @@ FBVanetExperiment::ConfigureMobility ()
 			mob->SetVelocity (Vector(0, 0, 0));
 		}
 	}
+	else if (m_mobility == 1)
+	{
+		// Create Ns2MobilityHelper with the specified trace log file as parameter
+		Ns2MobilityHelper ns2 = Ns2MobilityHelper (m_traceFile);
+		NS_LOG_INFO ("Loading ns2 mobility file \"" << m_traceFile << "\".");
+
+		ns2.Install (); // configure movements for each node, while reading trace file
+
+		// Configure callback for logging
+		std::ofstream m_os;
+		Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
+										 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
+	}
+	else
+		NS_LOG_ERROR ("Invalid mobility mode specified. Values must be [1-2].");
 }
 
 void
@@ -461,7 +475,19 @@ FBVanetExperiment::SetupScenario ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
 
-	if (m_scenario == 1)
+	if (m_scenario == 0) {
+		// DEBUG Scenario
+		m_mobility = 1;
+		m_nNodes = 5;
+
+		m_fixNodePosition.push_back( Vector (100, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (300, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (500, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (700, 0.0, 0.0));
+		m_fixNodePosition.push_back( Vector (900, 0.0, 0.0));
+
+	}
+	else if (m_scenario == 1)
 	{
 		m_mobility = 1;
 
@@ -487,8 +513,23 @@ FBVanetExperiment::SetupScenario ()
 		m_fixNodePosition.push_back( Vector (0,350, 0.0));
 		m_fixNodePosition.push_back( Vector (360,46,0.0));
 	}
+	else if (m_scenario == 3)
+	{
+		// Real word scenario
+		m_mobility = 2;
+		m_nNodes = 22;	// TODO: check this value
+		m_traceFile = "inputs/Blocco-IME.ns2mobility.xml";
+		m_bldgFile = "inputs/Blocco-IME.poly.xml";
+
+		if (m_loadBuildings != 0)
+		{
+			NS_LOG_INFO ("Loading buildings file \"" << m_bldgFile << "\".");
+			Topology::LoadBuildings (m_bldgFile);
+		}
+
+	}
 	else
-		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
+		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-3].");
 }
 
 void
@@ -521,8 +562,8 @@ FBVanetExperiment::Run ()
 		anim.SetMobilityPollInterval (Seconds (0.250));
 		anim.EnablePacketMetadata (true);
 		anim.EnableIpv4L3ProtocolCounters (Seconds (0), Seconds (m_TotalSimTime));
-		anim.EnableWifiMacCounters (Seconds (0), Seconds (m_TotalSimTime));
-		anim.EnableWifiPhyCounters (Seconds (0), Seconds (m_TotalSimTime));
+		// anim.EnableWifiMacCounters (Seconds (0), Seconds (m_TotalSimTime));
+		// anim.EnableWifiPhyCounters (Seconds (0), Seconds (m_TotalSimTime));
 
 		Simulator::Stop (Seconds (m_TotalSimTime));
 	}
