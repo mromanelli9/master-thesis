@@ -340,9 +340,9 @@ FBVanetExperiment::ConfigureMobility ()
 		ns2.Install (); // configure movements for each node, while reading trace file
 
 		// Configure callback for logging
-		std::ofstream m_os;
-		Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
-										 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
+		// std::ofstream m_os;
+		// Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
+		// 								 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
 	}
 	else
 		NS_LOG_ERROR ("Invalid mobility mode specified. Values must be [1-2].");
@@ -434,7 +434,7 @@ FBVanetExperiment::ConfigureFBApplication ()
 	// Create the application and schedule start and end time
 	m_fbApplication = CreateObject<FBApplication> ();
 	m_fbApplication->Setup (m_staticProtocol, 0, m_alertGeneration, m_actualRange, 32, 1024, 1000, 20);
-	m_fbApplication->SetStartTime (Seconds (1));
+	m_fbApplication->SetStartTime (Seconds (5));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
 	// Add the desired nodes to the application
@@ -517,7 +517,7 @@ FBVanetExperiment::SetupScenario ()
 	{
 		// Real word scenario
 		m_mobility = 2;
-		m_nNodes = 22;	// TODO: check this value
+		m_nNodes = 5;	// TODO: check this value
 		m_traceFile = "inputs/Blocco-IME.ns2mobility.xml";
 		m_bldgFile = "inputs/Blocco-IME.poly.xml";
 
@@ -582,17 +582,11 @@ FBVanetExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const Mo
   Vector pos = mobility->GetPosition (); // Get position
   Vector vel = mobility->GetVelocity (); // Get velocity
 
-  pos.z = 1.5;
-
   int nodeId = mobility->GetObject<Node> ()->GetId ();
 
-  NS_LOG_DEBUG ("Changing pos for node <" << nodeId << "> at " << Simulator::Now ().GetSeconds ()
-	 							<< "\n\tPOS: x=" << pos.x <<
-								", y=" << pos.y <<
-								", z=" << pos.z <<
-								";\n\tVEL:" << vel.x <<
-								", y=" << vel.y <<
-								", z=" << vel.z );
+  NS_LOG_DEBUG ("Changing pos for node " << nodeId << " at " << Simulator::Now ().GetSeconds ()
+	 							<< "; POS: (" << pos.x << ", " << pos.y << ", " << pos.z << ")"
+								<< "; VEL: (" << vel.x << ", " << vel.y << ", " << vel.z << ").");
 }
 
 Ptr<Socket>

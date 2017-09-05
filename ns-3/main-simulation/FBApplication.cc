@@ -417,7 +417,6 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	{
 		NS_LOG_DEBUG ("Broadcast Phase has reached the last node.");
 		StopBroadcastPhase ();
-		return;
 	}
 
 	// Check if this node has already a forwarding procedure pending
