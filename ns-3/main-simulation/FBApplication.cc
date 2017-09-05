@@ -34,6 +34,8 @@
 
 namespace ns3 {
 
+uint32_t g_tempHops = 0;
+
 NS_LOG_COMPONENT_DEFINE ("FBApplication");
 
 NS_OBJECT_ENSURE_REGISTERED (FBApplication);
@@ -64,6 +66,7 @@ FBApplication::FBApplication ()
 		m_packetPayload (100),
 		m_slot (20),
 		m_totalHelloMessages (0),
+		m_totalAlertMessages (0),
 		m_totalHops (0)
 {
 	NS_LOG_FUNCTION (this);
@@ -292,6 +295,7 @@ FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 	packet->AddHeader (fbHeader);
 
 	fbNode->Send (packet);
+	g_tempHops++;
 }
 
 void
@@ -416,6 +420,8 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	if (fbNodeId == m_nNodes-1)
 	{
 		NS_LOG_DEBUG ("Broadcast Phase has reached the last node.");
+		// Store the number of hops so far
+		m_totalHops = g_tempHops;
 		StopBroadcastPhase ();
 	}
 
@@ -472,7 +478,7 @@ FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader)
 	fbNode->Send (packet);
 
 	// Increase the hop counter
-	m_totalHops++;
+	g_tempHops++;
 }
 
 void
@@ -502,15 +508,18 @@ FBApplication::PrintStats (void)
 {
 	NS_LOG_FUNCTION (this);
 
+	m_totalAlertMessages = g_tempHops;
+
 	if (!m_staticProtocol) {
-		NS_LOG_INFO ("Total Hello Messages sent: " << m_totalHelloMessages << ".");
+		NS_LOG_INFO ("Total Hello messages sent: " << m_totalHelloMessages << ".");
 		NS_LOG_INFO ("Estimated transimision range: " << m_nodes.at (m_startingNode)->GetCMBR () << " meters (actual range: " << m_actualRange << " m).");
 	}
 	else
 	{
 		NS_LOG_INFO ("Estimation Phase disabled (static protocol); estimated range: " << m_actualRange << " meters.");
 	}
-	NS_LOG_INFO ("Total number of hops (Broadcast Phase): " << m_totalHops << ".");
+	NS_LOG_INFO ("Total Alert messages sent: " << m_totalAlertMessages << ".");
+	NS_LOG_INFO ("Number of hops required to reach the last node: " << m_totalHops << ".");
 }
 
 uint32_t
