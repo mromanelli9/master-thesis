@@ -1,0 +1,10 @@
+#!/bin/sh
+BASEDIR=$(dirname $0)
+cd $BASEDIR
+cd ..
+
+# Build the dissertation.
+xelatex tesi
+bibtex tesi
+xelatex tesi
+xelatex tesi

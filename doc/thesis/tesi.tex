@@ -1,0 +1,44 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+%!TeX spellcheck = it_IT
+
+\documentclass{Dissertate}
+
+\usepackage[italian]{babel}
+
+\begin{document}
+
+% the front matter
+\input{frontmatter/personalize}
+% \maketitle
+% \copyrightpage
+\frontmatter
+\setstretch{\dnormalspacing}
+% \abstractpage
+% \tableofcontents
+% %\authorlist
+% \listoffigures
+% \dedicationpage
+% \acknowledgments
+
+% \doublespacing
+
+% include each chapter...
+\setcounter{chapter}{0}  % start chapter numbering at 1
+\include{chapters/introduction}
+\include{chapters/chapter1}
+\include{chapters/conclusion}
+
+\addcontentsline{toc}{chapter}{References}
+%\bibliographystyle{unstr}
+\bibliography{references}
+\cleardoublepage
+\phantomsection
+\acknowledgments
+
+% \clearpage
+% \bibliography{references}
+% \addcontentsline{toc}{chapter}{References}
+% \bibliographystyle{apalike2}
+
+\end{document}
