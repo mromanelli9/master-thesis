@@ -3,9 +3,26 @@
 %!TeX spellcheck = it_IT
 %!TEX root = ../tesi.tex
 
-\chapter{Protocollo FB}
-La tecnica del Fast Broadcast \cite{Palazzi07howdo} si compone di due fasi. La prima, chiamata ``Fase di stima'', permette a ogni veicolo di avere una stima aggiornata
-del proprio raggio trasmissivo. La seconda, invece, è detta ``Fase di inoltro'' viene attivata nel momeno in cui si renda necessario inviare un messaggio
-a tutti gli altri veicoli nell'area di interesse.
+\chapter{Protocollo Fast Broadcast}
+La tecnica del Fast Broadcast~\cite{Palazzi07howdo} si compone di due fasi. La prima, chiamata ``Fase di stima'', permette a ogni veicolo di avere una stima aggiornata
+del proprio raggio trasmissivo. La seconda, invece, è detta ``Fase di inoltro'' viene attivata nel momento in cui si rende necessario inviare un messaggio
+al resto dei veicoli presenti nell'area di interesse.
 
 \section{Fase di stima}
+Durante questa fase, ogni veicolo effettua una stima del suo raggio trasmissivo, sia di fronte che alle sue spalle, attraverso l'uso di messaggi \textit{Hello}.
+Per ottenere una stima sempre aggiornata, il tempo è suddiviso in turni e le informazioni raccolte durante un certo turno
+rimangono attive per tutto il turno successivo, per poi essere scartate.
+Una brave durata dei turni permette di cogliere meglio variazioni del raggio trasmissivo mantendendo tuttavia un elevato scambio di messaggi;
+gli autori suggeriscono un tempo pari a 1 secondo.
+
+Le informazioni sull stima sono rappresentate dai campi \textit{Current-turn Maximum Front Range} (CMFR) e \textit{Current-turn Maximum Back Range} (CMBR).
+Il primo esprime la stima della massima distanza in avanti dalla quale un altro veicolo nell'area di interesse può ricevere messaggi che provengono dal veicolo considerato.
+Il secondo, invece, stima la massima distanza all'indietro.
+Questi valori sono costantemente aggiornati con i valori ricevuti nei messaggi Hello fino alla fine del turno;
+dopodiché vengono salvati nei campi \textit{Latest-turn Maximum Front Range} (LMFR) e \textit{Latest-turn Maximum Back Range} (LMBR) rispettivamente.
+Questo permette di combinare una stima calcolata nel tempo (con diversi messaggi Hello) con le ultime informazioni sul mezzo trasmissivo.
+
+Nel dettaglio, la procedura di invio di un messagio Hello prevede inizialmente che veicolo aspetti un tempo d'attesa casuale e,
+dopo aver verificato l'assenza di altre trasmissioni in corso e/o collisioni, proceda poi all'invio del messaggio contente
+la stima del raggio trasmissivo in avanti.
+Altre informazioni utili al protocollo vengono inserite all'iterno, come ad esempio la posizione aggiornata del veicolo.
