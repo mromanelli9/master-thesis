@@ -2,12 +2,12 @@
 %!TEX encoding = UTF-8 Unicode
 %!TeX spellcheck = it_IT
 %!TEX root = ../tesi.tex
-
+%
 \chapter{Protocollo Fast Broadcast}
 La tecnica del Fast Broadcast~\cite{Palazzi07howdo} si compone di due fasi. La prima, chiamata ``Fase di stima'', permette a ogni veicolo di avere una stima aggiornata
 del proprio raggio trasmissivo. La seconda, invece, è detta ``Fase di inoltro'' viene attivata nel momento in cui si rende necessario inviare un messaggio
 al resto dei veicoli presenti nell'area di interesse.
-
+%
 \section{Fase di stima}
 Durante questa fase, ogni veicolo effettua una stima del suo raggio trasmissivo, sia di fronte che alle sue spalle, attraverso l'uso di messaggi \textit{Hello}.
 Per ottenere una stima sempre aggiornata, il tempo è suddiviso in turni e le informazioni raccolte durante un certo turno
@@ -25,4 +25,36 @@ Questo permette di combinare una stima calcolata nel tempo (con diversi messaggi
 Nel dettaglio, la procedura di invio di un messagio Hello prevede inizialmente che veicolo aspetti un tempo d'attesa casuale e,
 dopo aver verificato l'assenza di altre trasmissioni in corso e/o collisioni, proceda poi all'invio del messaggio contente
 la stima del raggio trasmissivo in avanti.
-Altre informazioni utili al protocollo vengono inserite all'iterno, come ad esempio la posizione aggiornata del veicolo.
+Vengono poi aggiunte altre informazioni utili al protocollo, come ad esempio la posizione aggiornata del veicolo.
+
+Si fa notare che, ad ogni turno, non più di un messaggio Hello viene inviato fra veicoli all'interno dell'area delimitata dal raggio trasmissivo.
+In questo modo il numero totale di messaggi Hello generati rimane limitato nell'ordine di \BigO{1}.
+
+In fase di ricezione, un veicolo determina la distanza fra lui e chi ha spedito il messaggio: se proviene da davanti sarà aggiornato il campo CMFR,
+altrimenti se proviene dal retro verrà aggiornato il campo CMBR.
+In ogni caso, la nuova stima sarà calcolata come il massimo fra il vecchio valore, la distanza fra i due veicoli e la stima inviata dall'altro veicolo
+(e ricevuta nel messaggio di Hello).
+%
+\section{Fase di inoltro}
+Lo scopo di questa fase consiste nel determinare il veicolo migliore per inoltrare un messaggio.
+Questo viene fatto sfruttando le informazioni sulla stima del raggio trasmissivo raccolte nella fase precedente:
+ogni veicolo si assegna una priorità nell'inoltro basandosi sulla distanza dal veicolo che ha trasmesso il messaggio;
+la priorità cresce all'aumentare della distanza.
+
+All'attivazione di questa fase, viene generato un messagio di \textit{Broadcast} che dev'essere propagato lungo tutta l'area di interesse del mittente.
+All'interno troviamo due campi di interesse: la posizione del veicolo e la stima del raggio trasmissivo, detta \textit{MaxRange}; quest'ultima, caratteristica proprio di questo protocollo,
+rappresenta quanto all'indietro ci si aspetta che arrivi il segnale prima che diventi troppo debole da non essere rilevabile.
+
+Questo valore sarà poi sfruttato per determinare quale veicolo dovrà inoltrare il messagio in modo da minimizzare il numero di salti (\textit{hop}) e di conseguenza
+ridurre il tempo di propagazione;
+è facile vedere come questo compito dovrebbe ricadere sul veicolo più distante dal mittente. % sistemare un po' meglio questa frase
+Nel dettaglio, quando un veicolo deve inviare o inoltrare un messaggio Broadcast calcola il valore del campo MaxRange come il massimo fra l'LMBR e l'CMBR.
+
+In fase di ricezione, invece, un veicolo attente una quantità di tempo determinata in maniera casuale partendo dal valore di una finestra di contesa (\textit{contention window}).
+Il valore di questa finestra varia fra un valore minimo (\textit{CWMin}) e un valore massimo (\textit{CWMax}), in funzione della distanza dal veicolo che ha inviato il messagio (\textit{Distance})
+e la stima del raggio trasmissivo (MaxRange) secondo la formula espressa in~\ref{eq:contention-window}.
+\begin{gather}\label{eq:contention-window}
+	\left\lfloor \left( \frac{\text{MaxRange} - \text{Distance}}{\text{MaxRange}} \times (\text{CWMax} - \text{CWMin}) \right) + \text{CWmin}  \right\rfloor
+\end{gather}
+%
+\section{Estensione a due dimensioni}
