@@ -73,3 +73,53 @@ La prima modifica necessaria è quindi la presenza nel messaggio di inoltro dell
 In fase di ricezione, si controlla che la distanza origine-mezzo sia maggiore o uguale a quella origine-mittente: in tal caso il veicolo è un candidato per inoltrare il messaggio;
 se così non avviene il messaggio viene scartato.
 %
+\section{Algoritmi - BOZZA}
+\begin{algorithm}[!h]
+\caption{Invio di un messaggio Hello.}\label{fig:algoritmo-invio-msg-hello}
+\begin{algorithmic}[1]
+	\ForEach{turn}
+		\State{sendingTime $\gets random($turnSize$)$}
+		\State{$wait($sendingTime$)$}
+		\If{$\neg \left( heardHelloMsg() \vee heardCollision() \right)$}
+			\State{helloMsg.declaredMaxRange $\gets max($LMR, CMR$)$}
+			\State{helloMsg.position $\gets getPosition()$}
+			\State{$broadcast($helloMsg$)$}
+		\EndIf{}
+	\EndFor{}
+\end{algorithmic}
+\end{algorithm}
+%
+\begin{algorithm}[!h]
+\caption{Ricezione di un messaggio Hello.}\label{fig:algoritmo-ricezione-msg-hello}
+\begin{algorithmic}[1]
+	\State{drm $\gets$ helloMsg.declaredMaxRange}
+	\State{sp $\gets$ helloMsg.senderPosition}
+	\State{mp $\gets getPosition()$}
+	\State{distance $\gets distance($mp, sp$)$}
+	\State{cmr $\gets max($cmr, distance, drm$)$}
+\end{algorithmic}
+\end{algorithm}
+
+% \begin{algorithm}[!h]
+% \caption{Invio di messaggio Hello.}\label{fig:algoritmo-invio-mex-hello}
+% \begin{algorithmic}[1]
+% 	\Procedure{Algoritmo Dijkstra}{}
+% 	\State $N' \gets {u}$
+% 	\ForAll {$\textit{nodi } v$}
+% 		\If {$v \textit{ adiacente a } v$}
+% 			\State $D(v) \gets c(u,v)$
+% 		\Else
+% 			\State $D(v) \gets \infty$
+% 		\EndIf
+% 	\EndFor
+% 	\BState \emph{loop}:
+% 	\Repeat
+% 		\State $\textit{trova } w \not\in N' \textit{ tale che } D(w) \textit{ è minimo}$
+% 		\State $\textit{aggiugi } w \textit{ a } N'$
+% 		\ForAll {$v \textit{ adiacente a } w \textit{ e } w \not\in N'}$
+% 			\State $D(v) \gets min( D(v), D(w) + c(w,v) )$
+% 		\EndFor
+% 	\Until {$\textit{finché tutti i nodi non sono in } N'$}
+% 	\EndProcedure
+% \end{algorithmic}
+% \end{algorithm}
