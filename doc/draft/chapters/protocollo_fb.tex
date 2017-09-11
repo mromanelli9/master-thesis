@@ -46,15 +46,22 @@ All'interno troviamo due campi di interesse: la posizione del veicolo e la stima
 rappresenta quanto all'indietro ci si aspetta che arrivi il segnale prima che diventi troppo debole da non essere rilevabile.
 
 Questo valore sarà poi sfruttato per determinare quale veicolo dovrà inoltrare il messagio in modo da minimizzare il numero di salti (\textit{hop}) e di conseguenza
-ridurre il tempo di propagazione;
-è facile vedere come questo compito dovrebbe ricadere sul veicolo più distante dal mittente. % sistemare un po' meglio questa frase
-Nel dettaglio, quando un veicolo deve inviare o inoltrare un messaggio Broadcast calcola il valore del campo MaxRange come il massimo fra l'LMBR e l'CMBR.
+ridurre il tempo di propagazione.
+Nel dettaglio, quando un veicolo deve inviare o inoltrare un messaggio Broadcast calcola il valore del campo MaxRange come il massimo fra l'LMBR e il CMBR.
 
 In fase di ricezione, invece, un veicolo attente una quantità di tempo determinata in maniera casuale partendo dal valore di una finestra di contesa (\textit{contention window}).
 Il valore di questa finestra varia fra un valore minimo (\textit{CWMin}) e un valore massimo (\textit{CWMax}), in funzione della distanza dal veicolo che ha inviato il messagio (\textit{Distance})
 e la stima del raggio trasmissivo (MaxRange) secondo la formula espressa in~\ref{eq:contention-window}.
+È facile vedere come maggiore è la distanza dal mittente e minore è l'intervallo d'attesa.
 \begin{gather}\label{eq:contention-window}
 	\left\lfloor \left( \frac{\text{MaxRange} - \text{Distance}}{\text{MaxRange}} \times (\text{CWMax} - \text{CWMin}) \right) + \text{CWmin}  \right\rfloor
 \end{gather}
+
+Se durante l'attesa viene ricevuto lo stesso messaggio proveniente dai veicoli che seguono, ciò significa che il messaggio è già stato propagato in avanti e quindi non è necessario
+che il veicolo corrente lo inoltri.
+Se, invece, a inviarlo è un veicolo che precede significa che il messaggio è già stato inoltrato da un altro mezzo; la procedura quindi dev'essere riavviata includendo i parametri appena ricevuti.
+Nel caso in cui l'attesa finisca senza aver ricevuto nessun altro messaggio (o collisioni), il veicolo può procedere con l'inoltro inculdendo nei dati inviati la stima del raggio trasmissivo.
 %
 \section{Estensione a due dimensioni}
+
+%
