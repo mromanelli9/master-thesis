@@ -28,3 +28,10 @@
 \addto\captionsitalian{\renewcommand{\ALG@name}{Algoritmo}}
 \addto\captionsenglish{\renewcommand{\ALG@name}{Algorithm}}
 \makeatother
+
+% Text paragraph
+\makeatletter
+\newcommand{\algmargin}{\the\ALG@thistlm}
+\makeatother
+\algnewcommand{\TextState}[1]{\State%
+  \parbox[t]{\dimexpr\linewidth-\algmargin}{\strut #1\strut}}
