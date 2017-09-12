@@ -4,7 +4,10 @@
 %!TEX root = ../tesi.tex
 %
 \chapter{\textit{Obstacle Shadowing Model}}
-\section{NS-3}
+\section{ns-3}
+I Network Simulator (ns)~\cite{ns3Website} sono una serie di simulatori a eventi discreti utilizzati principalmente in ambito accademico e di ricerca.
+La terza versione, ns-3, creta nel 2006 da Tom Henderson, George Riley, Sally Floyd e Sumit Roy, è stata riscritta da zero utilizzando \Cpp e abbandonando
+la retrocompatibilità con ns-2; il software è distribuito sotto licenza GNU GPLv2.
 %
 \section{Il modello matematico}
 Gli autori di~\cite{Carpenter:2015:OMI:2756509.2756512} riprendono il modello introdotto da Christoph Sommer et al.\ in~\cite{5720204},
@@ -40,7 +43,15 @@ Si evince come, con questa quantità di attenuazione, sia difficile che la trasm
 Nel dettaglio, gli ostacoli sono rappresentati da poligoni bidimensionali che ne definiscono i bordi (spigoli).
 Riprendendo l'esempio in Figura~\ref{fig:scenario-urbano-1}, la linea di visibilità (in questo caso \textit{obstructed-line-of-sight}, OLOS), fra i due veicoli potrebbe
 intersecare diversi muri e percorrere una certa distanza internamente a uno o più edifici.
+Il modello \textit{Obstacle Shadowing} conta il numero di intersezioni con gli spigoli dell'ostacolo, calcola la distanza percorsa internamente a esso e, utilizzando
+il modello matematico visto in precedenza, restituisce l'attenuazione della trasmissione wireless fra i due veicoli.
 
+Il tutto è implementato in ns-3 tramite tre classi: \textsf{Obstacle} contiente la rappresentazione geometrica dell'ostacolo, utilizzando le Computational Geometry Algorithms Library (CGAL),
+come anche i parametri dell'attenuazione per-metro e per-muro.
+\textsf{Topology} legge i dati degli edifici da un file specifico, generato dall'utility Polyconvert del software SUMO (Simulator for Urban Mobility)~\cite{sumoWebsite}
+a partire dalle informazioni ottenute da OpenStreetMap (OSM)~\cite{osmWebsite}.
+L'oggetto \textsf{Topology} così creato è poi utilizzato per determinare la perdita di segnale fra due punti (e.g. veicoli), utilizzando l'algoritmo illustrato
+in Figura~\ref{fig:algoritmo-getobstucteddistancebetween}.
 %
 \begin{algorithm}[!h]
 \caption{Algoritmo per determinare il numero di intersezioni con i bordi dell'ostacolo e la distanza interna percorsa fra due punti.}\label{fig:algoritmo-getobstucteddistancebetween}
