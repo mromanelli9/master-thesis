@@ -98,7 +98,7 @@ private:
   virtual void StopApplication (void);
 
 	// TODO: headers
-	void GenerateHelloTraffic (void);
+	void GenerateHelloTraffic (uint32_t count);
 	void StartBroadcastPhase (void);
 	void StopEstimationPhase (void);
 	void StopBroadcastPhase (void);

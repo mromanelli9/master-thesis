@@ -177,33 +177,26 @@ FBApplication::StopApplication (void)
 }
 
 void
-FBApplication::GenerateHelloTraffic (void)
+FBApplication::GenerateHelloTraffic (uint32_t count)
 {
-	NS_LOG_FUNCTION (this);
+	NS_LOG_FUNCTION (this << count);
 
-	// Stop the generation of hello messages
-	if (!m_estimationPhaseRunning)
-		return;
+	std::vector<int> he;
+	uint32_t hel = 20;	// dunno know why
 
-	// Clear all node
-	std::fill(m_helloMessageDisabled.begin(), m_helloMessageDisabled.end(), false);
-
-	// For each node ...
-	for (uint32_t j = 0; j < m_nNodes; j++)
+	if (count > 0)
 	{
-		Ptr<FBNode> fbNode = m_nodes.at (j);
+		for (uint32_t i = 0; i < hel; i++)
+		{
+			int pos = rand() % m_nNodes;
+			he.push_back (pos);
+			Ptr<FBNode> fbNode = m_nodes.get(pos);
+			Simulator::Schedule (Seconds (i * 40), &FBApplication::GenerateHelloMessage, fbNode);
+		}
 
-		// Compute a random time
-		// problem: how much time?
-		uint32_t waitingTime = rand () % (m_turn / 4);
-
-		// Schedule the generation of a Hello Message for the current node
-		uint32_t nodeId = fbNode->GetNode ()->GetId ();
-		Simulator::ScheduleWithContext (nodeId, MilliSeconds (waitingTime * m_slot), &FBApplication::GenerateHelloMessage, this, fbNode);
+		// Other nodes must send Hello messages
+		Simulator::Schedule (Seconds (250), &FBApplication::GenerateHelloTraffic, count - 1);
 	}
-
-	// Schedule another turn
-	Simulator::Schedule (MilliSeconds (m_turn), &FBApplication::GenerateHelloTraffic, this);
 }
 
 void
