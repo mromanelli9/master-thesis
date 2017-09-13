@@ -112,6 +112,41 @@
 		return m_position;
 	}
 
+	uint32_t
+	FBNode::GetNum (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_num;
+	}
+
+	int32_t
+	FBNode::GetPhase (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_phase;
+	}
+
+	uint32_t
+	FBNode::GetSlot (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_slot;
+	}
+
+	bool
+	FBNode::GetReceived (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_received;
+	}
+
+	bool
+	FBNode::GetSent (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_sent;
+	}
+
 	void
 	FBNode::SetNode (Ptr<Node> node)
 	{
@@ -168,6 +203,49 @@
 
 		return m_position;
 	}
+
+	void
+	FBNode::SetNum (uint32_t value)
+	{
+		NS_LOG_FUNCTION (this << value);
+		m_num = value;
+	}
+
+	void
+	FBNode::SetPhase (int32_t value)
+	{
+	  NS_LOG_FUNCTION (this << value);
+	  m_phase = value;
+	}
+
+	void
+	FBNode::SetSlot (uint32_t value)
+	{
+	  NS_LOG_FUNCTION (this << value);
+	  m_slot = value;
+	}
+
+	void
+	FBNode::SetReceived (bool value)
+	{
+	  NS_LOG_FUNCTION (this << value);
+	  m_received = value;
+	}
+
+	void
+	FBNode::SetSent (bool value)
+	{
+	  NS_LOG_FUNCTION (this << value);
+	  m_sent = value;
+	}
+
+	void
+	FBNode::SetLMBR (uint32_t value)
+	{
+	  NS_LOG_FUNCTION (this << value);
+	  m_LMBR = value;
+	}
+
 
 	void
 	FBNode::Send (Ptr<Packet> packet)

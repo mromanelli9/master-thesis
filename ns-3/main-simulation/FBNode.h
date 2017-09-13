@@ -78,6 +78,31 @@ public:
 	Vector GetPosition (void) const;
 
 	/**
+	 * \returns the num of the node
+	 */
+	uint32_t GetNum (void) const;
+
+	/**
+	 * \returns the phase of the node
+	 */
+	int32_t GetPhase (void) const;
+
+	/**
+	 * \returns the slot of the node
+	 */
+	uint32_t GetSlot (void) const;
+
+	/**
+	 * \returns true if the node has received an alert
+	 */
+	bool GetReceived (void) const;
+
+	/**
+	 * \returns true if the node has sent an alert
+	 */
+	bool GetSent (void) const;
+
+	/**
 	 * \brief set the node
 	 * \param node ns-3 node
 	 */
@@ -120,6 +145,36 @@ public:
 	Vector UpdatePosition (void);
 
 	/**
+	 * \brief set the num
+	 * \param value new value of num
+	 */
+	void SetNum (uint32_t n);
+
+	/**
+	 * \brief set the phase
+	 * \param value new value of phase
+	 */
+	void SetPhase(int32_t value);
+
+	/**
+	 * \brief set the slot
+	 * \param value new value of slot
+	 */
+	void SetSlot (uint32_t value);
+
+	/**
+	 * \brief set the received field
+	 * \param value boolean value
+	 */
+	void SetReceived (bool value);
+
+	/**
+	 * \brief set the sent field
+	 * \param value boolean value
+	 */
+	void SetSent (bool value);
+
+	/**
 	 * \brief send a packet
 	 * \param packet packet to send
 	 */
@@ -134,6 +189,11 @@ public:
 	uint32_t 	  			m_CMBR;	// Current Maximum Back Range
 	uint32_t 	  			m_LMBR; // Last Maximum Back Range
 	Vector 						m_position;	// node current position
+	uint32_t					m_num;
+	int32_t						m_phase;
+	uint32_t					m_slot;
+	bool 							received;
+	bool 							sent;
 };
 
 } // namespace ns3
