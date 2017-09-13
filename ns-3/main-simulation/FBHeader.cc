@@ -33,27 +33,7 @@ namespace ns3 {
 	{
 	  static TypeId tid = TypeId ("ns3::FBHeader")
 	    .SetParent<Header> ()
-	    .SetGroupName("Network")
-			.AddAttribute ("Position", "The spatial location (gps) of the sender.",
-										TypeId::ATTR_GET || TypeId::ATTR_SET,
-										Vector3DValue (Vector (0,0,0)),
-										MakeVector3DAccessor (&FBHeader::m_position),
-										MakeVector3DChecker ())
-			.AddAttribute ("StarterPosition", "The spatial location (gps) of the starter node.",
-										TypeId::ATTR_GET || TypeId::ATTR_SET,
-										Vector3DValue (Vector (0,0,0)),
-										MakeVector3DAccessor (&FBHeader::m_starterPosition),
-										MakeVector3DChecker ())
-			.AddAttribute ("MaxRange", "The maximum range.",
-										TypeId::ATTR_GET || TypeId::ATTR_SET,
-										UintegerValue (0),
-										MakeUintegerAccessor (&FBHeader::m_maxRange),
-										MakeUintegerChecker<uint32_t> ())
-			.AddAttribute ("Type", "The type of the message (alert or hello).",
-										TypeId::ATTR_GET || TypeId::ATTR_SET,
-										UintegerValue (0),
-										MakeUintegerAccessor (&FBHeader::m_type),
-										MakeUintegerChecker<uint8_t> ());
+	    .SetGroupName("Network");
 
 	  return tid;
 	}
@@ -85,10 +65,24 @@ namespace ns3 {
 	}
 
 	void
-	FBHeader::SetType (uint8_t value)
+	FBHeader::SetType (uint32_t value)
 	{
 		NS_LOG_FUNCTION (this);
 		m_type = value;
+	}
+
+	void
+	FBHeader::SetSlot (uint32_t value)
+	{
+		NS_LOG_FUNCTION (this);
+		m_slot = value;
+	}
+
+	void
+	FBHeader::SetPhase (int8_t value)
+	{
+		NS_LOG_FUNCTION (this);
+		m_phase = value;
 	}
 
 	Vector
@@ -112,11 +106,25 @@ namespace ns3 {
 		return m_maxRange;
 	}
 
-	uint8_t
+	uint32_t
 	FBHeader::GetType (void) const
 	{
 		NS_LOG_FUNCTION (this);
 		return m_type;
+	}
+
+	uint32_t
+	FBHeader::GetSlot (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_slot;
+	}
+
+	int32_t
+	FBHeader::GetPhase (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_phase;
 	}
 
 	TypeId
@@ -128,13 +136,13 @@ namespace ns3 {
 	uint32_t
 	FBHeader::GetSerializedSize (void) const
 	{
-		// Vector3D = 24
-		// uint32_t = 4
+		// Vector3D = 24  * 2
+		// uint32_t = 4		* 4
 
 		NS_LOG_FUNCTION (this);
 
-		uint32_t length = 56;
-		return  length;
+		uint32_t length = 64;
+		return length;
 	}
 
 	void
@@ -151,6 +159,8 @@ namespace ns3 {
 		i.WriteU64(m_starterPosition.z);
 		i.WriteU32(m_maxRange);
 		i.WriteU32(m_type);
+		i.WriteU32(m_slot);
+		i.WriteU32(m_phase);
 	}
 
 	uint32_t
@@ -170,6 +180,8 @@ namespace ns3 {
 		m_starterPosition = Vector (x, y, z);
 		m_maxRange = i.ReadU32 ();
 		m_type = i.ReadU32 ();
+		m_slot = i.ReadU32 ();
+		m_phase = i.ReadU32 ();
 
 		return  GetSerializedSize  ();
 	}
@@ -181,7 +193,9 @@ namespace ns3 {
 		os << "m_position (" << m_position << ") "
 			<< "m_starterPosition (" << m_starterPosition << ") "
 			<< "m_maxRange " << m_maxRange << " "
-			<< "m_type " << m_type << std::endl;
+			<< "m_type " << m_maxRange << " "
+			<< "m_slot " << m_slot << " "
+			<< "m_phase " << m_phase << std::endl;
 	}
 
 } // namespace ns3

@@ -66,7 +66,19 @@ public:
 	 * \brief set the type of the message
 	 * \param value type of the message
 	 */
-	void SetType (uint8_t value);
+	void SetType (uint32_t value);
+
+	/**
+	 * \brief set the slot of the message
+	 * \param value slot of the message
+	 */
+	void SetSlot (uint32_t value);
+
+	/**
+	 * \brief set the phase of the message
+	 * \param value phase of the message
+	 */
+	void SetPhase (int32_t value);
 
 	/**
 	 * \returns the spatial location (gps) of the sender
@@ -86,7 +98,17 @@ public:
 	/**
 	 * \returns the type of the message
 	 */
-	uint8_t GetType (void) const;
+	uint32_t GetType (void) const;
+
+	/**
+	 * \returns the slot of the message
+	 */
+	uint32_t GetSlot (void) const;
+
+	/**
+	 * \returns the phase of the message
+	 */
+	int32_t GetPhase (void) const;
 
 	/**
    * Get the most derived TypeId for this Object.
@@ -160,6 +182,8 @@ private:
 	Vector 				m_starterPosition;
 	uint32_t			m_maxRange;
 	uint32_t			m_type;
+	uint32_t			m_slot;
+	int32_t				m_phase;
 };
 
 } // namespace ns3
