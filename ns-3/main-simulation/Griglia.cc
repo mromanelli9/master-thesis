@@ -10,6 +10,7 @@
 #include "ns3/dsdv-module.h"
 #include "ns3/dsr-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/topology.h"
 #include "ns3/netanim-module.h"
 
 using namespace ns3;
@@ -407,7 +408,7 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	std::cout<<"Setting parameters\n";
 	srand(time(0));
 	//Starting CMFR, LMFR, CMBR and LMBR
-	int param = 300; //0 for FB, 300 for C300 and 1000 for C1000
+	int param = 0; //0 for FB, 300 for C300 and 1000 for C1000
 	//Number of cars
 	int nWifis = 0;
 	int dist=12;
@@ -419,6 +420,15 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	uint32_t bord= (road/300)-1;
 	int rCirc=1000;
 
+	// Buildings
+	uint32_t m_loadBuildings = 0;
+	std::string m_bldgFile = "Griglia.poly.xml";
+
+	// allow command line overrides
+	CommandLine cmd;
+	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
+	cmd.Parse (argc, argv);
+
 	//Other parameters
 	std::string rate ("2048bps");
 	std::string phyMode ("DsssRate11Mbps");
@@ -429,6 +439,12 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	NodeContainer adhocNodes;
 	MobilityHelper mobility;
 	Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+
+	if (m_loadBuildings != 0)
+	{
+		NS_LOG_INFO ("Loading buildings file \"" << m_bldgFile << "\".");
+		Topology::LoadBuildings (m_bldgFile);
+	}
 
 	std::cout<<"Creating nodes\n";
 
@@ -586,6 +602,10 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	YansWifiChannelHelper wifiChannel;
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
 	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (RoutingExperiment::m_range+100));
+	if (m_loadBuildings != 0)
+	{
+		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel");
+	}
 	wifiPhy.SetChannel (wifiChannel.Create ());
 
 	//Add a mac and disable rate control
@@ -633,7 +653,7 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	std::cout<<"Connections set\n";
 
 	//Hello messages
-	//Simulator::Schedule (Seconds (500), &RoutingExperiment::Hello, adhocNodes, 60);
+	Simulator::Schedule (Seconds (500), &RoutingExperiment::Hello, adhocNodes, 60);
 	std::cout<<"Hello scheduled\n";
 
 	//Generate alert message
