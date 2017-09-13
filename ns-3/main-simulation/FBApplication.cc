@@ -244,17 +244,7 @@ void
 FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 {
 	NS_LOG_FUNCTION (this << fbNode);
-
-	// Check if this node can send a hello message (in this turn)
-	uint32_t nodeId = fbNode->GetNode ()->GetId ();
-	uint32_t fbNodeId = m_nodesMap.at (nodeId);
-	if (m_helloMessageDisabled.at (fbNodeId))
-	{
-		// if so, do not generate a hello message
-		return;
-	}
-
-	NS_LOG_DEBUG ("Generate Hello Message (" << nodeId << ").");
+	NS_LOG_DEBUG ("Generate Hello Message (" << fbNode->GetNode ()->GetId () << ").");
 
 	// Create a packet with the correct parameters taken from the node
 	Vector position = fbNode->UpdatePosition ();
@@ -276,7 +266,7 @@ void
 FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 {
 	NS_LOG_FUNCTION (this << fbNode);
-	NS_LOG_DEBUG ("Generate Alert Message (node " << fbNode->GetNode ()->GetId () << ").");
+	NS_LOG_DEBUG ("Generate Alert Message (" << fbNode->GetNode ()->GetId () << ").");
 
 	// Create a packet with the correct parameters taken from the node
 	uint32_t LMBR, CMBR, maxi;
@@ -295,7 +285,7 @@ FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 	packet->AddHeader (fbHeader);
 
 	fbNode->Send (packet);
-	g_tempHops++;
+	StopNode (fbNode);
 }
 
 void
@@ -412,7 +402,6 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	if (!m_alertReceived.at (fbNodeId))
 	{
 		NS_LOG_DEBUG ("Alert. Stop node  (" << nodeId << ").");
-		StopNode (fbNode);
 		m_alertReceived.at (fbNodeId) = true;
 	}
 
