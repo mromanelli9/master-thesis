@@ -53,12 +53,14 @@ class RoutingExperiment
 	double m_txp;
 	bool m_traceMobility;
 	static const int m_range=300;
+	uint32_t m_loadBuildings;
 };
 
 RoutingExperiment::RoutingExperiment ()
 : port (9),
 m_CSVfileName ("manet-routing.output.csv"),
-m_traceMobility (false)
+m_traceMobility (false),
+m_loadBuildings (0)
 {
 }
 
@@ -345,6 +347,7 @@ RoutingExperiment::CommandSetup (int argc, char **argv)
 	CommandLine cmd;
 	cmd.AddValue ("CSVfileName", "The name of the CSV output file name", m_CSVfileName);
 	cmd.AddValue ("traceMobility", "Enable mobility tracing", m_traceMobility);
+	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
 	cmd.Parse (argc, argv);
 	return m_CSVfileName;
 }
@@ -421,13 +424,7 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	int rCirc=1000;
 
 	// Buildings
-	uint32_t m_loadBuildings = 0;
 	std::string m_bldgFile = "Griglia.poly.xml";
-
-	// allow command line overrides
-	CommandLine cmd;
-	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
-	cmd.Parse (argc, argv);
 
 	//Other parameters
 	std::string rate ("2048bps");
