@@ -430,8 +430,8 @@ FBVanetExperiment::ConfigureFBApplication ()
 
 	// Create the application and schedule start and end time
 	m_fbApplication = CreateObject<FBApplication> ();
-	m_fbApplication->Setup (m_staticProtocol, 0, m_alertGeneration, m_actualRange, 32, 1024, 1000, 20);
-	m_fbApplication->SetStartTime (Seconds (5));
+	m_fbApplication->Setup (m_staticProtocol, m_startingNode, m_alertGeneration, m_actualRange, 32, 1024);
+	m_fbApplication->SetStartTime (Seconds (500));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
 	// Add the desired nodes to the application
