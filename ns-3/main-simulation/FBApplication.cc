@@ -80,7 +80,7 @@ FBApplication::~FBApplication ()
 }
 
 void
-FBApplication::Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t cwMin, uint32_t cwMax, uint32_t turn, uint32_t slot)
+FBApplication::Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t cwMin, uint32_t cwMax)
 {
 	if (protocol == PROTOCOL_FB)
 	{
@@ -105,8 +105,6 @@ FBApplication::Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadca
 	m_actualRange = actualRange;
 	m_cwMin = cwMin;
 	m_cwMax	= cwMax;
-	m_turn = turn;
-	m_slot = slot;
 }
 
 void
@@ -138,16 +136,6 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 }
 
 void
-FBApplication::DisableEstimationPhase (void)
-{
-	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Estimation Phase disabled.");
-
-	m_staticProtocol = true;
-	m_estimatedRange = m_actualRange;
-}
-
-void
 FBApplication::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
@@ -158,12 +146,10 @@ FBApplication::StartApplication (void)
 		NS_LOG_INFO ("Start Estimation Phase.");
 		m_estimationPhaseRunning = true;
 		GenerateHelloTraffic ();
-
-		// Schedule Broadcast Phase
-		Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
 	}
-	else
-		StartBroadcastPhase ();
+
+	// Schedule Broadcast Phase
+	Simulator::Schedule (Seconds (m_broadcastPhaseStart), &FBApplication::StartBroadcastPhase, this);
 }
 
 void
@@ -309,40 +295,46 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 		// Get the position of the sender node
 		Vector senderPosition = fbHeader.GetPosition ();
 
-		// Compute the distance between the sender and the node who received the message
+		// Compute the distance between the sender and me (the node who received the message)
 	 	double distanceSenderToCurrent = ComputeDistance(senderPosition, currentPosition);
 		uint32_t distanceSenderToCurrent_uint = std::abs (std::floor (distanceSenderToCurrent));
 
 		// If the node is in range
-		// TODO check if actual range or the estimated range
 		if (distanceSenderToCurrent_uint <= m_actualRange)
 		{
 			if (messageType == HELLO_MESSAGE)
 				HandleHelloMessage (fbNode, fbHeader);
 			else if (messageType == ALERT_MESSAGE)
 			{
-				// Compute the two different distances
+				m_received++;
+
+				// Get the phase
+				uint32_t phase = fbHeader.GetPhase ();
+
+				// Get the position of the node who start the broadcast
 				Vector starterPosition = fbHeader.GetStarterPosition ();
-				double distanceStarterToSender = ComputeDistance(starterPosition, senderPosition);
-				double distanceStarterToCurrent = ComputeDistance(starterPosition, currentPosition);
+
+				// Compute the two distances
+				double distanceStarterToSender = ComputeDistance(senderPosition, starterPosition);
+				double distanceStarterToCurrent = ComputeDistance(currentPosition, starterPosition);
 
 				// If starter-to-sender distance is less than starter-to-current distance,
 				// then the message is coming from the front and it needs to be menaged,
 				// otherwise do nothing
-				if (distanceStarterToSender < distanceStarterToCurrent)
+				if (distanceStarterToCurrent > distanceStarterToSender && fbNode->GetReceived ())
+				{
+					uint32_t sl = head.GetSlot ();
+					fbNode->SetSlot (fbNode->GetSlot() + sl);
+					StopNode (fbNode);
+					fbNode->SetReceived (true);
+					if (fbNode->GetNum( ) == 0)
+						fbNode->SetNum (phase);
 					HandleAlertMessage (fbNode, fbHeader, distanceSenderToCurrent_uint);
+				}
 				else
 				{
-					NS_LOG_DEBUG ("Node " << node->GetId () << " has dropped an Alert Message.");
-
-					// Check if this node has already a forwarding procedure pending
-					// If true, delete the pending event
-					// TODO: check if it's true
-					if (m_broadcastForwardCheck.at (fbNode->GetId ()) == true)
-					{
-						NS_LOG_DEBUG ("Another forwarding procedure is pending so the previous one will be deleted (" << node->GetId () << ").");
-						Simulator::Cancel (m_broadcastForwardEvent.at (fbNode->GetId ()));
-					}
+					if (fbNode->GetPhase() < phase)
+						fbNode->SetPhase (phase);
 				}
 			}
 		}

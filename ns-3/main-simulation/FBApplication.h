@@ -55,7 +55,7 @@ public:
 	 * \param TODO
 	 * \return none
 	 */
-	void Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t cwMin, uint32_t cwMax, uint32_t turn, uint32_t slot);
+	void Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t cwMin, uint32_t cwMax);
 
 	/**
 	 * \brief Add a new node to the applicatin and set up protocol parameters
@@ -65,12 +65,6 @@ public:
 	 * \return none
 	 */
 	void AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink);
-
-	/**
-	 * \brief Disable the estimation phase of the protocol
-	 * \return none
-	 */
-	void DisableEstimationPhase (void);
 
 	/**
 	 * \brief Print value of some useful field
@@ -145,21 +139,15 @@ private:
 	uint32_t																m_startingNode; // index of the node that will generate the Alert Message
 	std::map<uint32_t, uint32_t> 						m_nodesMap;	// map nodes and FBNodes
 	bool																		m_staticProtocol;	// true if static protocol is used
-	std::map<uint32_t, bool>								m_broadcastForwardCheck;	// used to check if a node has already schedule to forward an alert message
-	std::map<uint32_t, EventId>							m_broadcastForwardEvent;	// used to store the forward event of an alert message
-	std::vector<bool>												m_helloMessageDisabled;	// disable the generation of a hello message
-	std::vector<bool>												m_alertReceived;	// true if fbNode i has received an alert message
 	bool           										 			m_estimationPhaseRunning;	// true if the estimation phase is running
 	bool            									 			m_broadcastPhaseRunning;	// true if the broadcast phase is running
 	uint32_t													 			m_broadcastPhaseStart;	// broadcast phase start time (seconds)
 	uint32_t													 			m_cwMin;	// min size of the contention window (in slot)
 	uint32_t													 			m_cwMax;	// max size of the contention window (in slot)
 	bool															 			m_flooding;	// used for control the flooding of the Alert messages
-	uint32_t													 			m_turn;	// duration of a single turn (milliseconds)
 	uint32_t													 			m_actualRange;	// real transmission range
 	uint32_t													 			m_estimatedRange;	// range of transmission to be estimated
 	uint32_t													 			m_packetPayload; // size of the packet payload
-	uint32_t													 			m_slot;	// value of a slot (milliseconds)
 	uint32_t													 			m_totalHelloMessages;	// number of hello messages sent
 	uint32_t																m_totalAlertMessages; // // number of alert messages sent
 	uint32_t													 			m_totalHops;	// total number of hop in the broadcast phase
