@@ -361,7 +361,7 @@ FBVanetExperiment::SetupAdhocDevices ()
 	YansWifiChannelHelper wifiChannel;
 
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange));
+	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100)); // why?
 	if (m_loadBuildings != 0)
 	{
 		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel");
@@ -511,7 +511,7 @@ FBVanetExperiment::SetupScenario ()
 
 		m_txp = 7.5;
 		m_TotalSimTime = 990000.0;
-		m_alertGeneration = 45000;
+		m_alertGeneration = 45000 - 500; // 500 = fbApplication start time
 		m_mobility = 1;
 
 		// Position of the nodes

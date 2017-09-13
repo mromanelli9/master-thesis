@@ -117,7 +117,8 @@ private:
 	void ReceivePacket (Ptr<Socket> socket);
 	void HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader);
 	void HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32_t distance);
-	void ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader);
+	void WaitAgain (Ptr<FBNode> fbNode,  FBHeader fbHeader, uint32_t waitingTime);
+	void ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader, uint32_t waitingTime);
 
 	/**
 	 * \brief Stop a node
@@ -148,9 +149,8 @@ private:
 	uint32_t													 			m_actualRange;	// real transmission range
 	uint32_t													 			m_estimatedRange;	// range of transmission to be estimated
 	uint32_t													 			m_packetPayload; // size of the packet payload
-	uint32_t													 			m_totalHelloMessages;	// number of hello messages sent
-	uint32_t																m_totalAlertMessages; // // number of alert messages sent
-	uint32_t													 			m_totalHops;	// total number of hop in the broadcast phase
+	uint32_t													 			m_received;	// number of hello messages sent
+	uint32_t																m_sent; // // number of alert messages sent
 };
 
 } // namespace ns3

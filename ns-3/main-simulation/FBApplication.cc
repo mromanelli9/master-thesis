@@ -34,8 +34,6 @@
 
 namespace ns3 {
 
-uint32_t g_tempHops = 0;
-
 NS_LOG_COMPONENT_DEFINE ("FBApplication");
 
 NS_OBJECT_ENSURE_REGISTERED (FBApplication);
@@ -60,14 +58,11 @@ FBApplication::FBApplication ()
 		m_cwMin (32),
 		m_cwMax (1024),
 		m_flooding (true),
-		m_turn (1000),
 		m_actualRange (300),
 		m_estimatedRange (0),
 		m_packetPayload (100),
-		m_slot (20),
-		m_totalHelloMessages (0),
-		m_totalAlertMessages (0),
-		m_totalHops (0)
+		m_received (0),
+		m_sent (0)
 {
 	NS_LOG_FUNCTION (this);
 
@@ -121,16 +116,15 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 	fbNode->SetCMBR (m_estimatedRange);
 	fbNode->SetLMBR (m_estimatedRange);
 	fbNode->UpdatePosition ();
+	fbNode->SetNum (0);
+	fbNode->SetPhase (-1);
+	fbNode->SetSlot (0);
+	fbNode->SetReceived (false);
+	fbNode->SetSent (false);
 
 	// misc stuff
 	m_nodes.push_back (fbNode);
 	m_nodesMap.insert (std::pair<uint32_t, uint32_t> (node->GetId (), fbNode->GetId ()));
-
-	m_broadcastForwardCheck.insert (std::pair<uint32_t, bool> (fbNode->GetId (), false));
-
-	m_helloMessageDisabled.push_back (false);
-
-	m_alertReceived.push_back (false);
 
 	m_nNodes++;
 }
@@ -237,8 +231,6 @@ FBApplication::GenerateHelloMessage (Ptr<FBNode> fbNode)
 	packet->AddHeader (fbHeader);
 
 	fbNode->Send (packet);
-
-	m_totalHelloMessages++;
 }
 
 void
@@ -259,11 +251,15 @@ FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 	fbHeader.SetMaxRange (maxi);
 	fbHeader.SetStarterPosition (position);
 	fbHeader.SetPosition (position);
+	fbHeader.SetPhase(0);
+	fbHeader.SetSlot(0);
 
 	Ptr<Packet> packet = Create<Packet> (m_packetPayload);
 	packet->AddHeader (fbHeader);
 
 	fbNode->Send (packet);
+
+	fbNode->SetSent(true);
 	StopNode (fbNode);
 }
 
@@ -309,7 +305,7 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 				m_received++;
 
 				// Get the phase
-				uint32_t phase = fbHeader.GetPhase ();
+				int32_t phase = fbHeader.GetPhase ();
 
 				// Get the position of the node who start the broadcast
 				Vector starterPosition = fbHeader.GetStarterPosition ();
@@ -329,7 +325,13 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 					fbNode->SetReceived (true);
 					if (fbNode->GetNum( ) == 0)
 						fbNode->SetNum (phase);
-					HandleAlertMessage (fbNode, fbHeader, distanceSenderToCurrent_uint);
+
+					// check if the message is coming fron the front
+					if (phase > fbNode->GetPhase ())
+					{
+						fbNode->SetPhase (phase);
+						HandleAlertMessage (fbNode, fbHeader, distanceSenderToCurrent_uint);
+					}
 				}
 				else
 				{
@@ -384,29 +386,6 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	uint32_t nodeId = fbNode->GetNode ()->GetId ();
 	uint32_t fbNodeId = fbNode->GetId ();
 
-	if (!m_alertReceived.at (fbNodeId))
-	{
-		NS_LOG_DEBUG ("Alert. Stop node  (" << nodeId << ").");
-		m_alertReceived.at (fbNodeId) = true;
-	}
-
-	// If I'm the last car in the platoon then the broadcast phase needs to end, goal reached
-	if (fbNodeId == m_nNodes-1)
-	{
-		NS_LOG_DEBUG ("Broadcast Phase has reached the last node.");
-		// Store the number of hops so far
-		m_totalHops = g_tempHops;
-		StopBroadcastPhase ();
-	}
-
-	// Check if this node has already a forwarding procedure pending
-	// If true, delete the pending event
-	if (m_broadcastForwardCheck.at (fbNodeId) == true)
-	{
-		NS_LOG_DEBUG ("Another forwarding procedure is pending so it will be deleted (" << nodeId << ").");
-		Simulator::Cancel (m_broadcastForwardEvent.at (fbNodeId));
-	}
-
 	NS_LOG_DEBUG ("Handle an Alert Message (" << nodeId << ").");
 
 	// Compute the size of the contention window
@@ -416,43 +395,74 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	// Compute a random waiting time (1 <= waitingTime <= cwnd)
 	uint32_t waitingTime = (rand () % cwnd) + 1;
 
-	// Wait <waitingTime> milliseconds and then forward the message
-	EventId event = Simulator::Schedule (MilliSeconds (waitingTime * m_slot), &FBApplication::ForwardAlertMessage, this, fbNode, fbHeader);
-
-	// Store the event for further use
-	m_broadcastForwardEvent.insert (std::pair<uint32_t, EventId> (fbNodeId, event));
-	m_broadcastForwardCheck.at (fbNodeId) = true;
+	// Wait and then forward the message
+	if (m_flooding == false)
+		Simulator::ScheduleWithContext (nodeId, MilliSeconds (rs * 200 * 3),
+																	&FBApplication::WaitAgain, fbNode, fbHeader, waitingTime);
+	else
+		Simulator::ScheduleWithContext (nodeId, MilliSeconds(0),
+																	&FBApplication::ForwardAlertMessage, fbNode, fbHeader, waitingTime);
 }
 
 void
-FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader)
+FBApplication::WaitAgain (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32_t waitingTime)
+{
+	 NS_LOG_FUNCTION (this);
+
+	 // Get the phase
+	 int32_t phase = fbHeader.GetPhase ();
+
+	 if (phase >= fbNode->GetPhase())
+	 {
+		 uint32_t rnd = (rand() % 20)+1;
+		 uint32_t rnd1 = (rand() % 20)+1;
+		 uint32_t rnd2 = (rand() % 20)+1;
+		 uint32_t rnd3 = (rand() % 20)+1;
+		 Simulator::Schedule (MilliSeconds (10* (rs+rnd+rnd1+rnd2+rnd3) * 200 * 3),
+		 											&FBApplication::ForwardAlertMessage, fbNode, fbHeader, waitingTime);
+	 }
+}
+
+void
+FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader, uint32_t waitingTime)
 {
 	NS_LOG_FUNCTION (this << fbNode << oldFBHeader);
-	NS_LOG_DEBUG ("Forwarding Alert Message (" << fbNode->GetNode ()->GetId () << ").");
 
-	// Create a packet with the correct parameters taken from the node
-	uint32_t LMBR, CMBR, maxi;
-	LMBR = fbNode->GetLMBR ();
-	CMBR = fbNode->GetCMBR ();
-	maxi = std::max (LMBR, CMBR);
+	// Get the phase
+	int32_t phase = fbHeader.GetPhase ();
 
-	Vector position = fbNode->UpdatePosition ();
-	Vector starterPosition = oldFBHeader.GetStarterPosition ();
+	// If I'm the first to wake up, I must forward the message
+	if ((!m_flooding && phase >= fbNode->GetPhase ()) || (m_flooding && !fbNode->GetSent ()))
+	{
+		NS_LOG_DEBUG ("Forwarding Alert Message (" << fbNode->GetNode ()->GetId () << ").");
 
-	FBHeader fbHeader;
-	fbHeader.SetType (ALERT_MESSAGE);
-	fbHeader.SetMaxRange (maxi);
-	fbHeader.SetStarterPosition (starterPosition);
-	fbHeader.SetPosition (position);
+		// Create a packet with the correct parameters taken from the node
+		uint32_t LMBR, CMBR, maxi;
+		LMBR = fbNode->GetLMBR ();
+		CMBR = fbNode->GetCMBR ();
+		maxi = std::max (LMBR, CMBR);
 
-	Ptr<Packet> packet = Create<Packet> (m_packetPayload);
-	packet->AddHeader (fbHeader);
+		Vector position = fbNode->UpdatePosition ();
+		Vector starterPosition = oldFBHeader.GetStarterPosition ();
 
-	// Forward
-	fbNode->Send (packet);
+		FBHeader fbHeader;
+		fbHeader.SetType (ALERT_MESSAGE);
+		fbHeader.SetMaxRange (maxi);
+		fbHeader.SetStarterPosition (starterPosition);
+		fbHeader.SetPosition (position);
+		fbHeader.SetPhase (phase + 1);
+		fbHeader.SetSlot (fbNode->GetSlot() + waitingTime);
 
-	// Increase the hop counter
-	g_tempHops++;
+		Ptr<Packet> packet = Create<Packet> (m_packetPayload);
+		packet->AddHeader (fbHeader);
+
+		// Forward
+		fbNode->Send (packet);
+		fbNode->SetSent (true);
+
+		// Increase the hop counter
+		m_sent++;
+	}
 }
 
 void
@@ -482,18 +492,7 @@ FBApplication::PrintStats (void)
 {
 	NS_LOG_FUNCTION (this);
 
-	m_totalAlertMessages = g_tempHops;
-
-	if (!m_staticProtocol) {
-		NS_LOG_INFO ("Total Hello messages sent: " << m_totalHelloMessages << ".");
-		NS_LOG_INFO ("Estimated transimision range: " << m_nodes.at (m_startingNode)->GetCMBR () << " meters (actual range: " << m_actualRange << " m).");
-	}
-	else
-	{
-		NS_LOG_INFO ("Estimation Phase disabled (static protocol); estimated range: " << m_actualRange << " meters.");
-	}
-	NS_LOG_INFO ("Total Alert messages sent: " << m_totalAlertMessages << ".");
-	NS_LOG_INFO ("Number of hops required to reach the last node: " << m_totalHops << ".");
+	// TODO
 }
 
 uint32_t
