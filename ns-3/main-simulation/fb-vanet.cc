@@ -224,7 +224,7 @@ FBVanetExperiment::FBVanetExperiment ()
 	:	m_nNodes (0),	// random value, it will be set later
 		m_packetSize ("64"),
 		m_rate ("2048bps"),
-		m_phyMode ("OfdmRate6MbpsBW10MHz"),
+		m_phyMode ("DsssRate11Mbps"),
 		m_txp (20),
 		m_actualRange (300),
 		m_startingNode (0),
@@ -354,34 +354,31 @@ FBVanetExperiment::SetupAdhocDevices ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure channels.");
 
+	WifiHelper wifi;
+	wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
+
 	YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
-	//YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
 	YansWifiChannelHelper wifiChannel;
 
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
 	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange));
-	wifiChannel.AddPropagationLoss ("ns3::TwoRayGroundPropagationLossModel", "Frequency", DoubleValue (5.9e9), "HeightAboveZ", DoubleValue (1.5));
-
 	if (m_loadBuildings != 0)
 	{
 		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel");
 	}
+	wifiPhy.SetChannel (wifiChannel.Create ());
 
-	Ptr<YansWifiChannel> channel = wifiChannel.Create ();
-	wifiPhy.SetChannel (channel);
-	wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);
-
+	WifiMacHelper wifiMac;
+	wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
+																"DataMode",StringValue (m_phyMode),
+																"ControlMode",StringValue (m_phyMode));
 	// Set Tx Power
   wifiPhy.Set ("TxPowerStart",DoubleValue (m_txp));
   wifiPhy.Set ("TxPowerEnd", DoubleValue (m_txp));
 
-	NqosWaveMacHelper wifi80211pMac = NqosWaveMacHelper::Default ();
-	Wifi80211pHelper wifi80211p = Wifi80211pHelper::Default ();
+	wifiMac.SetType ("ns3::AdhocWifiMac");
 
-	wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-																			"DataMode",StringValue (m_phyMode),
-																			"ControlMode",StringValue (m_phyMode));
-	m_adhocDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, m_adhocNodes);
+	m_adhocDevices = wifi.Install (wifiPhy, wifiMac, m_adhocNodes);
 }
 
 void
@@ -413,7 +410,7 @@ FBVanetExperiment::ConfigureConnections ()
 	// Set unicast sender (for each node in the application)
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
-		SetupPacketSend (ns3::Ipv4Address("255.255.255.255"),  m_adhocNodes.Get (i));
+		SetupPacketSend (ns3::Ipv4Address("10.1.255.255"),  m_adhocNodes.Get (i));
 	}
 }
 
@@ -504,14 +501,93 @@ FBVanetExperiment::SetupScenario ()
 	}
 	else if (m_scenario == 2)
 	{
+		// Barichello's Grid
+		uint32_t road = 4000;	// meter
+		uint32_t block = 300;	// meters
+		uint32_t bord= (road / block) - 1;
+		uint32_t rCirc = 1000;
+		uint32_t dist = 12;
+		m_startingNode = (dist = 12) ? 2242 : 1137;
+
+		m_txp = 7.5;
+		m_TotalSimTime = 990000.0;
+		m_alertGeneration = 45000;
 		m_mobility = 1;
 
-		// DEBUG
-		m_nNodes = 3;
+		// Position of the nodes
+		// Left side
+		uint32_t borders = 0, cont = 0;
+		while (cont<bord)
+		{
+			m_fixNodePosition.push_back (Vector (0.0, (cont+1) * block, 0.0));
 
-		m_fixNodePosition.push_back( Vector (350,350, 0.0));
-		m_fixNodePosition.push_back( Vector (0,350, 0.0));
-		m_fixNodePosition.push_back( Vector (360,46,0.0));
+			cont++;
+			borders++;
+			m_nNodes++;
+		}
+
+		// Bottom side
+		cont = 0;
+		while (cont<bord)
+		{
+			m_fixNodePosition.push_back (Vector ((cont + 1) * block, road, 0.0));
+
+			cont++;
+			borders++;
+			m_nNodes++;
+		}
+
+		// Right side
+		cont = 0;
+		while (cont < bord)
+		{
+			m_fixNodePosition.push_back (Vector (road, (cont + 1) * block, 0.0));
+
+			cont++;
+			borders++;
+			nWifis++;
+		}
+
+		// Top side
+		cont = 0;
+		while (cont < bord)
+		{
+			m_fixNodePosition.push_back (Vector ((cont + 1) * block, 0.0, 0.0));
+
+			cont++;
+			borders++;
+			m_nNodes++;
+		}
+
+		//Other nodes
+		for (uint32_t i = 0; i < bord; i++)
+		{
+			uint32_t r = road;
+			uint32_t d = dist;
+			while (r > 0)
+			{
+				m_fixNodePosition.push_back (Vector ((i + 1) * block, d, 0.0));
+
+				borders++;
+				d = d + dist;
+				r = r - dist;
+				m_nNodes++;
+			}
+		}
+		for (uint i=0; i<bord; i++)
+		{
+			int r = road;
+			int d = dist;
+			while (r > 0)
+			{
+				m_fixNodePosition.push_back (Vector (d, (i+1) * block, 0.0));
+
+				borders++;
+				d = d + dist;
+				r = r - dist;
+				m_nNodes++;
+			}
+		}
 	}
 	else if (m_scenario == 3)
 	{
