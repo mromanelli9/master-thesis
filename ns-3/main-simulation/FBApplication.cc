@@ -139,7 +139,7 @@ FBApplication::StartApplication (void)
 		// Start Estimation Phase
 		NS_LOG_INFO ("Start Estimation Phase.");
 		m_estimationPhaseRunning = true;
-		GenerateHelloTraffic ();
+		GenerateHelloTraffic (60);
 	}
 
 	// Schedule Broadcast Phase
@@ -170,7 +170,7 @@ FBApplication::GenerateHelloTraffic (uint32_t count)
 		{
 			int pos = rand() % m_nNodes;
 			he.push_back (pos);
-			Ptr<FBNode> fbNode = m_nodes.get(pos);
+			Ptr<FBNode> fbNode = m_nodes.at(pos);
 			Simulator::Schedule (Seconds (i * 40), &FBApplication::GenerateHelloMessage, fbNode);
 		}
 
@@ -319,7 +319,7 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 				// otherwise do nothing
 				if (distanceStarterToCurrent > distanceStarterToSender && fbNode->GetReceived ())
 				{
-					uint32_t sl = head.GetSlot ();
+					uint32_t sl = fbHeader.GetSlot ();
 					fbNode->SetSlot (fbNode->GetSlot() + sl);
 					StopNode (fbNode);
 					fbNode->SetReceived (true);
@@ -349,10 +349,6 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader)
 	NS_LOG_FUNCTION (this << fbNode << fbHeader);
 	uint32_t nodeId = fbNode->GetNode ()->GetId ();
 	NS_LOG_DEBUG ("Handle a Hello Message (" << nodeId << ").");
-
-	// I have received a hello message, so in this turn i won't send another
-	uint32_t fbNodeId = m_nodesMap.at (nodeId);
-	m_helloMessageDisabled.at (fbNodeId) = true;
 
 	// Override the old values
 	fbNode->SetLMFR (fbNode->GetCMFR ());
@@ -384,7 +380,6 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	// We assume that the message is coming from the front
 	NS_LOG_FUNCTION (this << fbNode << fbHeader << distance);
 	uint32_t nodeId = fbNode->GetNode ()->GetId ();
-	uint32_t fbNodeId = fbNode->GetId ();
 
 	NS_LOG_DEBUG ("Handle an Alert Message (" << nodeId << ").");
 
@@ -397,7 +392,7 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 
 	// Wait and then forward the message
 	if (m_flooding == false)
-		Simulator::ScheduleWithContext (nodeId, MilliSeconds (rs * 200 * 3),
+		Simulator::ScheduleWithContext (nodeId, MilliSeconds (waitingTime * 200 * 3),
 																	&FBApplication::WaitAgain, fbNode, fbHeader, waitingTime);
 	else
 		Simulator::ScheduleWithContext (nodeId, MilliSeconds(0),
@@ -418,7 +413,7 @@ FBApplication::WaitAgain (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32_t waitin
 		 uint32_t rnd1 = (rand() % 20)+1;
 		 uint32_t rnd2 = (rand() % 20)+1;
 		 uint32_t rnd3 = (rand() % 20)+1;
-		 Simulator::Schedule (MilliSeconds (10* (rs+rnd+rnd1+rnd2+rnd3) * 200 * 3),
+		 Simulator::Schedule (MilliSeconds (10* (waitingTime+rnd+rnd1+rnd2+rnd3) * 200 * 3),
 		 											&FBApplication::ForwardAlertMessage, fbNode, fbHeader, waitingTime);
 	 }
 }
@@ -429,7 +424,7 @@ FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader, ui
 	NS_LOG_FUNCTION (this << fbNode << oldFBHeader);
 
 	// Get the phase
-	int32_t phase = fbHeader.GetPhase ();
+	int32_t phase = oldFBHeader.GetPhase ();
 
 	// If I'm the first to wake up, I must forward the message
 	if ((!m_flooding && phase >= fbNode->GetPhase ()) || (m_flooding && !fbNode->GetSent ()))

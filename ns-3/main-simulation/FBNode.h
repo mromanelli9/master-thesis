@@ -192,8 +192,8 @@ public:
 	uint32_t					m_num;
 	int32_t						m_phase;
 	uint32_t					m_slot;
-	bool 							received;
-	bool 							sent;
+	bool 							m_received;
+	bool 							m_sent;
 };
 
 } // namespace ns3

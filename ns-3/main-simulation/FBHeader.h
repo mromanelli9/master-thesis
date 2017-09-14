@@ -78,7 +78,7 @@ public:
 	 * \brief set the phase of the message
 	 * \param value phase of the message
 	 */
-	void SetPhase (int32_t value);
+	void SetPhase (int8_t value);
 
 	/**
 	 * \returns the spatial location (gps) of the sender

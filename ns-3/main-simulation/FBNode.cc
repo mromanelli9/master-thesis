@@ -240,14 +240,6 @@
 	}
 
 	void
-	FBNode::SetLMBR (uint32_t value)
-	{
-	  NS_LOG_FUNCTION (this << value);
-	  m_LMBR = value;
-	}
-
-
-	void
 	FBNode::Send (Ptr<Packet> packet)
 	{
 		NS_LOG_FUNCTION (this << packet);
