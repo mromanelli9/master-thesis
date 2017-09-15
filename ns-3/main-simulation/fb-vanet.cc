@@ -478,7 +478,6 @@ FBVanetExperiment::SetupScenario ()
 		// uint32_t rCirc = 1000;
 		uint32_t dist = 12;
 		m_startingNode = (dist = 12) ? 2242 : 1137;
-		m_startingNode = 30;
 
 		m_txp = 7.5;
 		m_TotalSimTime = 990000.0;
