@@ -284,13 +284,13 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 				Vector starterPosition = fbHeader.GetStarterPosition ();
 
 				// Compute the two distances
-				double distanceStarterToSender = ComputeDistance(senderPosition, starterPosition);
-				double distanceStarterToCurrent = ComputeDistance(currentPosition, starterPosition);
+				double distanceSenderToStarter = ComputeDistance(senderPosition, starterPosition);
+				double distanceCurrentToStarter = ComputeDistance(currentPosition, starterPosition);
 
 				// If starter-to-sender distance is less than starter-to-current distance,
 				// then the message is coming from the front and it needs to be menaged,
 				// otherwise do nothing
-				if (distanceStarterToCurrent > distanceStarterToSender && fbNode->GetReceived ())
+				if (distanceCurrentToStarter > distanceSenderToStarter && !fbNode->GetReceived ())
 				{
 					uint32_t sl = fbHeader.GetSlot ();
 					fbNode->SetSlot (fbNode->GetSlot() + sl);
@@ -428,7 +428,6 @@ FBApplication::ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader, ui
 		fbNode->Send (packet);
 		fbNode->SetSent (true);
 
-		// Increase the hop counter
 		m_sent++;
 	}
 }
