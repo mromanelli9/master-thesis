@@ -462,27 +462,27 @@ FBApplication::PrintStats (void)
 
 	uint32_t cover=1;
 	uint32_t circ = 0, circCont = 0;
-	for (uint32_t i = 0; i < m_nNodes; i++)
-	{
-		Ptr<FBNode> current = m_nodes.at (i);
-		Ptr<FBNode> startingNode = m_nodes.at (m_startingNode);
-		Vector currentPosition = current->UpdatePosition ();
-		Vector startingNodePosition = startingNode->UpdatePosition ();
-		double distStart = CalculateDistance (currentPosition, startingNodePosition);
-
-		uint32_t dist = 12; 	// TODO cambiare (distanza fra mezzi)
-		uint32_t rCirc = 1000;
-		if (i != m_startingNode && distStart > 0 &&
-				((distStart - rCirc <= (dist/2) && distStart - rCirc >= 0) || (rCirc - distStart <= (dist/2) && distStart - rCirc <= 0)))
-		{
-			circCont++;
-			if (current->GetReceived ())
-				circ++;
-		}
-
-		if (current->GetReceived ())
-			cover++;
-	}
+	// for (uint32_t i = 0; i < m_nNodes; i++)
+	// {
+	// 	Ptr<FBNode> current = m_nodes.at (i);
+	// 	Ptr<FBNode> startingNode = m_nodes.at (m_startingNode);
+	// 	Vector currentPosition = current->UpdatePosition ();
+	// 	Vector startingNodePosition = startingNode->UpdatePosition ();
+	// 	double distStart = CalculateDistance (currentPosition, startingNodePosition);
+	//
+	// 	uint32_t dist = 12; 	// TODO cambiare (distanza fra mezzi)
+	// 	uint32_t rCirc = 1000;
+	// 	if (i != m_startingNode && distStart > 0 &&
+	// 			((distStart - rCirc <= (dist/2) && distStart - rCirc >= 0) || (rCirc - distStart <= (dist/2) && distStart - rCirc <= 0)))
+	// 	{
+	// 		circCont++;
+	// 		if (current->GetReceived ())
+	// 			circ++;
+	// 	}
+	//
+	// 	if (current->GetReceived ())
+	// 		cover++;
+	// }
 
 	NS_LOG_INFO ("Actual range: " << m_actualRange << " meter.");
 	NS_LOG_INFO ("Initital estimated range: " << m_estimatedRange << " meters.");

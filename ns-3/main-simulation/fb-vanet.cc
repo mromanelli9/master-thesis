@@ -192,6 +192,7 @@ private:
 	Ptr<FBApplication>			m_fbApplication;
 	uint32_t 								m_nNodes;
 	NodeContainer						m_adhocNodes;
+	Ptr<ListPositionAllocator> m_adhocPositionAllocator;
 	NetDeviceContainer			m_adhocDevices;
 	Ipv4InterfaceContainer	m_adhocInterfaces;
 	std::vector <Ptr<Socket>>		m_adhocSources;
@@ -207,7 +208,6 @@ private:
 	uint32_t								m_alertGeneration;
 	uint32_t								m_mobility;
 	uint32_t								m_scenario;
-	std::vector <Vector>		m_fixNodePosition;
 	uint32_t								m_loadBuildings;
 	uint32_t								m_animation;
 	std::string							m_traceFile;
@@ -300,7 +300,7 @@ void
 FBVanetExperiment::ConfigureNodes ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Setup nodes (" << m_nNodes << ").");
+	NS_LOG_INFO ("Setup nodes.");
 
 	m_adhocNodes.Create (m_nNodes);
 }
@@ -314,16 +314,10 @@ FBVanetExperiment::ConfigureMobility ()
 	if (m_mobility == 1)
 	{
 		MobilityHelper mobility;
-		Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-
-		for (uint32_t i = 0 ; i < m_nNodes; i++)
-		{
-			positionAlloc->Add (m_fixNodePosition[i]);
-		}
 
 		// Install nodes in a constant velocity mobility model
 		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
-		mobility.SetPositionAllocator (positionAlloc);
+		mobility.SetPositionAllocator (m_adhocPositionAllocator);
 		mobility.Install (m_adhocNodes);
 
 		// Set the velocity value (constant) to zero
@@ -475,21 +469,7 @@ FBVanetExperiment::SetupScenario ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
 
-	if (m_scenario == 0) {
-		// DEBUG Scenario
-		m_mobility = 1;
-		m_nNodes = 5;
-
-		m_startingNode = 3;
-
-		m_fixNodePosition.push_back( Vector (100, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (300, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (500, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (700, 0.0, 0.0));
-		m_fixNodePosition.push_back( Vector (900, 0.0, 0.0));
-
-	}
-	else if (m_scenario == 1)
+	if (m_scenario == 1)
 	{
 		// Barichello's Grid
 		uint32_t road = 4000;	// meter
@@ -498,18 +478,22 @@ FBVanetExperiment::SetupScenario ()
 		// uint32_t rCirc = 1000;
 		uint32_t dist = 12;
 		m_startingNode = (dist = 12) ? 2242 : 1137;
+		m_startingNode = 30;
 
 		m_txp = 7.5;
 		m_TotalSimTime = 990000.0;
 		m_alertGeneration = 45000 - 500; // 500 = fbApplication start time
 		m_mobility = 1;
 
+		m_adhocPositionAllocator = CreateObject<ListPositionAllocator> ();
+
 		// Position of the nodes
 		// Left side
 		uint32_t borders = 0, cont = 0;
-		while (cont<bord)
+		while (cont < bord)
 		{
-			m_fixNodePosition.push_back (Vector (0.0, (cont+1) * block, 0.0));
+			m_adhocNodes.Add(CreateObject<Node> ());
+			m_adhocPositionAllocator->Add (Vector (0.0, (cont+1) * block, 0.0));
 
 			cont++;
 			borders++;
@@ -518,9 +502,10 @@ FBVanetExperiment::SetupScenario ()
 
 		// Bottom side
 		cont = 0;
-		while (cont<bord)
+		while (cont < bord)
 		{
-			m_fixNodePosition.push_back (Vector ((cont + 1) * block, road, 0.0));
+			m_adhocNodes.Add(CreateObject<Node> ());
+			m_adhocPositionAllocator->Add (Vector ((cont + 1) * block, road, 0.0));
 
 			cont++;
 			borders++;
@@ -531,7 +516,8 @@ FBVanetExperiment::SetupScenario ()
 		cont = 0;
 		while (cont < bord)
 		{
-			m_fixNodePosition.push_back (Vector (road, (cont + 1) * block, 0.0));
+			m_adhocNodes.Add(CreateObject<Node> ());
+			m_adhocPositionAllocator->Add (Vector (road, (cont + 1) * block, 0.0));
 
 			cont++;
 			borders++;
@@ -542,21 +528,23 @@ FBVanetExperiment::SetupScenario ()
 		cont = 0;
 		while (cont < bord)
 		{
-			m_fixNodePosition.push_back (Vector ((cont + 1) * block, 0.0, 0.0));
+			m_adhocNodes.Add(CreateObject<Node> ());
+			m_adhocPositionAllocator->Add (Vector ((cont + 1) * block, 0.0, 0.0));
 
 			cont++;
 			borders++;
 			m_nNodes++;
 		}
 
-		//Other nodes
+		// Other nodes
 		for (uint32_t i = 0; i < bord; i++)
 		{
-			uint32_t r = road;
-			uint32_t d = dist;
-			while (r > 0)
+			int r=road;
+			int d=dist;
+			while(r>0)
 			{
-				m_fixNodePosition.push_back (Vector ((i + 1) * block, d, 0.0));
+				m_adhocNodes.Add (CreateObject<Node> ());
+				m_adhocPositionAllocator->Add (Vector ((i+1)*300, d, 0.0));
 
 				borders++;
 				d = d + dist;
@@ -564,13 +552,14 @@ FBVanetExperiment::SetupScenario ()
 				m_nNodes++;
 			}
 		}
-		for (uint i=0; i<bord; i++)
+		for (uint32_t i=0; i < bord; i++)
 		{
 			int r = road;
 			int d = dist;
-			while (r > 0)
+			while(r > 0)
 			{
-				m_fixNodePosition.push_back (Vector (d, (i+1) * block, 0.0));
+				m_adhocNodes.Add (CreateObject<Node> ());
+				m_adhocPositionAllocator->Add (Vector (d, (i+1)*300, 0.0));
 
 				borders++;
 				d = d + dist;
