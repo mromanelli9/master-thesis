@@ -55,7 +55,7 @@ public:
 	 * \param TODO
 	 * \return none
 	 */
-	void Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t cwMin, uint32_t cwMax);
+	void Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, bool flooding, uint32_t cwMin, uint32_t cwMax);
 
 	/**
 	 * \brief Add a new node to the applicatin and set up protocol parameters
@@ -94,9 +94,7 @@ private:
 	// TODO: headers
 	void GenerateHelloTraffic (uint32_t count);
 	void StartBroadcastPhase (void);
-	void StopEstimationPhase (void);
-	void StopBroadcastPhase (void);
-
+	
 	/**
 	 * \brief Send a Hello message to all nodes in its range
 	 * \return none
@@ -138,10 +136,7 @@ private:
 	uint32_t																m_nNodes;	// number of nodes
 	std::vector<Ptr<FBNode>>								m_nodes;	// nodes that run this application
 	uint32_t																m_startingNode; // index of the node that will generate the Alert Message
-	std::map<uint32_t, uint32_t> 						m_nodesMap;	// map nodes and FBNodes
 	bool																		m_staticProtocol;	// true if static protocol is used
-	bool           										 			m_estimationPhaseRunning;	// true if the estimation phase is running
-	bool            									 			m_broadcastPhaseRunning;	// true if the broadcast phase is running
 	uint32_t													 			m_broadcastPhaseStart;	// broadcast phase start time (seconds)
 	uint32_t													 			m_cwMin;	// min size of the contention window (in slot)
 	uint32_t													 			m_cwMax;	// max size of the contention window (in slot)

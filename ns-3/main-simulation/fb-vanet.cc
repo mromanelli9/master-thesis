@@ -203,6 +203,7 @@ private:
 	uint32_t								m_actualRange;
 	uint32_t								m_startingNode;
 	uint32_t								m_staticProtocol;
+	uint32_t								m_flooding;
 	uint32_t								m_alertGeneration;
 	uint32_t								m_mobility;
 	uint32_t								m_scenario;
@@ -229,6 +230,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_actualRange (300),
 		m_startingNode (0),
 		m_staticProtocol (1),
+		m_flooding (1),
 		m_alertGeneration (20),
 		m_mobility (1),
 		m_scenario (1),
@@ -361,7 +363,7 @@ FBVanetExperiment::SetupAdhocDevices ()
 	YansWifiChannelHelper wifiChannel;
 
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100)); // why?
+	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100));
 	if (m_loadBuildings != 0)
 	{
 		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel");
@@ -426,15 +428,15 @@ void
 FBVanetExperiment::ConfigureFBApplication ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Configure main application.");
+	NS_LOG_INFO ("Configure FB application.");
 
 	// Create the application and schedule start and end time
 	m_fbApplication = CreateObject<FBApplication> ();
-	m_fbApplication->Setup (m_staticProtocol, m_startingNode, m_alertGeneration, m_actualRange, 32, 1024);
+	m_fbApplication->Install (m_staticProtocol, m_alertGeneration, m_actualRange, (m_flooding==1) ? true : false, 32, 1024);
 	m_fbApplication->SetStartTime (Seconds (500));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
-	// Add the desired nodes to the application
+	// Add nodes to the application
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
 		m_fbApplication->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
@@ -456,9 +458,10 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
 	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C1000", m_staticProtocol);
+	cmd.AddValue ("flooding", "Enable flooding", m_flooding);
 	cmd.AddValue ("alertGeneration", "Time at which the first Alert Message should be generated.", m_alertGeneration);
 	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
-	cmd.AddValue ("scenario", "1=straight street, 2=grid layout, 3=real world", m_scenario);
+	cmd.AddValue ("scenario", "1=grid layout, 2=real world", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
 	cmd.AddValue ("animation", "Enable netanim animation.", m_animation);
 	cmd.AddValue ("totalTime", "Simulation end time", m_TotalSimTime);
@@ -477,6 +480,8 @@ FBVanetExperiment::SetupScenario ()
 		m_mobility = 1;
 		m_nNodes = 5;
 
+		m_startingNode = 3;
+
 		m_fixNodePosition.push_back( Vector (100, 0.0, 0.0));
 		m_fixNodePosition.push_back( Vector (300, 0.0, 0.0));
 		m_fixNodePosition.push_back( Vector (500, 0.0, 0.0));
@@ -486,26 +491,11 @@ FBVanetExperiment::SetupScenario ()
 	}
 	else if (m_scenario == 1)
 	{
-		m_mobility = 1;
-
-		// Default value for this scenario
-		if (m_nNodes == 0)
-			m_nNodes = 500;
-
-		uint32_t roadLength = 8000;	// in meters
-		uint32_t distance = roadLength / m_nNodes;
-
-		for (uint32_t i = 0; i < m_nNodes; i++)
-			m_fixNodePosition.push_back( Vector (i*distance, 0.0, 0.0));
-
-	}
-	else if (m_scenario == 2)
-	{
 		// Barichello's Grid
 		uint32_t road = 4000;	// meter
 		uint32_t block = 300;	// meters
 		uint32_t bord= (road / block) - 1;
-		uint32_t rCirc = 1000;
+		// uint32_t rCirc = 1000;
 		uint32_t dist = 12;
 		m_startingNode = (dist = 12) ? 2242 : 1137;
 
@@ -545,7 +535,7 @@ FBVanetExperiment::SetupScenario ()
 
 			cont++;
 			borders++;
-			nWifis++;
+			m_nNodes++;
 		}
 
 		// Top side
@@ -589,7 +579,7 @@ FBVanetExperiment::SetupScenario ()
 			}
 		}
 	}
-	else if (m_scenario == 3)
+	else if (m_scenario == 2)
 	{
 		// Real word scenario
 		m_mobility = 2;
@@ -605,7 +595,7 @@ FBVanetExperiment::SetupScenario ()
 
 	}
 	else
-		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-3].");
+		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
 }
 
 void
@@ -621,7 +611,7 @@ void
 FBVanetExperiment::ProcessOutputs ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("----------------------------------------\nPrint some statistics.");
+	NS_LOG_INFO ("Process outputs.");
 
 	m_fbApplication->PrintStats ();
 }

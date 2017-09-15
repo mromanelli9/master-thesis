@@ -52,8 +52,6 @@ FBApplication::FBApplication ()
 	:	m_nNodes (0),
 		m_startingNode (0),
 		m_staticProtocol (false),
-		m_estimationPhaseRunning (false),
-		m_broadcastPhaseRunning (false),
 		m_broadcastPhaseStart (0),
 		m_cwMin (32),
 		m_cwMax (1024),
@@ -75,7 +73,7 @@ FBApplication::~FBApplication ()
 }
 
 void
-FBApplication::Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t cwMin, uint32_t cwMax)
+FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, bool flooding, uint32_t cwMin, uint32_t cwMax)
 {
 	if (protocol == PROTOCOL_FB)
 	{
@@ -95,9 +93,9 @@ FBApplication::Setup (uint32_t protocol, uint32_t startingNode, uint32_t broadca
 	else
 		NS_LOG_ERROR ("Protocol not found.");
 
-	m_startingNode = startingNode;
 	m_broadcastPhaseStart = broadcastPhaseStart;
 	m_actualRange = actualRange;
+	m_flooding = flooding;
 	m_cwMin = cwMin;
 	m_cwMax	= cwMax;
 }
@@ -124,8 +122,6 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 
 	// misc stuff
 	m_nodes.push_back (fbNode);
-	m_nodesMap.insert (std::pair<uint32_t, uint32_t> (node->GetId (), fbNode->GetId ()));
-
 	m_nNodes++;
 }
 
@@ -134,11 +130,12 @@ FBApplication::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
 
+	m_startingNode = this->GetNode ()->GetId ();
+
 	if (!m_staticProtocol)
 	{
 		// Start Estimation Phase
 		NS_LOG_INFO ("Start Estimation Phase.");
-		m_estimationPhaseRunning = true;
 		GenerateHelloTraffic (60);
 	}
 
@@ -150,10 +147,6 @@ void
 FBApplication::StopApplication (void)
 {
 	NS_LOG_FUNCTION (this);
-
-	// Stop both phases
-	StopEstimationPhase ();
-  StopBroadcastPhase ();
 }
 
 void
@@ -171,11 +164,13 @@ FBApplication::GenerateHelloTraffic (uint32_t count)
 			int pos = rand() % m_nNodes;
 			he.push_back (pos);
 			Ptr<FBNode> fbNode = m_nodes.at(pos);
-			Simulator::Schedule (Seconds (i * 40), &FBApplication::GenerateHelloMessage, fbNode);
+			Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (),
+																			Seconds (i * 40),
+																			&FBApplication::GenerateHelloMessage, this, fbNode);
 		}
 
 		// Other nodes must send Hello messages
-		Simulator::Schedule (Seconds (250), &FBApplication::GenerateHelloTraffic, count - 1);
+		Simulator::Schedule (Seconds (250), &FBApplication::GenerateHelloTraffic, this, count - 1);
 	}
 }
 
@@ -185,32 +180,10 @@ FBApplication::StartBroadcastPhase (void)
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Start Broadcast Phase.");
 
-	m_estimationPhaseRunning = false;
-	m_broadcastPhaseRunning = true;
-
 	Ptr<FBNode> fbNode = m_nodes.at (m_startingNode);
-	// Simulate the event (that will cause the generation of an alert)
-	// by stopping the node
-	StopNode (fbNode);
 
 	// Generate the first alert message
 	GenerateAlertMessage (fbNode);
-}
-
-void
-FBApplication::StopEstimationPhase (void)
-{
-	NS_LOG_FUNCTION (this);
-
-	m_estimationPhaseRunning = false;
-}
-
-void
-FBApplication::StopBroadcastPhase (void)
-{
-	NS_LOG_FUNCTION (this);
-
-	m_broadcastPhaseRunning = false;
 }
 
 void
@@ -393,10 +366,10 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	// Wait and then forward the message
 	if (m_flooding == false)
 		Simulator::ScheduleWithContext (nodeId, MilliSeconds (waitingTime * 200 * 3),
-																	&FBApplication::WaitAgain, fbNode, fbHeader, waitingTime);
+																	&FBApplication::WaitAgain, this, fbNode, fbHeader, waitingTime);
 	else
 		Simulator::ScheduleWithContext (nodeId, MilliSeconds(0),
-																	&FBApplication::ForwardAlertMessage, fbNode, fbHeader, waitingTime);
+																	&FBApplication::ForwardAlertMessage, this, fbNode, fbHeader, waitingTime);
 }
 
 void
@@ -414,7 +387,7 @@ FBApplication::WaitAgain (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32_t waitin
 		 uint32_t rnd2 = (rand() % 20)+1;
 		 uint32_t rnd3 = (rand() % 20)+1;
 		 Simulator::Schedule (MilliSeconds (10* (waitingTime+rnd+rnd1+rnd2+rnd3) * 200 * 3),
-		 											&FBApplication::ForwardAlertMessage, fbNode, fbHeader, waitingTime);
+		 											&FBApplication::ForwardAlertMessage, this, fbNode, fbHeader, waitingTime);
 	 }
 }
 
@@ -477,17 +450,56 @@ FBApplication::GetFBNode (Ptr<Node> node)
 	NS_LOG_FUNCTION (this);
 
 	uint32_t id = node->GetId ();
-	uint32_t index = m_nodesMap.at (id);
 
-	return m_nodes.at (index);
+	return m_nodes.at (id);
 }
 
 void
 FBApplication::PrintStats (void)
 {
 	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("------------------ STATISTICS ------------------");
 
-	// TODO
+	uint32_t cover=1;
+	uint32_t circ = 0, circCont = 0;
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		Ptr<FBNode> current = m_nodes.at (i);
+		Ptr<FBNode> startingNode = m_nodes.at (m_startingNode);
+		Vector currentPosition = current->UpdatePosition ();
+		Vector startingNodePosition = startingNode->UpdatePosition ();
+		double distStart = CalculateDistance (currentPosition, startingNodePosition);
+
+		uint32_t dist = 12; 	// TODO cambiare (distanza fra mezzi)
+		uint32_t rCirc = 1000;
+		if (i != m_startingNode && distStart > 0 &&
+				((distStart - rCirc <= (dist/2) && distStart - rCirc >= 0) || (rCirc - distStart <= (dist/2) && distStart - rCirc <= 0)))
+		{
+			circCont++;
+			if (current->GetReceived ())
+				circ++;
+		}
+
+		if (current->GetReceived ())
+			cover++;
+	}
+
+	NS_LOG_INFO ("Actual range: " << m_actualRange << " meter.");
+	NS_LOG_INFO ("Initital estimated range: " << m_estimatedRange << " meters.");
+	NS_LOG_INFO ("Number of vehicles: " << m_nNodes << ".");
+	NS_LOG_INFO ("Number of vehicles covered (whole area): " << ((double)cover/(double)m_nNodes)*100 << "%.");
+	NS_LOG_INFO ("Number of vehicles covered (outer limit): " << ((double)circ/(double)circCont)*100 << "%.");
+
+	uint32_t bord = (4000 / 300) -1;
+	std::string nums = "";
+	for (uint i=0; i<(bord*4); i++)
+	{
+		nums += std::to_string (m_nodes.at (i)->GetNum());
+		nums += " ";
+	}
+	NS_LOG_INFO ("Nums: " << nums << ".");
+	NS_LOG_INFO ("Total messages sent: " << m_sent << ".");
+	NS_LOG_INFO ("Total messages received: " << m_received << ".");
 }
 
 uint32_t
