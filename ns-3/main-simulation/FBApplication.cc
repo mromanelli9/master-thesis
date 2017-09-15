@@ -19,6 +19,8 @@
  *
  */
 
+#include <numeric>
+
 #include "ns3/log.h"
 #include "ns3/uinteger.h"
 #include "ns3/boolean.h"
@@ -58,6 +60,7 @@ FBApplication::FBApplication ()
 		m_flooding (true),
 		m_actualRange (300),
 		m_estimatedRange (0),
+		m_aoi (m_actualRange * 2),
 		m_packetPayload (100),
 		m_received (0),
 		m_sent (0)
@@ -73,7 +76,7 @@ FBApplication::~FBApplication ()
 }
 
 void
-FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, bool flooding, uint32_t cwMin, uint32_t cwMax)
+FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t aoi, bool flooding, uint32_t cwMin, uint32_t cwMax)
 {
 	if (protocol == PROTOCOL_FB)
 	{
@@ -94,6 +97,7 @@ FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_
 		NS_LOG_ERROR ("Protocol not found.");
 
 	m_broadcastPhaseStart = broadcastPhaseStart;
+	m_aoi = aoi;
 	m_actualRange = actualRange;
 	m_flooding = flooding;
 	m_cwMin = cwMin;
@@ -489,10 +493,21 @@ FBApplication::PrintStats (void)
 	}
 
 	NS_LOG_INFO ("Actual range: " << m_actualRange << " meter.");
-	NS_LOG_INFO ("Initital estimated range: " << m_estimatedRange << " meters.");
-	NS_LOG_INFO ("Number of vehicles: " << m_nNodes << ".");
-	NS_LOG_INFO ("Number of vehicles covered (whole area): " << ((double)cover/(double)m_nNodes)*100 << "%.");
-	NS_LOG_INFO ("Number of vehicles covered (outer limit): " << ((double)circ/(double)circCont)*100 << "%.");
+	std::string protocolName = "";
+	if (m_estimatedRange == 0)
+		protocolName = "FAST_BROADCAST";
+	else if (m_estimatedRange == 300)
+		protocolName = "STATIC_300";
+	else
+		protocolName = "STATIC_1000";
+	NS_LOG_INFO ("Protocol used: " << protocolName << ".");
+	NS_LOG_INFO ("Total number of vehicles: " << m_nNodes << ".");
+	NS_LOG_INFO ("Number of vehicles covered (whole area): "
+									<< ((double)cover/(double)m_nNodes)*100 << "% ("
+									<< cover << "/" << m_nNodes << ").");
+	NS_LOG_INFO ("Number of vehicles covered (outer limit): "
+									<< ((double)circ/(double)circCont)*100 << "% ("
+									<< circ << "/" << circCont << ").");
 
 	uint32_t bord = (4000 / 300) -1;
 	std::string nums = "";
@@ -502,6 +517,7 @@ FBApplication::PrintStats (void)
 		nums += " ";
 	}
 	NS_LOG_INFO ("Nums: " << nums << ".");
+
 	NS_LOG_INFO ("Total messages sent: " << m_sent << ".");
 	NS_LOG_INFO ("Total messages received: " << m_received << ".");
 }

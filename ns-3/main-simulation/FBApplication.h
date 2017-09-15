@@ -55,7 +55,7 @@ public:
 	 * \param TODO
 	 * \return none
 	 */
-	void Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, bool flooding, uint32_t cwMin, uint32_t cwMax);
+	void Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t aoi, bool flooding, uint32_t cwMin, uint32_t cwMax);
 
 	/**
 	 * \brief Add a new node to the applicatin and set up protocol parameters
@@ -94,7 +94,7 @@ private:
 	// TODO: headers
 	void GenerateHelloTraffic (uint32_t count);
 	void StartBroadcastPhase (void);
-	
+
 	/**
 	 * \brief Send a Hello message to all nodes in its range
 	 * \return none
@@ -131,7 +131,6 @@ private:
 
 	static double ComputeDistance (Vector a, Vector b);
 
-
 private:
 	uint32_t																m_nNodes;	// number of nodes
 	std::vector<Ptr<FBNode>>								m_nodes;	// nodes that run this application
@@ -143,6 +142,7 @@ private:
 	bool															 			m_flooding;	// used for control the flooding of the Alert messages
 	uint32_t													 			m_actualRange;	// real transmission range
 	uint32_t													 			m_estimatedRange;	// range of transmission to be estimated
+	uint32_t																m_aoi;	// radius of the area of interest (meters)
 	uint32_t													 			m_packetPayload; // size of the packet payload
 	uint32_t													 			m_received;	// number of hello messages sent
 	uint32_t																m_sent; // // number of alert messages sent

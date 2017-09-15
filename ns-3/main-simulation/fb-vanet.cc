@@ -206,6 +206,7 @@ private:
 	uint32_t								m_staticProtocol;
 	uint32_t								m_flooding;
 	uint32_t								m_alertGeneration;
+	uint32_t								m_areaOfInterest;
 	uint32_t								m_mobility;
 	uint32_t								m_scenario;
 	uint32_t								m_loadBuildings;
@@ -232,6 +233,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_staticProtocol (1),
 		m_flooding (1),
 		m_alertGeneration (20),
+		m_areaOfInterest (1000),
 		m_mobility (1),
 		m_scenario (1),
 		m_loadBuildings (0),
@@ -426,7 +428,12 @@ FBVanetExperiment::ConfigureFBApplication ()
 
 	// Create the application and schedule start and end time
 	m_fbApplication = CreateObject<FBApplication> ();
-	m_fbApplication->Install (m_staticProtocol, m_alertGeneration, m_actualRange, (m_flooding==1) ? true : false, 32, 1024);
+	m_fbApplication->Install (m_staticProtocol,
+														m_alertGeneration,
+														m_actualRange,
+														m_areaOfInterest,
+														(m_flooding==1) ? true : false,
+														32, 1024);
 	m_fbApplication->SetStartTime (Seconds (500));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
@@ -454,6 +461,7 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C1000", m_staticProtocol);
 	cmd.AddValue ("flooding", "Enable flooding", m_flooding);
 	cmd.AddValue ("alertGeneration", "Time at which the first Alert Message should be generated.", m_alertGeneration);
+	cmd.AddValue ("area", "Radius of the area of interest", m_areaOfInterest);
 	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
 	cmd.AddValue ("scenario", "1=grid layout, 2=real world", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
@@ -482,7 +490,9 @@ FBVanetExperiment::SetupScenario ()
 		m_txp = 7.5;
 		m_TotalSimTime = 990000.0;
 		m_alertGeneration = 45000 - 500; // 500 = fbApplication start time
+		m_areaOfInterest = 1000;
 		m_mobility = 1;
+		m_bldgFile = "scratch/vanet/Griglia.poly.xml";
 
 		m_adhocPositionAllocator = CreateObject<ListPositionAllocator> ();
 
@@ -572,18 +582,16 @@ FBVanetExperiment::SetupScenario ()
 		// Real word scenario
 		m_mobility = 2;
 		m_nNodes = 5;	// TODO: check this value
-		m_traceFile = "inputs/Blocco-IME.ns2mobility.xml";
-		m_bldgFile = "inputs/Blocco-IME.poly.xml";
-
-		if (m_loadBuildings != 0)
-		{
-			NS_LOG_INFO ("Loading buildings file \"" << m_bldgFile << "\".");
-			Topology::LoadBuildings (m_bldgFile);
-		}
-
+		m_traceFile = "scratch/vanet/Blocco-IME.ns2mobility.xml";
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
+
+	if (m_loadBuildings != 0)
+	{
+		NS_LOG_INFO ("Loading buildings file \"" << m_bldgFile << "\".");
+		Topology::LoadBuildings (m_bldgFile);
+	}
 }
 
 void
