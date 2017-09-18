@@ -4,13 +4,13 @@
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
+#include "ns3/topology.h"
 #include "ns3/wifi-module.h"
 #include "ns3/aodv-module.h"
 #include "ns3/olsr-module.h"
 #include "ns3/dsdv-module.h"
 #include "ns3/dsr-module.h"
 #include "ns3/applications-module.h"
-#include "ns3/topology.h"
 #include "ns3/netanim-module.h"
 
 using namespace ns3;
@@ -20,7 +20,7 @@ NS_LOG_COMPONENT_DEFINE ("Wireless");
 
 //Avoid useless messages on the screen
 int state=-1;
-bool flooding=true;
+bool flooding=false;
 int received=0, sent=0;
 
 class RoutingExperiment
