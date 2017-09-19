@@ -1,8 +1,9 @@
 # Patch
 Collection of patches for:
 * _NetAnim_: This patch will remove the limitation for old version of netanim xml files.
-* ns-3:
+* _ns-3_:
 	* Obstacle Model: original Obstacle Shadowing Model
+	* Custom Obstacle Model: Obstacle Shadowing Model with some modifications
 
 
 ### Prerequisites
