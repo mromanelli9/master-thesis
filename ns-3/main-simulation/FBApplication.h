@@ -52,7 +52,13 @@ public:
 
 	/**
 	 * \brief Set up some application parameters
-	 * \param TODO
+	 * \param protocol fb or static protocol
+	 * \param broadcastPhaseStart time after which broadcast phase will start (seconds)
+	 * \param actualRange actual transmission range (meters)
+	 * \param aoi radius of area of interest (meters)
+	 * \param flooding enable or disable flooding
+	 * \param cwMin minumum size of the contention window (slots)
+	 * \param cwMin maximum size of the contention window (slots)
 	 * \return none
 	 */
 	void Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t aoi, bool flooding, uint32_t cwMin, uint32_t cwMax);
@@ -91,8 +97,17 @@ private:
 	 */
   virtual void StopApplication (void);
 
-	// TODO: headers
+	/**
+	 * \brief Start the estimation phase
+	 * \param count count
+	 * \return none
+	 */
 	void GenerateHelloTraffic (uint32_t count);
+
+	/**
+	 * \brief Start the broadcast phase
+	 * \return none
+	 */
 	void StartBroadcastPhase (void);
 
 	/**
@@ -113,9 +128,40 @@ private:
    * \return none
    */
 	void ReceivePacket (Ptr<Socket> socket);
+
+	/**
+	 * \brief Handle a Hello message
+	 * \param fbNode node that received the message
+	 * \param fbHeader header received in the message
+	 * \return none
+	 */
 	void HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader);
+
+	/**
+	 * \brief Handle an Alert message
+	 * \param fbNode node that received the message
+	 * \param fbHeader header received in the message
+	 * \param distance distance between the sender of the message and the node (meters)
+	 * \return none
+	 */
 	void HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32_t distance);
+
+	/**
+	 * \brief Wait a specific amount of time
+	 * \param fbNode node that received the message
+	 * \param fbHeader header received in the message
+	 * \param waitingTime contention window value
+	 * \return none
+	 */
 	void WaitAgain (Ptr<FBNode> fbNode,  FBHeader fbHeader, uint32_t waitingTime);
+
+	/**
+	 * \brief Forward an Alert message
+	 * \param fbNode node that received the message
+	 * \param fbHeader header received in the message
+	 * \param waitingTime contention window value
+	 * \return none
+	 */
 	void ForwardAlertMessage (Ptr<FBNode> fbNode, FBHeader oldFBHeader, uint32_t waitingTime);
 
 	/**
@@ -125,10 +171,27 @@ private:
 	 */
 	void StopNode (Ptr<FBNode> fbNode);
 
+	/**
+	 * \brief Retrieve a fbNode from a ns3::Node
+	 * \param node original node
+	 * \return a fbNode
+	 */
 	Ptr<FBNode> GetFBNode (Ptr<Node> node);
 
+	/**
+	 * \brief Compute contention window
+	 * \param maxRange estimated range (meters)
+	 * \param distance distance between nodes (meters)
+	 * \return the value of the contention window
+	 */
 	uint32_t ComputeContetionWindow (uint32_t maxRange, uint32_t distance);
 
+	/**
+	 * \brief Compute distance between two nodes
+	 * \param a position of the first node
+	 * \param a position of the second node
+	 * \return the value of the distance
+	 */
 	static double ComputeDistance (Vector a, Vector b);
 
 private:
