@@ -601,7 +601,7 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (RoutingExperiment::m_range+100));
 	if (m_loadBuildings != 0)
 	{
-		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel");
+		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel", "Radius", DoubleValue (RoutingExperiment::m_range+100));
 	}
 	wifiPhy.SetChannel (wifiChannel.Create ());
 
