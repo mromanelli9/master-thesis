@@ -240,7 +240,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_animation (0),
 		m_traceFile (""),
 		m_bldgFile (""),
-		m_animationFileName ("outputs/fb-vanet-animation.xml"),
+		m_animationFileName ("fb-vanet.animation.xml"),
 		m_TotalSimTime (30)
 {
 	srand (time (0));
@@ -362,7 +362,7 @@ FBVanetExperiment::SetupAdhocDevices ()
 	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100));
 	if (m_loadBuildings != 0)
 	{
-		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel");
+		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel", "Radius", DoubleValue (m_actualRange + 100));
 	}
 	wifiPhy.SetChannel (wifiChannel.Create ());
 
