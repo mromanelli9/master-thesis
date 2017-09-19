@@ -189,32 +189,33 @@ private:
 	CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility);
 
 
-	Ptr<FBApplication>			m_fbApplication;
-	uint32_t 								m_nNodes;
-	NodeContainer						m_adhocNodes;
-	Ptr<ListPositionAllocator> m_adhocPositionAllocator;
-	NetDeviceContainer			m_adhocDevices;
-	Ipv4InterfaceContainer	m_adhocInterfaces;
-	std::vector <Ptr<Socket>>		m_adhocSources;
-	std::vector <Ptr<Socket>>		m_adhocSinks;
-	std::string							m_packetSize;
-	std::string							m_rate;
-	std::string							m_phyMode;
-	uint32_t								m_txp;
-	uint32_t								m_actualRange;
-	uint32_t								m_startingNode;
-	uint32_t								m_staticProtocol;
-	uint32_t								m_flooding;
-	uint32_t								m_alertGeneration;
-	uint32_t								m_areaOfInterest;
-	uint32_t								m_mobility;
-	uint32_t								m_scenario;
-	uint32_t								m_loadBuildings;
-	uint32_t								m_animation;
-	std::string							m_traceFile;
-	std::string							m_bldgFile;
-	std::string							m_animationFileName;
-	double									m_TotalSimTime;
+	Ptr<FBApplication>								m_fbApplication;
+	uint32_t 													m_nNodes;
+	NodeContainer											m_adhocNodes;
+	Ptr<ListPositionAllocator> 				m_adhocPositionAllocator;
+	NetDeviceContainer								m_adhocDevices;
+	Ipv4InterfaceContainer						m_adhocInterfaces;
+	std::vector <Ptr<Socket>>					m_adhocSources;
+	std::vector <Ptr<Socket>>					m_adhocSinks;
+	std::string												m_packetSize;
+	std::string												m_rate;
+	std::string												m_phyMode;
+	double														m_txp;
+	uint32_t													m_port;
+	uint32_t													m_actualRange;
+	uint32_t													m_startingNode;
+	uint32_t													m_staticProtocol;
+	uint32_t													m_flooding;
+	uint32_t													m_alertGeneration;
+	uint32_t													m_areaOfInterest;
+	uint32_t													m_mobility;
+	uint32_t													m_scenario;
+	uint32_t													m_loadBuildings;
+	uint32_t													m_animation;
+	std::string												m_traceFile;
+	std::string												m_bldgFile;
+	std::string												m_animationFileName;
+	double														m_TotalSimTime;
 };
 
 /* -----------------------------------------------------------------------------
@@ -227,7 +228,8 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_packetSize ("64"),
 		m_rate ("2048bps"),
 		m_phyMode ("DsssRate11Mbps"),
-		m_txp (20),
+		m_txp (7.5),
+		m_port (9),
 		m_actualRange (300),
 		m_startingNode (0),
 		m_staticProtocol (1),
@@ -355,7 +357,7 @@ FBVanetExperiment::SetupAdhocDevices ()
 	WifiHelper wifi;
 	wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
 
-	YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
+	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
 	YansWifiChannelHelper wifiChannel;
 
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
@@ -401,7 +403,7 @@ FBVanetExperiment::ConfigureConnections ()
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
 		SetupPacketReceive (m_adhocNodes.Get (i));
-		AddressValue remoteAddress (InetSocketAddress (ns3::Ipv4Address::GetAny (), 9));
+		AddressValue remoteAddress (InetSocketAddress (ns3::Ipv4Address::GetAny (), m_port));
 		onoff1.SetAttribute ("Remote", remoteAddress);
 	}
 
@@ -658,7 +660,7 @@ FBVanetExperiment::SetupPacketReceive (Ptr<Node> node)
 
 	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 	Ptr<Socket> sink = Socket::CreateSocket (node, tid);
-	InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 9);
+	InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
 	sink->Bind (local);
 
 	// Store socket
@@ -674,7 +676,7 @@ FBVanetExperiment::SetupPacketSend (Ipv4Address addr, Ptr<Node> node)
 
 	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 	Ptr<Socket> sender = Socket::CreateSocket (node, tid);
-	InetSocketAddress remote = InetSocketAddress (addr, 9);
+	InetSocketAddress remote = InetSocketAddress (addr, m_port);
 	sender->SetAllowBroadcast (true);
 	sender->Connect (remote);
 

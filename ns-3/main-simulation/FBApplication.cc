@@ -159,7 +159,7 @@ FBApplication::GenerateHelloTraffic (uint32_t count)
 	NS_LOG_FUNCTION (this << count);
 
 	std::vector<int> he;
-	uint32_t hel = 20;	// dunno know why
+	uint32_t hel = 20;
 
 	if (count > 0)
 	{
@@ -270,9 +270,9 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 
 		// Compute the distance between the sender and me (the node who received the message)
 	 	double distanceSenderToCurrent = ComputeDistance(senderPosition, currentPosition);
-		uint32_t distanceSenderToCurrent_uint = std::abs (std::floor (distanceSenderToCurrent));
+		uint32_t distanceSenderToCurrent_uint = std::floor (distanceSenderToCurrent);
 
-		// If the node is in range
+		// If the node is in range I can read the packet
 		if (distanceSenderToCurrent_uint <= m_actualRange)
 		{
 			if (messageType == HELLO_MESSAGE)
@@ -325,11 +325,8 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader)
 {
 	NS_LOG_FUNCTION (this << fbNode << fbHeader);
 	uint32_t nodeId = fbNode->GetNode ()->GetId ();
-	NS_LOG_DEBUG ("Handle a Hello Message (" << nodeId << ").");
 
-	// Override the old values
-	fbNode->SetLMFR (fbNode->GetCMFR ());
-	fbNode->SetLMBR (fbNode->GetCMBR ());
+	NS_LOG_DEBUG ("Handle a Hello Message (" << nodeId << ").");
 
 	// Retrieve CMFR from the packet received and CMBR from the current node
 	uint32_t otherCMFR = fbHeader.GetMaxRange ();
@@ -343,12 +340,15 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader)
 
 	// Compute distance
 	double distance_double = CalculateDistance (senderPosition, currentPosition);
-	uint32_t distance = std::abs (std::floor (distance_double));
+	uint32_t distance = std::floor (distance_double);
 
 	// Update new values
 	uint32_t maxi = std::max (std::max (myCMBR, otherCMFR), distance);
 
 	fbNode->SetCMBR (maxi);
+
+	// Override the old values
+	fbNode->SetLMBR (myCMBR);
 }
 
 void
@@ -361,8 +361,8 @@ FBApplication::HandleAlertMessage (Ptr<FBNode> fbNode, FBHeader fbHeader, uint32
 	NS_LOG_DEBUG ("Handle an Alert Message (" << nodeId << ").");
 
 	// Compute the size of the contention window
-	uint32_t cmbr = fbNode->GetCMBR ();
-	uint32_t cwnd = ComputeContetionWindow (cmbr, distance);
+	uint32_t bmr = fbNode->GetCMBR ();
+	uint32_t cwnd = ComputeContetionWindow (bmr, distance);
 
 	// Compute a random waiting time (1 <= waitingTime <= cwnd)
 	uint32_t waitingTime = (rand () % cwnd) + 1;
@@ -525,12 +525,18 @@ FBApplication::PrintStats (void)
 uint32_t
 FBApplication::ComputeContetionWindow (uint32_t maxRange, uint32_t distance)
 {
-	// NB: distance is always >= 0 (its type is uint32_t)
 	NS_LOG_FUNCTION (this << maxRange << distance);
 
-	double cwnd = 0;
+	double cwnd = 0.0;
+	double rapp = 0.0;
 
-	double rapp = (maxRange - distance) / (double) maxRange;
+	if (maxRange != 0)
+		rapp = (maxRange - distance) / (double) maxRange;
+	else
+		rapp = 0;
+
+	rapp = (rapp < 0) ? 0 : rapp;
+
 	cwnd = (rapp * (m_cwMax - m_cwMin)) + m_cwMin;
 
 	return std::floor (cwnd);
