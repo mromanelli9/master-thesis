@@ -35,6 +35,7 @@
 #include "ns3/dsdv-module.h"
 #include "ns3/wifi-80211p-helper.h"
 #include "ns3/wifi-module.h"
+#include "ns3/applications-module.h"
 #include "ns3/netanim-module.h"
 
 using namespace ns3;
@@ -145,6 +146,12 @@ protected:
 
 private:
 	/**
+	 * \brief Sets up routing messages on the nodes and their interfaces
+	 * \return none
+	 */
+	void SetupRoutingMessages (void);
+
+	/**
 	 * \brief Run the simulation
 	 * \return none
 	 */
@@ -163,19 +170,19 @@ private:
 	void SetupScenario ();
 
 	/**
-	 * \brief Set up receivers socket
-	 * \param node node to configure
-	 * \return socket created
+	 * \brief Sets up a routing packet for tranmission
+	 * \param addr destination address
+	 * \parm node source node
+	 * \return Socket to be used for sending/receiving a routed data packet
 	 */
-	Ptr<Socket> SetupPacketReceive (Ptr<Node> node);
+	Ptr<Socket> SetupRoutingPacketReceive (Ipv4Address addr, Ptr<Node> node);
 
 	/**
-	 * \brief Set up senders socket
-	 * \param addr address of the node
-	 * \param node node to configure
-	 * \return socket created
+	 * \brief Process a received routing packet
+	 * \param socket the receiving socket
+	 * \return none
 	 */
-	Ptr<Socket> SetupPacketSend (Ipv4Address addr, Ptr<Node> node);
+	void ReceiveRoutingPacket (Ptr<Socket> socket);
 
 	/**
    * \brief Prints actual position and velocity when a course change event occurs
@@ -192,6 +199,7 @@ private:
 	std::string												m_rate;	// data rate
 	std::string												m_phyMode;	// the PHY mode to use for the PHY layer
 	double														m_txp;	// transmit power
+	uint32_t													m_port;	// socket port
 	uint32_t													m_actualRange; // transmission range
 	uint32_t													m_mobility;	// type of mobility
 	uint32_t													m_scenario; // scenario
@@ -212,6 +220,7 @@ DroneExperiment::DroneExperiment ()
 		m_rate ("2048bps"),
 		m_phyMode ("OfdmRate6Mbps"),
 		m_txp (7.5),
+		m_port (9),
 		m_actualRange (300),
 		m_mobility (1),
 		m_scenario (1),
@@ -220,7 +229,11 @@ DroneExperiment::DroneExperiment ()
 		m_animFile ("DroneExperiment.animation.xml"),
 		m_totalSimTime (10)
 {
-	srand (time (0));
+	// Init ns3 pseudo-random number generator seed
+	RngSeedManager::SetSeed (time (0));
+
+	// Set the index of the current run (default = 0)
+	RngSeedManager::SetRun (0);
 }
 
 
@@ -374,6 +387,8 @@ DroneExperiment::ConfigureTracingAndLogging ()
 {
 	NS_LOG_FUNCTION (this);
 
+	LogComponentEnable("DroneExperiment", LOG_LEVEL_INFO);
+
 	Packet::EnablePrinting ();
 }
 
@@ -381,7 +396,11 @@ void
 DroneExperiment::ConfigureApplications ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Configure FB application.");
+	NS_LOG_INFO ("Configure Applications.");
+
+	// Traffic mix consists of:
+  // 1. routing data
+	SetupRoutingMessages ();
 }
 
 void
@@ -439,6 +458,29 @@ DroneExperiment::ProcessOutputs ()
 }
 
 void
+DroneExperiment::SetupRoutingMessages (void)
+{
+	NS_LOG_FUNCTION (this);
+
+	// Setup routing transmissions
+  OnOffHelper onoff1 ("ns3::UdpSocketFactory",Address ());
+  onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
+  onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
+
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		Ptr<Socket> sink = SetupRoutingPacketReceive (m_adhocInterfaces.GetAddress (i), m_adhocNodes.Get (i));
+
+		AddressValue remoteAddress (InetSocketAddress (m_adhocInterfaces.GetAddress (i), m_port));
+		onoff1.SetAttribute ("Remote", remoteAddress);
+
+		ApplicationContainer temp = onoff1.Install (m_adhocNodes.Get (i));
+		temp.Start (Seconds (1));
+		temp.Stop (Seconds (m_totalSimTime));
+	}
+}
+
+void
 DroneExperiment::Run ()
 {
 	NS_LOG_FUNCTION (this);
@@ -456,6 +498,7 @@ DroneExperiment::Run ()
 
 	Simulator::Stop (Seconds (m_totalSimTime));
 	Simulator::Run ();
+
 	Simulator::Destroy ();
 }
 
@@ -474,6 +517,33 @@ DroneExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const Mobi
 								<< "; VEL: (" << vel.x << ", " << vel.y << ", " << vel.z << ").");
 }
 
+Ptr<Socket>
+DroneExperiment::SetupRoutingPacketReceive (Ipv4Address addr, Ptr<Node> node)
+{
+	NS_LOG_FUNCTION ( this << addr << node);
+
+	TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+	Ptr<Socket> sink = Socket::CreateSocket (node, tid);
+	InetSocketAddress local = InetSocketAddress (addr, m_port);
+	sink->Bind (local);
+	sink->SetRecvCallback (MakeCallback (&DroneExperiment::ReceiveRoutingPacket, this));
+
+	return sink;
+}
+
+void
+DroneExperiment::ReceiveRoutingPacket (Ptr<Socket> socket)
+{
+  Ptr<Packet> packet;
+  Address srcAddress;
+  while ((packet = socket->RecvFrom (srcAddress)))
+  {
+    // application data, for goodput
+		uint32_t nodeId = socket->GetNode()->GetId ();
+    uint32_t RxRoutingBytes = packet->GetSize ();
+    NS_LOG_DEBUG ("Node " << nodeId << " received a packet ("<< RxRoutingBytes << "b) from " << srcAddress << ".");
+  }
+}
 
 /* -----------------------------------------------------------------------------
 *			MAIN
