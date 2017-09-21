@@ -6,7 +6,6 @@ Various works, files and data for my Master Degree's thesis at University of Pad
 .
 ├── Documentation
 ├── ns-3
-|   └── Simulations
 ├─── Patch
 |    ├── NetAnim
 |    └── ns-3
@@ -14,8 +13,8 @@ Various works, files and data for my Master Degree's thesis at University of Pad
 └── GNU GPL License		
 ```
 * _Documentation_: contains files and data that will be used to build the final thesis.
-* _Simulations_: various experiments and examples for ns-3.
-* _Patch_: modifications of some software (ns-3, NetAnim).
+* _ns-3_: ns-3 code (examples and simulations).
+* _Patch_: software modifications (ns-3, NetAnim).
 * _Scripts_: some useful bash scripts.
 
 ## License
