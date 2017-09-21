@@ -366,9 +366,9 @@ DroneExperiment::ConfigureDevices ()
 
 	m_droneDevices = wifi.Install (wifiPhy, wifiMac, m_droneNodes);
 
-	AsciiTraceHelper ascii;
-	wifiPhy.EnableAsciiAll (ascii.CreateFileStream (m_trName));
-	wifiPhy.EnablePcapAll (m_trName);
+	// AsciiTraceHelper ascii;
+	// wifiPhy.EnableAsciiAll (ascii.CreateFileStream (m_trName));
+	// wifiPhy.EnablePcapAll (m_trName);
 }
 
 void
@@ -427,12 +427,12 @@ DroneExperiment::CommandSetup (int argc, char **argv)
 
 	// allow command line overrides
 	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nDrones);
-	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
+	cmd.AddValue ("actualRange", "Actual transimision range [meters]", m_actualRange);
 	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
 	cmd.AddValue ("scenario", "Scenario: 1=random, 2=real world", m_scenario);
 	cmd.AddValue ("animation", "Enable netanim animation", m_animation);
-	cmd.AddValue ("dataStart", "Time at which nodes start to transmit data", m_dataStartTime);
-	cmd.AddValue ("totalTime", "Simulation end time", m_totalSimTime);
+	cmd.AddValue ("dataStart", "Time at which nodes start to transmit data [seconds]", m_dataStartTime);
+	cmd.AddValue ("totalTime", "Simulation end time [seconds]", m_totalSimTime);
 
 	cmd.Parse (argc, argv);
 }
@@ -517,12 +517,21 @@ DroneExperiment::Run ()
 	if (m_animation != 0)
 	{
 		// Create the animation object and configure for specified output
+		double interval = 0.250; // seconds
 		AnimationInterface anim (m_animFile);
-		anim.SetMobilityPollInterval (Seconds (0.250));
+		anim.SetStartTime (Seconds (m_dataStartTime));
+		anim.SetStopTime (Seconds (m_totalSimTime));
 		anim.EnablePacketMetadata (true);
-		// anim.EnableIpv4L3ProtocolCounters (Seconds (1), Seconds (m_totalSimTime));
-		// anim.EnableWifiMacCounters (Seconds (1), Seconds (m_totalSimTime));
-		// anim.EnableWifiPhyCounters (Seconds (1), Seconds (m_totalSimTime));
+
+		if (m_mobility == 1)
+			anim.SetMobilityPollInterval (Seconds (m_totalSimTime));
+		else
+			anim.SetMobilityPollInterval (Seconds (interval));
+
+		// NB: enabling those will cause SIGSEGV
+		// anim.EnableIpv4L3ProtocolCounters (Seconds (m_dataStartTime), Seconds (m_totalSimTime), Seconds (interval));
+		// anim.EnableWifiMacCounters (Seconds (m_dataStartTime), Seconds (m_totalSimTime), Seconds (interval));
+		// anim.EnableWifiPhyCounters (Seconds (m_dataStartTime), Seconds (m_totalSimTime), Seconds (interval));
 	}
 
 	Simulator::Stop (Seconds (m_totalSimTime));
