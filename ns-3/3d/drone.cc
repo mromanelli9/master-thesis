@@ -109,12 +109,6 @@ protected:
 	void ConfigureMobility ();
 
 	/**
-	 * \brief Set up the adhoc devices
-	 * \return none
-	 */
-	void SetupAdhocDevices ();
-
-	/**
 	 * \brief Configure connections
 	 * \return none
 	 */
@@ -170,6 +164,14 @@ private:
 	void SetupScenario ();
 
 	/**
+	 * \brief Trace the receipt of an on-off-application generated packet
+	 * \param context this object
+	 * \param packet a received packet
+	 * \return none
+	 */
+	void OnOffTrace (std::string context, Ptr<const Packet> packet);
+
+	/**
 	 * \brief Sets up a routing packet for tranmission
 	 * \param addr destination address
 	 * \parm node source node
@@ -191,10 +193,10 @@ private:
 	static void
 	CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility);
 
-	uint32_t 													m_nNodes;	// number of nodes
-	NodeContainer											m_adhocNodes; // all nodes
-	NetDeviceContainer								m_adhocDevices;	// net devices
-	Ipv4InterfaceContainer						m_adhocInterfaces;	// ipv4 interfaces
+	uint32_t 													m_nDrones;	// number of nodes
+	NodeContainer											m_droneNodes; // all nodes
+	NetDeviceContainer								m_droneDevices;	// net devices
+	Ipv4InterfaceContainer						m_droneInterfaces;	// ipv4 interfaces
 	std::string												m_packetSize; // size of the packets
 	std::string												m_rate;	// data rate
 	std::string												m_phyMode;	// the PHY mode to use for the PHY layer
@@ -205,7 +207,9 @@ private:
 	uint32_t													m_scenario; // scenario
 	uint32_t													m_animation;	// animation enabler
 	std::string												m_traceFile; // nodes trace files
+	std::string												m_trName;	// phy trace file name
 	std::string												m_animFile;	// output filename for animation
+	uint32_t													m_dataStartTime;	// Time at which nodes start to transmit data
 	uint32_t													m_totalSimTime;	// simulation time
 };
 
@@ -215,10 +219,10 @@ private:
 */
 
 DroneExperiment::DroneExperiment ()
-	:	m_nNodes (0),	// random value, it will be set later
+	:	m_nDrones (0),	// random value, it will be set later
 		m_packetSize ("64"),
 		m_rate ("2048bps"),
-		m_phyMode ("OfdmRate6Mbps"),
+		m_phyMode ("DsssRate11Mbps"),
 		m_txp (7.5),
 		m_port (9),
 		m_actualRange (300),
@@ -226,7 +230,9 @@ DroneExperiment::DroneExperiment ()
 		m_scenario (1),
 		m_animation (0),
 		m_traceFile (""),
+		m_trName ("DroneExperiment.tr.xml"),
 		m_animFile ("DroneExperiment.animation.xml"),
+		m_dataStartTime (1),
 		m_totalSimTime (10)
 {
 	// Init ns3 pseudo-random number generator seed
@@ -251,7 +257,7 @@ DroneExperiment::Simulate (int argc, char **argv)
 	// Configure the network and all the elements in it
 	ConfigureNodes ();
 	ConfigureMobility ();
-	SetupAdhocDevices ();
+	ConfigureDevices ();
 	ConfigureConnections ();
 
 	// Configure applications
@@ -269,9 +275,9 @@ DroneExperiment::ConfigureDefaults ()
 {
 	NS_LOG_FUNCTION (this);
 
-	// Config::SetDefault ("ns3::OnOffApplication::PacketSize",StringValue (m_packetSize));
-	// Config::SetDefault ("ns3::OnOffApplication::DataRate",  StringValue (m_rate));
-	// Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (m_phyMode));
+	Config::SetDefault ("ns3::OnOffApplication::PacketSize",StringValue (m_packetSize));
+	Config::SetDefault ("ns3::OnOffApplication::DataRate",  StringValue (m_rate));
+	Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (m_phyMode));
 }
 
 void
@@ -289,7 +295,7 @@ DroneExperiment::ConfigureNodes ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Setup nodes.");
 
-	m_adhocNodes.Create (m_nNodes);
+	m_droneNodes.Create (m_nDrones);
 }
 
 void
@@ -312,7 +318,7 @@ DroneExperiment::ConfigureMobility ()
 
 		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
 		mobility.SetPositionAllocator (taPositionAlloc);
-		mobility.Install (m_adhocNodes);
+		mobility.Install (m_droneNodes);
 	}
 	else if (m_mobility == 2)
 	{
@@ -332,13 +338,13 @@ DroneExperiment::ConfigureMobility ()
 }
 
 void
-DroneExperiment::SetupAdhocDevices ()
+DroneExperiment::ConfigureDevices ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Configure channels.");
+	NS_LOG_INFO ("Configure devices.");
 
 	WifiHelper wifi;
-	wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
+	wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
 	wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
 																"DataMode",StringValue (m_phyMode),
 																"ControlMode",StringValue (m_phyMode));
@@ -352,15 +358,17 @@ DroneExperiment::SetupAdhocDevices ()
 	wifiPhy.SetChannel (wifiChannel.Create ());
 
 	WifiMacHelper wifiMac;
-	wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-																"DataMode",StringValue (m_phyMode),
-																"ControlMode",StringValue (m_phyMode));
-	// Set Tx Power
-  wifiPhy.Set ("TxPowerStart",DoubleValue (m_txp));
-  wifiPhy.Set ("TxPowerEnd", DoubleValue (m_txp));
 	wifiMac.SetType ("ns3::AdhocWifiMac");
 
-	m_adhocDevices = wifi.Install (wifiPhy, wifiMac, m_adhocNodes);
+	// Set Tx Power
+  wifiPhy.Set ("TxPowerStart", DoubleValue (m_txp));
+  wifiPhy.Set ("TxPowerEnd", DoubleValue (m_txp));
+
+	m_droneDevices = wifi.Install (wifiPhy, wifiMac, m_droneNodes);
+
+	AsciiTraceHelper ascii;
+	wifiPhy.EnableAsciiAll (ascii.CreateFileStream (m_trName));
+	wifiPhy.EnablePcapAll (m_trName);
 }
 
 void
@@ -370,16 +378,19 @@ DroneExperiment::ConfigureConnections ()
 	NS_LOG_INFO ("Configure connections.");
 
 	DsdvHelper dsdv;
-	Ipv4ListRoutingHelper listRouting; // or Ipv4StaticRoutingHelper?
-	listRouting.Add (dsdv, 100);	// (&routing, priority)
+	dsdv.Set ("PeriodicUpdateInterval", TimeValue (Seconds (15)));	//Periodic Interval Time
+	dsdv.Set ("SettlingTime", TimeValue (Seconds (6)));	// Settling Time before sending out an update for changed metric
+
+	// Ipv4ListRoutingHelper listRouting; // or Ipv4StaticRoutingHelper?
+	// listRouting.Add (dsdv, 100);	// (&routing, priority)
 
 	InternetStackHelper internet;
-	internet.SetRoutingHelper (listRouting);
-	internet.Install (m_adhocNodes);
+	internet.SetRoutingHelper (dsdv);
+	internet.Install (m_droneNodes);
 
 	Ipv4AddressHelper ipv4;
 	ipv4.SetBase ("10.1.1.0", "255.255.255.0");
-	m_adhocInterfaces = ipv4.Assign (m_adhocDevices);
+	m_droneInterfaces = ipv4.Assign (m_droneDevices);
 }
 
 void
@@ -401,6 +412,9 @@ DroneExperiment::ConfigureApplications ()
 	// Traffic mix consists of:
   // 1. routing data
 	SetupRoutingMessages ();
+
+	Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::OnOffApplication/Tx",
+									MakeCallback (&DroneExperiment::OnOffTrace, this));
 }
 
 void
@@ -412,11 +426,12 @@ DroneExperiment::CommandSetup (int argc, char **argv)
 	CommandLine cmd;
 
 	// allow command line overrides
-	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
+	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nDrones);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
 	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
 	cmd.AddValue ("scenario", "Scenario: 1=random, 2=real world", m_scenario);
-	cmd.AddValue ("animation", "Enable netanim animation.", m_animation);
+	cmd.AddValue ("animation", "Enable netanim animation", m_animation);
+	cmd.AddValue ("dataStart", "Time at which nodes start to transmit data", m_dataStartTime);
 	cmd.AddValue ("totalTime", "Simulation end time", m_totalSimTime);
 
 	cmd.Parse (argc, argv);
@@ -431,7 +446,7 @@ DroneExperiment::SetupScenario ()
 	if (m_scenario == 1)
 	{
 		m_mobility = 1;
-		m_nNodes = 10;
+		m_nDrones = 10;
 	}
 	else if (m_scenario == 2)
 	{
@@ -462,21 +477,35 @@ DroneExperiment::SetupRoutingMessages (void)
 {
 	NS_LOG_FUNCTION (this);
 
-	// Setup routing transmissions
-  OnOffHelper onoff1 ("ns3::UdpSocketFactory",Address ());
+	OnOffHelper onoff1 ("ns3::UdpSocketFactory",Address ());
   onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
   onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
 
-	for (uint32_t i = 0; i < m_nNodes; i++)
+	uint32_t nSinks = m_nDrones;
+
+  for (uint32_t i = 0; i < nSinks; i++)
 	{
-		Ptr<Socket> sink = SetupRoutingPacketReceive (m_adhocInterfaces.GetAddress (i), m_adhocNodes.Get (i));
+		Ptr<Socket> sink = SetupRoutingPacketReceive (m_droneInterfaces.GetAddress (i), m_droneNodes.Get (i));
+	}
 
-		AddressValue remoteAddress (InetSocketAddress (m_adhocInterfaces.GetAddress (i), m_port));
-		onoff1.SetAttribute ("Remote", remoteAddress);
+	for (uint32_t i = 0; i < m_nDrones; i++)
+	{
+		for (uint32_t j = 0; j < nSinks; j++)
+		{
+			OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address (InetSocketAddress (m_droneInterfaces.GetAddress (j), m_port)));
+			onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
+			onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
 
-		ApplicationContainer temp = onoff1.Install (m_adhocNodes.Get (i));
-		temp.Start (Seconds (1));
-		temp.Stop (Seconds (m_totalSimTime));
+			// Skip the same node
+			if (i == j)
+				continue;
+
+				ApplicationContainer apps1 = onoff1.Install (m_droneNodes.Get (i));
+				Ptr<UniformRandomVariable> var = CreateObject<UniformRandomVariable> ();
+				apps1.Start (Seconds (var->GetValue (m_dataStartTime, m_dataStartTime + 1)));
+				apps1.Stop (Seconds (m_totalSimTime));
+
+		}
 	}
 }
 
@@ -517,6 +546,15 @@ DroneExperiment::CourseChange (std::ostream *os, std::string foo, Ptr<const Mobi
 								<< "; VEL: (" << vel.x << ", " << vel.y << ", " << vel.z << ").");
 }
 
+void
+DroneExperiment::OnOffTrace (std::string context, Ptr<const Packet> packet)
+{
+  NS_LOG_FUNCTION ( this << context << packet);
+
+	uint32_t nodeId = Simulator::GetContext ();
+	NS_LOG_DEBUG ("Node " << nodeId << " sent packet " << packet->GetUid () << ".");
+}
+
 Ptr<Socket>
 DroneExperiment::SetupRoutingPacketReceive (Ipv4Address addr, Ptr<Node> node)
 {
@@ -540,8 +578,7 @@ DroneExperiment::ReceiveRoutingPacket (Ptr<Socket> socket)
   {
     // application data, for goodput
 		uint32_t nodeId = socket->GetNode()->GetId ();
-    uint32_t RxRoutingBytes = packet->GetSize ();
-    NS_LOG_DEBUG ("Node " << nodeId << " received a packet ("<< RxRoutingBytes << "b) from " << srcAddress << ".");
+    NS_LOG_DEBUG ("Node " << nodeId << " received packet "<< packet->GetUid () << " from " << srcAddress << ".");
   }
 }
 
