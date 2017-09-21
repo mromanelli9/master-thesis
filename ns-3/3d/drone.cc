@@ -35,6 +35,9 @@
 #include "ns3/dsdv-module.h"
 #include "ns3/wifi-80211p-helper.h"
 #include "ns3/wifi-module.h"
+#include "ns3/propagation-delay-model.h"
+#include "ns3/propagation-loss-model.h"
+#include "ns3/yans-wifi-channel.h"
 #include "ns3/applications-module.h"
 #include "ns3/netanim-module.h"
 
@@ -306,17 +309,16 @@ DroneExperiment::ConfigureMobility ()
 
 	if (m_mobility == 1)
 	{
-		MobilityHelper mobility;
-
 		ObjectFactory pos;
 		pos.SetTypeId ("ns3::RandomBoxPositionAllocator");
-		pos.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=500.0]"));
-		pos.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=500.0]"));
+		pos.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
+		pos.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
 		pos.Set ("Z", StringValue ("ns3::UniformRandomVariable[Min=70.0|Max=100.0]"));
 
 		Ptr<PositionAllocator> taPositionAlloc = pos.Create ()->GetObject<PositionAllocator> ();
 
-		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
+		MobilityHelper mobility;
+		mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
 		mobility.SetPositionAllocator (taPositionAlloc);
 		mobility.Install (m_droneNodes);
 	}
@@ -351,11 +353,13 @@ DroneExperiment::ConfigureDevices ()
 
 	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
 
-	YansWifiChannelHelper wifiChannel;
-	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-	wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5.9e9));	// 802.11n 5.9 GHz
-
-	wifiPhy.SetChannel (wifiChannel.Create ());
+	Ptr<YansWifiChannel> wifiChannel = CreateObject<YansWifiChannel> ();
+	Ptr<ConstantSpeedPropagationDelayModel> propagationDelayModel = CreateObject<ConstantSpeedPropagationDelayModel> ();
+	wifiChannel->SetPropagationDelayModel (propagationDelayModel);
+	Ptr<FriisPropagationLossModel> friisLossModel = CreateObject<FriisPropagationLossModel> ();
+	friisLossModel->SetFrequency ( 5.9e9);
+	wifiChannel->SetPropagationLossModel (friisLossModel);
+	wifiPhy.SetChannel (wifiChannel);
 
 	WifiMacHelper wifiMac;
 	wifiMac.SetType ("ns3::AdhocWifiMac");
