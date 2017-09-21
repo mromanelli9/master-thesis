@@ -494,7 +494,7 @@ FBVanetExperiment::SetupScenario ()
 		m_alertGeneration = 45000 - 500; // 500 = fbApplication start time
 		m_areaOfInterest = 1000;
 		m_mobility = 1;
-		m_bldgFile = "scratch/vanet/Griglia.poly.xml";
+		m_bldgFile = "Griglia.poly.xml";
 
 		m_adhocPositionAllocator = CreateObject<ListPositionAllocator> ();
 
