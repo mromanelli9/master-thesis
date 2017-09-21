@@ -582,9 +582,6 @@ FBVanetExperiment::SetupScenario ()
 	else if (m_scenario == 2)
 	{
 		// Real word scenario
-		m_mobility = 2;
-		m_nNodes = 5;	// TODO: check this value
-		m_traceFile = "scratch/vanet/Blocco-IME.ns2mobility.xml";
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
