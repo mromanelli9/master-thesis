@@ -89,24 +89,30 @@ def generateRandomPoints(n, boundingBox, noflyZones):
 
 	for i in range(0, n):
 		point = (-1,-1,-1)
-		while (True):
+
+		loop = True
+		while (loop):
 			# Generate a point within the bounding box
 			x = float(format(Decimal(random.uniform(boundingBox["xMin"], boundingBox["xMax"])), '.2f'))
 			y = float(format(Decimal(random.uniform(boundingBox["yMin"], boundingBox["yMax"])), '.2f'))
 			z = float(format(Decimal(random.uniform(boundingBox["zMin"], boundingBox["zMax"])), '.2f'))
 			point = (x,y,z)
+			loop = False
 
-			# Check if the point violate a no-fly zones
+			# Check if the point violate a no-fly zone
 			for zone in noflyZones:
-				if point[0] < zone["xMin"] or point[0] > zone["xMax"]:
-					continue
-				if point[1] < zone["yMin"] or point[1] > zone["yMax"]:
-					continue
-				if point[2] < zone["zMin"] or point[2] > zone["yMax"]:
-					continue
+				test = 0
+				if point[0] > zone["xMin"] and point[0] < zone["xMax"]:
+					test += 1
+				if point[1] > zone["yMin"] and point[1] < zone["yMax"]:
+					test += 1
+				# TODO
+				# if point[2] < zone["zMin"] or point[2] > zone["yMax"]:
+				# 	test += 1
 
-			# If the point passed all the tests, then is ok
-			break
+				# If the point failed all the tests, then..
+				if (test == 2):
+					loop = True
 
 		allinone.append((x,y,z))
 
