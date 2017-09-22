@@ -35,20 +35,12 @@
 #include "ns3/dsdv-module.h"
 #include "ns3/wifi-80211p-helper.h"
 #include "ns3/wifi-module.h"
-#include "ns3/propagation-delay-model.h"
-#include "ns3/propagation-loss-model.h"
-#include "ns3/yans-wifi-channel.h"
 #include "ns3/applications-module.h"
 #include "ns3/netanim-module.h"
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("DroneExperiment");
-
-/* -----------------------------------------------------------------------------
-*			CLASS AND METHODS PROTOTIPES
-* ------------------------------------------------------------------------------
-*/
 
 /**
  * \ingroup object
@@ -351,15 +343,11 @@ DroneExperiment::ConfigureDevices ()
 																"DataMode",StringValue (m_phyMode),
 																"ControlMode",StringValue (m_phyMode));
 
+	YansWifiChannelHelper wifiChannel;
+	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+	wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5.9e9));	// 802.11n 5.9 GHz
 	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
-
-	Ptr<YansWifiChannel> wifiChannel = CreateObject<YansWifiChannel> ();
-	Ptr<ConstantSpeedPropagationDelayModel> propagationDelayModel = CreateObject<ConstantSpeedPropagationDelayModel> ();
-	wifiChannel->SetPropagationDelayModel (propagationDelayModel);
-	Ptr<FriisPropagationLossModel> friisLossModel = CreateObject<FriisPropagationLossModel> ();
-	friisLossModel->SetFrequency ( 5.9e9);
-	wifiChannel->SetPropagationLossModel (friisLossModel);
-	wifiPhy.SetChannel (wifiChannel);
+	wifiPhy.SetChannel (wifiChannel.Create ());
 
 	WifiMacHelper wifiMac;
 	wifiMac.SetType ("ns3::AdhocWifiMac");
