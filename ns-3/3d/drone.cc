@@ -36,6 +36,7 @@
 #include "ns3/wifi-80211p-helper.h"
 #include "ns3/wifi-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/topology.h"
 #include "ns3/netanim-module.h"
 
 using namespace ns3;
@@ -200,9 +201,11 @@ private:
 	uint32_t													m_actualRange; // transmission range
 	uint32_t													m_mobility;	// type of mobility
 	uint32_t													m_scenario; // scenario
+	uint32_t													m_loadBuildings; // enable ObstacleShadowingPropagationLossModel
 	uint32_t													m_animation;	// animation enabler
 	std::string												m_traceFile; // nodes trace files
 	std::string												m_trName;	// phy trace file name
+	std::string												m_bldgFile; // building data file
 	std::string												m_animFile;	// output filename for animation
 	uint32_t													m_dataStartTime;	// Time at which nodes start to transmit data
 	uint32_t													m_totalSimTime;	// simulation time
@@ -223,9 +226,11 @@ DroneExperiment::DroneExperiment ()
 		m_actualRange (300),
 		m_mobility (1),
 		m_scenario (1),
+		m_loadBuildings (0),
 		m_animation (0),
 		m_traceFile (""),
 		m_trName ("DroneExperiment.tr.xml"),
+		m_bldgFile (""),
 		m_animFile ("DroneExperiment.animation.xml"),
 		m_dataStartTime (1),
 		m_totalSimTime (10)
@@ -346,6 +351,11 @@ DroneExperiment::ConfigureDevices ()
 	YansWifiChannelHelper wifiChannel;
 	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
 	wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5.9e9));	// 802.11n 5.9 GHz
+	if (m_loadBuildings != 0)
+	{
+		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel", "Radius", DoubleValue (500));
+	}
+
 	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
 	wifiPhy.SetChannel (wifiChannel.Create ());
 
@@ -422,6 +432,7 @@ DroneExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("actualRange", "Actual transimision range [meters]", m_actualRange);
 	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
 	cmd.AddValue ("scenario", "Scenario: 1=random, 2=real world", m_scenario);
+	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
 	cmd.AddValue ("animation", "Enable netanim animation", m_animation);
 	cmd.AddValue ("dataStart", "Time at which nodes start to transmit data [seconds]", m_dataStartTime);
 	cmd.AddValue ("totalTime", "Simulation end time [seconds]", m_totalSimTime);
@@ -439,6 +450,8 @@ DroneExperiment::SetupScenario ()
 	{
 		m_mobility = 1;
 		m_nDrones = 10;
+
+		m_bldgFile = "drone.poly.xml";
 	}
 	else if (m_scenario == 2)
 	{
@@ -446,6 +459,12 @@ DroneExperiment::SetupScenario ()
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
+
+	if (m_loadBuildings != 0)
+	{
+		NS_LOG_INFO ("Loading buildings file \"" << m_bldgFile << "\".");
+		Topology::LoadBuildings (m_bldgFile);
+	}
 }
 
 void
