@@ -24,8 +24,12 @@
 * ------------------------------------------------------------------------------
 */
 
-#include <fstream>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <cstdlib>
 
 #include "ns3/core-module.h"
 #include "ns3/node-list.h"
@@ -40,8 +44,133 @@
 #include "ns3/netanim-module.h"
 
 using namespace ns3;
+using namespace std;
 
 NS_LOG_COMPONENT_DEFINE ("DroneExperiment");
+
+class NodesPositionsHelper
+{
+public:
+	NodesPositionsHelper ();
+	~NodesPositionsHelper ();
+
+	void ReadFromFile (std::string node_coordinates_file_name);
+	Ptr<ListPositionAllocator> GetPositions ();
+	uint32_t GetN ();
+
+private:
+	void Parse ();
+	void AllocateNodePositions ();
+
+	uint32_t															m_nNodes;
+	std::string 													m_node_coordinates_file_name;
+	std::vector<std::vector<double>>			m_coordinates;
+	Ptr<ListPositionAllocator> 						m_positionAlloc;
+};
+
+NodesPositionsHelper::NodesPositionsHelper ()
+	:	m_nNodes (0),
+		m_node_coordinates_file_name ("")
+{
+}
+
+NodesPositionsHelper::~NodesPositionsHelper ()
+{
+	m_coordinates.clear ();
+	m_positionAlloc = 0;
+}
+
+void
+NodesPositionsHelper::ReadFromFile (std::string node_coordinates_file_name)
+{
+	NS_LOG_FUNCTION (this << node_coordinates_file_name);
+	m_node_coordinates_file_name = node_coordinates_file_name;
+
+	Parse ();
+	AllocateNodePositions	();
+}
+
+void
+NodesPositionsHelper::Parse ()
+{
+	NS_LOG_FUNCTION (this);
+	NS_LOG_INFO ("Read nodes positions from file " << m_node_coordinates_file_name.c_str () << ".");
+
+	ifstream node_coordinates_file;
+	node_coordinates_file.open (m_node_coordinates_file_name.c_str (), ios::in);
+	if (node_coordinates_file.fail ())
+	{
+		NS_FATAL_ERROR ("File " << m_node_coordinates_file_name.c_str () << " not found.");
+	}
+
+	int m = 0;
+
+	while (!node_coordinates_file.eof ())
+	{
+		string line;
+		getline (node_coordinates_file, line);
+
+		if (line == "")
+		{
+			NS_LOG_WARN ("WARNING: Ignoring blank row: " << m);
+			break;
+		}
+
+		istringstream iss (line);
+		double coordinate;
+		std::vector<double> row;
+		int n = 0;
+		while (iss >> coordinate)
+		{
+			row.push_back (coordinate);
+			n++;
+		}
+
+		if (n != 3)
+		{
+			NS_LOG_ERROR ("ERROR: Number of elements at line#" << m << " is "  << n << " which is not equal to 3 for node coordinates file.");
+			exit (1);
+		}
+		else
+		{
+			m_coordinates.push_back (row);
+		}
+
+		m++;
+	}
+
+	node_coordinates_file.close ();
+	m_nNodes = m++;
+}
+
+void
+NodesPositionsHelper::AllocateNodePositions ()
+{
+	NS_LOG_FUNCTION (this);
+
+  m_positionAlloc = CreateObject<ListPositionAllocator> ();
+
+  for (size_t m = 0; m < m_coordinates.size (); m++)
+  {
+    m_positionAlloc->Add (Vector (m_coordinates[m][0], m_coordinates[m][1], m_coordinates[m][2]));
+  }
+}
+
+Ptr<ListPositionAllocator>
+NodesPositionsHelper::GetPositions ()
+{
+	NS_LOG_FUNCTION (this);
+
+	return m_positionAlloc;
+}
+
+uint32_t
+NodesPositionsHelper::GetN ()
+{
+	NS_LOG_FUNCTION (this);
+
+	return m_nNodes;
+}
 
 /**
  * \ingroup object
@@ -205,6 +334,7 @@ private:
 	uint32_t													m_animation;	// animation enabler
 	std::string												m_traceFile; // nodes trace files
 	std::string												m_trName;	// phy trace file name
+	std::string												m_nodesTopologyFile;	// nodes coordinates
 	std::string												m_bldgFile; // building data file
 	std::string												m_animFile;	// output filename for animation
 	uint32_t													m_dataStartTime;	// Time at which nodes start to transmit data
@@ -230,6 +360,7 @@ DroneExperiment::DroneExperiment ()
 		m_animation (0),
 		m_traceFile (""),
 		m_trName ("DroneExperiment.tr.xml"),
+		m_nodesTopologyFile (""),
 		m_bldgFile (""),
 		m_animFile ("DroneExperiment.animation.xml"),
 		m_dataStartTime (1),
@@ -306,13 +437,14 @@ DroneExperiment::ConfigureMobility ()
 
 	if (m_mobility == 1)
 	{
-		ObjectFactory pos;
-		pos.SetTypeId ("ns3::RandomBoxPositionAllocator");
-		pos.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
-		pos.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
-		pos.Set ("Z", StringValue ("ns3::UniformRandomVariable[Min=70.0|Max=100.0]"));
+		// Read nodes positions from file
+		NodesPositionsHelper nodesPositions;
+		nodesPositions.ReadFromFile (m_nodesTopologyFile);
+		Ptr<PositionAllocator> taPositionAlloc = nodesPositions.GetPositions ();
 
-		Ptr<PositionAllocator> taPositionAlloc = pos.Create ()->GetObject<PositionAllocator> ();
+		// number of nodes should be egual
+		if (m_nDrones != nodesPositions.GetN ())
+			NS_FATAL_ERROR ("The number of lines in coordinate file is: " << nodesPositions.GetN () << ", not equal to the number of nodes in the simulation." << m_nDrones);
 
 		MobilityHelper mobility;
 		mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -452,6 +584,7 @@ DroneExperiment::SetupScenario ()
 		m_nDrones = 10;
 
 		m_bldgFile = "drone.poly.xml";
+		m_nodesTopologyFile = "node_coordinates.txt";
 	}
 	else if (m_scenario == 2)
 	{
