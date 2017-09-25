@@ -93,13 +93,6 @@ public:
    */
   RoutingStats & GetRoutingStats ();
 
-  /**
-   * \brief Enable/disable logging
-   * \param log non-zero to enable logging
-   * \return none
-   */
-  void SetLogging (int log);
-
 private:
   /**
    * \brief Sets up the protocol protocol on the nodes
@@ -147,7 +140,6 @@ private:
   uint32_t 						m_nSinks; // number of sink nodes (<= all nodes)
   RoutingStats 				routingStats;
   std::string 				m_protocolName;
-  int 								m_log;
 };
 }
 

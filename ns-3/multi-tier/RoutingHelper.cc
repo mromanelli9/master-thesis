@@ -49,13 +49,14 @@ RoutingHelper::RoutingHelper ()
   : m_TotalSimTime (300.01),
     m_protocol (0),
     m_port (9),
-    m_nSinks (0),
-    m_log (0)
+    m_nSinks (0)
 {
+	NS_LOG_FUNCTION (this);
 }
 
 RoutingHelper::~RoutingHelper ()
 {
+	NS_LOG_FUNCTION (this);
 }
 
 void
@@ -66,6 +67,8 @@ RoutingHelper::Install (NodeContainer & c,
                         int protocol,
                         uint32_t nSinks)
 {
+	NS_LOG_FUNCTION (this << &c << &d << &i << totalTime << protocol << nSinks);
+
   m_TotalSimTime = totalTime;
   m_protocol = protocol;
   m_nSinks = nSinks;
@@ -78,6 +81,8 @@ RoutingHelper::Install (NodeContainer & c,
 Ptr<Socket>
 RoutingHelper::SetupRoutingPacketReceive (Ipv4Address addr, Ptr<Node> node)
 {
+	NS_LOG_FUNCTION (this << addr << node);
+
   TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
   Ptr<Socket> sink = Socket::CreateSocket (node, tid);
   InetSocketAddress local = InetSocketAddress (addr, m_port);
@@ -90,6 +95,8 @@ RoutingHelper::SetupRoutingPacketReceive (Ipv4Address addr, Ptr<Node> node)
 void
 RoutingHelper::SetupRoutingProtocol (NodeContainer & c)
 {
+	NS_LOG_FUNCTION (this << &c);
+
   AodvHelper aodv;
   OlsrHelper olsr;
   DsdvHelper dsdv;
@@ -139,17 +146,16 @@ RoutingHelper::SetupRoutingProtocol (NodeContainer & c)
       dsrMain.Install (dsr, c);
     }
 
-  if (m_log != 0)
-    {
-      NS_LOG_UNCOND ("Routing Setup for " << m_protocolName);
-    }
+	NS_LOG_DEBUG ("Routing Setup for " << m_protocolName << ".");
 }
 
 void
 RoutingHelper::AssignIpAddresses (NetDeviceContainer & d,
                                   Ipv4InterfaceContainer & adhocTxInterfaces)
 {
-  NS_LOG_INFO ("Assigning IP addresses");
+	NS_LOG_FUNCTION (this << &d << &adhocTxInterfaces);
+
+  NS_LOG_DEBUG ("Assigning IP addresses.");
   Ipv4AddressHelper addressAdhoc;
   // we may have a lot of nodes, and want them all
   // in same subnet, to support broadcast
@@ -161,6 +167,8 @@ void
 RoutingHelper::SetupRoutingMessages (NodeContainer & c,
                                      Ipv4InterfaceContainer & adhocTxInterfaces)
 {
+	NS_LOG_FUNCTION (this << &c << &adhocTxInterfaces);
+
   // Setup routing transmissions
   OnOffHelper onoff1 ("ns3::UdpSocketFactory",Address ());
   onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
@@ -187,59 +195,42 @@ RoutingHelper::SetupRoutingMessages (NodeContainer & c,
     }
 }
 
-static inline std::string
-PrintReceivedRoutingPacket (Ptr<Socket> socket, Ptr<Packet> packet, Address srcAddress)
-{
-  std::ostringstream oss;
-
-  oss << Simulator::Now ().GetSeconds () << " " << socket->GetNode ()->GetId ();
-
-  if (InetSocketAddress::IsMatchingType (srcAddress))
-    {
-      InetSocketAddress addr = InetSocketAddress::ConvertFrom (srcAddress);
-      oss << " received one packet from " << addr.GetIpv4 ();
-    }
-  else
-    {
-      oss << " received one packet!";
-    }
-  return oss.str ();
-}
-
 void
 RoutingHelper::ReceiveRoutingPacket (Ptr<Socket> socket)
 {
+	NS_LOG_FUNCTION (this << socket);
+
   Ptr<Packet> packet;
   Address srcAddress;
   while ((packet = socket->RecvFrom (srcAddress)))
-    {
-      // application data, for goodput
-      uint32_t RxRoutingBytes = packet->GetSize ();
-      GetRoutingStats ().IncRxBytes (RxRoutingBytes);
-      GetRoutingStats ().IncRxPkts ();
-      if (m_log != 0)
-        {
-          NS_LOG_UNCOND (m_protocolName + " " + PrintReceivedRoutingPacket (socket, packet, srcAddress));
-        }
-    }
+  {
+		// application data, for goodput
+		uint32_t RxRoutingBytes = packet->GetSize ();
+		GetRoutingStats ().IncRxBytes (RxRoutingBytes);
+		GetRoutingStats ().IncRxPkts ();
+
+		uint32_t nodeId = socket->GetNode()->GetId ();
+    NS_LOG_DEBUG ("Node " << nodeId << " received packet "<< packet->GetUid () << " from " << srcAddress << ".");
+  }
 }
 
 void
 RoutingHelper::OnOffTrace (std::string context, Ptr<const Packet> packet)
 {
+	NS_LOG_FUNCTION (this << context << packet);
+
   uint32_t pktBytes = packet->GetSize ();
   routingStats.IncTxBytes (pktBytes);
+
+	uint32_t nodeId = Simulator::GetContext ();
+	NS_LOG_DEBUG ("Node " << nodeId << " sent packet " << packet->GetUid () << ".");
 }
 
 RoutingStats &
 RoutingHelper::GetRoutingStats ()
 {
-  return routingStats;
-}
+	NS_LOG_FUNCTION (this);
 
-void
-RoutingHelper::SetLogging (int log)
-{
-  m_log = log;
+  return routingStats;
 }
 }
