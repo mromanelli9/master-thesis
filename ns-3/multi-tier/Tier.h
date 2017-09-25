@@ -123,8 +123,8 @@ protected:
 	 uint32_t												m_mobility; // mobility mode
 	 std::string										m_traceFile; // trace file path
 	 Ptr<RoutingHelper> 						m_routingHelper;	// routingHelper instance
-	 uint32_t												m_dataStartTime;	// Time at which nodes start to transmit data
-	 uint32_t												m_totalSimTime; // simulation end time
+	 double													m_dataStartTime;	// Time at which nodes start to transmit data
+	 double													m_totalSimTime; // simulation end time
 };
 } // namespace ns3
 

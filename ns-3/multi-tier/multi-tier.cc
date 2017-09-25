@@ -91,8 +91,8 @@ private:
 	uint32_t 													m_nNodes;	// total number of nodes
 	uint32_t 													m_nDrones;	// total number of drones
 	uint32_t 													m_nVeichles;	// total number of vehicles
-	uint32_t													m_dataStartTime;	// Time at which nodes start to transmit data
-	uint32_t													m_totalSimTime;	// simulation time
+	double														m_dataStartTime;	// Time at which nodes start to transmit data
+	double														m_totalSimTime;	// simulation time
 	Ptr<Tier>													m_vehiclesTier;	// lower tier
 	Ptr<Tier>													m_droneTier;	// upper tier
 };
@@ -106,8 +106,8 @@ MultiTier::MultiTier ()
 	:	m_nNodes (0),
 		m_nDrones (0),
 		m_nVeichles (0),
-		m_dataStartTime (1),
-		m_totalSimTime (10)
+		m_dataStartTime (1.0),
+		m_totalSimTime (10.0)
 {
 	// Init ns3 pseudo-random number generator seed
 	RngSeedManager::SetSeed (time (0));
@@ -163,7 +163,11 @@ MultiTier::CheckCommandLineValues ()
 {
 	NS_LOG_FUNCTION (this);
 
-	NS_ASSERT_MSG ((m_nDrones + m_nVeichles) <= m_nNodes, "Invalid number of drones or vehicles. Value must be less or egual to the total number of nodes.");
+	// If m_nNodes is specified
+	if (m_nNodes != 0)
+		NS_ASSERT_MSG ((m_nDrones + m_nVeichles) <= m_nNodes, "Invalid number of drones or vehicles. Value must be less or egual to the total number of nodes.");
+	else
+		m_nNodes = m_nDrones + m_nVeichles;
 }
 
 void
@@ -172,18 +176,16 @@ MultiTier::SetupScenario ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current scenario.");
 
-	// Create the bottom tier with vehicles
-	m_vehiclesTier = CreateObjectWithAttributes<Tier>
+	// Create the bottom tier with drones
+	m_droneTier = CreateObjectWithAttributes<Tier>
     ("Nodes", UintegerValue (m_nDrones),
      "RoutingProtocol", StringValue ("DSDV"),
      "PropagationLossModel", StringValue ("ns3::FriisPropagationLossModel"),
      "Buildings", UintegerValue (0),
-     "DataStartTime", UintegerValue (m_dataStartTime),
-     "TotalSimTime", UintegerValue (m_totalSimTime));
-
-
-	// Create the top tier with drones
-	// m_droneTier = CreateObject<Tier> ();
+		 "Mobility", UintegerValue (0),	// DEBUG
+     "DataStartTime", DoubleValue (m_dataStartTime),
+     "TotalSimTime", DoubleValue (m_totalSimTime));
+	m_droneTier->Install ();
 }
 
 void

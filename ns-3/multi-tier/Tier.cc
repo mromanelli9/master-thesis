@@ -91,13 +91,13 @@ Tier::GetTypeId (void)
 									 MakeStringAccessor (&Tier::m_traceFile),
 									 MakeStringChecker ())
 	 .AddAttribute ("DataStartTime", "Time at which nodes start to transmit data [seconds],",
-										 UintegerValue (1),
-										 MakeUintegerAccessor (&Tier::m_dataStartTime),
-										 MakeUintegerChecker<uint32_t> ())
+										 DoubleValue (1),
+										 MakeDoubleAccessor (&Tier::m_dataStartTime),
+										 MakeDoubleChecker<double> ())
 	 .AddAttribute ("TotalSimTime", "Simulation end time [seconds].",
-										 UintegerValue (1),
-										 MakeUintegerAccessor (&Tier::m_totalSimTime),
-										 MakeUintegerChecker<uint32_t> ());
+										 DoubleValue (1),
+										 MakeDoubleAccessor (&Tier::m_totalSimTime),
+										 MakeDoubleChecker<double> ());
 
 	 return tid;
  }
@@ -117,10 +117,12 @@ Tier::Tier ()
 	m_txp (20),
 	m_mobility (1),
 	m_traceFile (""),
-	m_dataStartTime (1),
-	m_totalSimTime (0)
+	m_dataStartTime (1.0),
+	m_totalSimTime (0.0)
 {
 	NS_LOG_FUNCTION (this);
+
+	m_routingHelper = CreateObject<RoutingHelper> ();
 }
 
 Tier::~Tier ()
@@ -271,7 +273,22 @@ Tier::ConfigureMobility ()
 {
 	NS_LOG_FUNCTION (this);
 
-	if (m_mobility == 1)
+	// DEBUG
+	if (m_mobility == 0)
+	{
+		MobilityHelper mobility;
+		Ptr<ListPositionAllocator> ltPositionAllocator = CreateObject<ListPositionAllocator> ();
+		ltPositionAllocator->Add (Vector (0.0, 0.0, 70.0));
+		ltPositionAllocator->Add (Vector (100.0, 30.0, 80.0));
+		ltPositionAllocator->Add (Vector (40.0, 60.0, 75.0));
+		ltPositionAllocator->Add (Vector (15.0, 60.0, 90.0));
+		ltPositionAllocator->Add (Vector (100.0, 100.0, 100.0));
+
+		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
+		mobility.SetPositionAllocator (ltPositionAllocator);
+		mobility.Install (m_nodes);
+	}
+	else if (m_mobility == 1)
 	{
 		// Check if m_traceFile exists
 		NS_ASSERT_MSG (m_traceFile != "", "Invalid ns2 trace file specified.");
@@ -333,6 +350,7 @@ Tier::SetupRoutingMessages ()
 	m_routingHelper->Install (m_nodes,
 														m_devices,
 														m_interfaces,
+														m_dataStartTime,
 														m_totalSimTime,
 														m_protocol,
 														m_nNodes);

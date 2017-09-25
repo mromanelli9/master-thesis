@@ -66,6 +66,7 @@ public:
    * \param c node container
    * \param d net device container
    * \param i IPv4 interface container
+	 * \param startTime time at which nodes start to transmit data
    * \param totalTime the total time that nodes should attempt to
    * route data
    * \param protocol the routing protocol (1=OLSR;2=AODV;3=DSDV;4=DSR)
@@ -75,6 +76,7 @@ public:
   void Install (NodeContainer & c,
                 NetDeviceContainer & d,
                 Ipv4InterfaceContainer & i,
+								double startTime,
                 double totalTime,
                 int protocol,
                 uint32_t nSinks);
@@ -134,6 +136,7 @@ private:
    */
   void ReceiveRoutingPacket (Ptr<Socket> socket);
 
+	double							m_dataStartTime;
   double 							m_TotalSimTime;	// seconds
   uint32_t 						m_protocol;	// routing protocol; 0=NONE, 1=OLSR, 2=AODV, 3=DSDV, 4=DSR
   uint32_t 						m_port;

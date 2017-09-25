@@ -46,7 +46,8 @@ RoutingHelper::GetTypeId (void)
 }
 
 RoutingHelper::RoutingHelper ()
-  : m_TotalSimTime (300.01),
+  : m_dataStartTime (1.0),
+		m_TotalSimTime (300.01),
     m_protocol (0),
     m_port (9),
     m_nSinks (0)
@@ -63,12 +64,14 @@ void
 RoutingHelper::Install (NodeContainer & c,
                         NetDeviceContainer & d,
                         Ipv4InterfaceContainer & i,
+												double startTime,
                         double totalTime,
                         int protocol,
                         uint32_t nSinks)
 {
 	NS_LOG_FUNCTION (this << &c << &d << &i << totalTime << protocol << nSinks);
 
+	m_dataStartTime = startTime;
   m_TotalSimTime = totalTime;
   m_protocol = protocol;
   m_nSinks = nSinks;
@@ -169,30 +172,35 @@ RoutingHelper::SetupRoutingMessages (NodeContainer & c,
 {
 	NS_LOG_FUNCTION (this << &c << &adhocTxInterfaces);
 
-  // Setup routing transmissions
-  OnOffHelper onoff1 ("ns3::UdpSocketFactory",Address ());
-  onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
-  onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
+	// protocol == 0 means no routing data, so do not set up sink
+	if (m_protocol != 0)
+		for (uint32_t i = 0; i < m_nSinks; i++)
+		{
+			Ptr<Socket> sink = SetupRoutingPacketReceive (adhocTxInterfaces.GetAddress (i), c.Get (i));
+		}
 
-  Ptr<UniformRandomVariable> var = CreateObject<UniformRandomVariable> ();
-  int64_t stream = 2;
-  var->SetStream (stream);
-  for (uint32_t i = 0; i < m_nSinks; i++)
-    {
-      // protocol == 0 means no routing data, WAVE BSM only
-      // so do not set up sink
-      if (m_protocol != 0)
-        {
-          Ptr<Socket> sink = SetupRoutingPacketReceive (adhocTxInterfaces.GetAddress (i), c.Get (i));
-        }
-
-      AddressValue remoteAddress (InetSocketAddress (adhocTxInterfaces.GetAddress (i), m_port));
+	for (uint32_t i = 0; i < c.GetN (); i++)
+	{
+		for (uint32_t j = 0; j < m_nSinks; j++)
+		{
+			// Setup routing transmissions
+			OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address (InetSocketAddress (adhocTxInterfaces.GetAddress (j), m_port)));
+			onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
+			onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
+			AddressValue remoteAddress (InetSocketAddress (adhocTxInterfaces.GetAddress (i), m_port));
       onoff1.SetAttribute ("Remote", remoteAddress);
 
-      ApplicationContainer temp = onoff1.Install (c.Get (i + m_nSinks));
-      temp.Start (Seconds (var->GetValue (1.0,2.0)));
-      temp.Stop (Seconds (m_TotalSimTime));
-    }
+			// Skip the same node
+			if (i == j)
+				continue;
+
+				ApplicationContainer apps1 = onoff1.Install (c.Get (i));
+				Ptr<UniformRandomVariable> var = CreateObject<UniformRandomVariable> ();
+				apps1.Start (Seconds (var->GetValue (m_dataStartTime, m_dataStartTime + 1)));
+				apps1.Stop (Seconds (m_TotalSimTime));
+
+		}
+	}
 }
 
 void
