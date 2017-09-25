@@ -354,5 +354,7 @@ Tier::SetupRoutingMessages ()
 														m_totalSimTime,
 														m_protocol,
 														m_nNodes);
+	Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::OnOffApplication/Tx",
+									MakeCallback (&RoutingHelper::OnOffTrace, m_routingHelper));
 }
 } // namespace ns3
