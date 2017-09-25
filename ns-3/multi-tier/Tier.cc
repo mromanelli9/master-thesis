@@ -41,7 +41,63 @@ Tier::GetTypeId (void)
 {
 	static TypeId tid = TypeId ("ns3::Tier")
 	 .SetParent<Object> ()
-	 .AddConstructor<Tier> ();
+	 .AddConstructor<Tier> ()
+	 .AddAttribute ("Nodes", "Number of nodes.",
+									 UintegerValue (0),
+									 MakeUintegerAccessor (&Tier::m_nNodes),
+									 MakeUintegerChecker<uint32_t> ())
+	 .AddAttribute ("PacketSize", "The size of the packets in the OnOffApplication.",
+									StringValue ("64"),
+									MakeStringAccessor (&Tier::m_packetSize),
+									MakeStringChecker ())
+	 .AddAttribute ("DataRate", "The data rate in the OnOffApplication.",
+									StringValue ("2048bps"),
+									MakeStringAccessor (&Tier::m_rate),
+									MakeStringChecker ())
+	 .AddAttribute ("RoutingProtocol", "The routing protocol (NONE, OLSR, AODV, DSDV, DSR).",
+									 StringValue ("DSDV"),
+									 MakeStringAccessor (&Tier::m_protocolName),
+									 MakeStringChecker ())
+	 .AddAttribute ("PhyMode", "Wifi Phy mode.",
+									 StringValue ("OfdmRate6MbpsBW10MHz"),
+									 MakeStringAccessor (&Tier::m_phyMode),
+									 MakeStringChecker ())
+	 .AddAttribute ("80211mode", "802.11* mode [1=802.11p; 2=802.11b; 3=WAVE-PHY].",
+									 UintegerValue (1),
+									 MakeUintegerAccessor (&Tier::m_80211mode),
+									 MakeUintegerChecker<uint32_t> ())
+	 .AddAttribute ("PhyModeB", "Phy mode for 802.11b.",
+ 									StringValue ("DsssRate11Mbps"),
+ 									MakeStringAccessor (&Tier::m_phyModeB),
+ 									MakeStringChecker ())
+	 .AddAttribute ("PropagationLossModel", "Propagation loss model name [Friis;ItuR1411Los;TwoRayGround;LogDistance].",
+									 StringValue ("ns3::FriisPropagationLossModel"),
+									 MakeStringAccessor (&Tier::m_lossModelName),
+									 MakeStringChecker ())
+	 .AddAttribute ("Buildings", "Enable ObstacleShadowingPropagationLossModel.",
+									 UintegerValue (0),
+									 MakeUintegerAccessor (&Tier::m_loadBuildings),
+									 MakeUintegerChecker<uint32_t> ())
+	 .AddAttribute ("Txp", "Transmit power [dB].",
+	 								UintegerValue (20),
+	 								MakeUintegerAccessor (&Tier::m_txp),
+	 								MakeUintegerChecker<uint32_t> ())
+	 .AddAttribute ("Mobility", "Mobility mode.",
+									 UintegerValue (1),
+									 MakeUintegerAccessor (&Tier::m_mobility),
+									 MakeUintegerChecker<uint32_t> ())
+	 .AddAttribute ("TraceFile", "ns2 trace file path.",
+									 StringValue (""),
+									 MakeStringAccessor (&Tier::m_traceFile),
+									 MakeStringChecker ())
+	 .AddAttribute ("DataStartTime", "Time at which nodes start to transmit data [seconds],",
+										 UintegerValue (1),
+										 MakeUintegerAccessor (&Tier::m_dataStartTime),
+										 MakeUintegerChecker<uint32_t> ())
+	 .AddAttribute ("TotalSimTime", "Simulation end time [seconds].",
+										 UintegerValue (1),
+										 MakeUintegerAccessor (&Tier::m_totalSimTime),
+										 MakeUintegerChecker<uint32_t> ());
 
 	 return tid;
  }
@@ -61,7 +117,7 @@ Tier::Tier ()
 	m_txp (20),
 	m_mobility (1),
 	m_traceFile (""),
-	m_dataStartTime (0),
+	m_dataStartTime (1),
 	m_totalSimTime (0)
 {
 	NS_LOG_FUNCTION (this);
@@ -114,17 +170,16 @@ Tier::ConfigureChannels ()
 {
 	NS_LOG_FUNCTION (this);
 
-	switch (m_lossModel) {
-		case 1:	m_lossModelName = "ns3::FriisPropagationLossModel";
-						break;
-		case 2:	m_lossModelName = "ns3::ItuR1411LosPropagationLossModel";
-						break;
-		case 3:	m_lossModelName = "ns3::TwoRayGroundPropagationLossModel";
-						break;
-		case 4:	m_lossModelName = "ns3::LogDistancePropagationLossModel";
-						break;
-		default:	 NS_LOG_ERROR ("Invalid propagation loss model specified. Values must be [1-4], where 1=Friis;2=ItuR1411Los;3=TwoRayGround;4=LogDistance");
-	}
+	if (m_lossModelName == "ns3::FriisPropagationLossModel")
+		m_lossModel = 1;
+	else if (m_lossModelName == "ns3::ItuR1411LosPropagationLossModel")
+		m_lossModel = 2;
+	else if (m_lossModelName == "ns3::TwoRayGroundPropagationLossModel")
+		m_lossModel = 3;
+	else if (m_lossModelName == "ns3::LogDistancePropagationLossModel")
+		m_lossModel = 4;
+	else
+		NS_FATAL_ERROR ("Invalid propagation loss model specified. Values must be [1-4], where 1=Friis;2=ItuR1411Los;3=TwoRayGround;4=LogDistance");
 
 	// frequency
 	double freq = 0.0;
@@ -261,6 +316,19 @@ void
 Tier::SetupRoutingMessages ()
 {
 	NS_LOG_FUNCTION (this);
+
+	if (m_protocolName == "NONE")
+		m_protocol = 0;
+	else if (m_protocolName == "OLSR")
+			m_protocol = 1;
+	else if (m_protocolName == "AODV")
+			m_protocol = 2;
+	else if (m_protocolName == "DSDV")
+			m_protocol = 3;
+	else if (m_protocolName == "DSR")
+			m_protocol = 4;
+	else
+		NS_FATAL_ERROR ("No such protocol:" << m_protocolName);
 
 	m_routingHelper->Install (m_nodes,
 														m_devices,

@@ -119,7 +119,7 @@ protected:
 	 uint32_t												m_lossModel; // propagation loss model
 	 std::string										m_lossModelName; // propagation loss model name
 	 uint32_t												m_loadBuildings;	// enable ObstacleShadowingPropagationLossModel
-	 uint32_t												m_txp; // transmit power [db
+	 uint32_t												m_txp; // transmit power [db]
 	 uint32_t												m_mobility; // mobility mode
 	 std::string										m_traceFile; // trace file path
 	 Ptr<RoutingHelper> 						m_routingHelper;	// routingHelper instance

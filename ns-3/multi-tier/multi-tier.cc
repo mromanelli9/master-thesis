@@ -23,9 +23,6 @@
 
 #include "Tier.h"
 
-// DEBUG
-#include "RoutingHelper.h"
-
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("MultiTierExperiment");
@@ -122,7 +119,7 @@ MultiTier::MultiTier ()
 
 MultiTier::~MultiTier ()
 {
-	// m_vehiclesTier = 0;
+	m_vehiclesTier = 0;
 	// m_droneTier = 0;
 }
 
@@ -175,10 +172,15 @@ MultiTier::SetupScenario ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current scenario.");
 
-	m_nNodes = 10;
+	// Create the bottom tier with vehicles
+	m_vehiclesTier = CreateObjectWithAttributes<Tier>
+    ("Nodes", UintegerValue (m_nDrones),
+     "RoutingProtocol", StringValue ("DSDV"),
+     "PropagationLossModel", StringValue ("ns3::FriisPropagationLossModel"),
+     "Buildings", UintegerValue (0),
+     "DataStartTime", UintegerValue (m_dataStartTime),
+     "TotalSimTime", UintegerValue (m_totalSimTime));
 
-	// // Create the bottom tier with vehicles
-	// m_vehiclesTier = CreateObject<Tier> ();
 
 	// Create the top tier with drones
 	// m_droneTier = CreateObject<Tier> ();
@@ -211,8 +213,6 @@ int main (int argc, char *argv[])
 
 	RoutingHelper stats;
 
-	// MultiTier experiment;
-	// experiment.Simulate (argc, argv);
-
-
+	MultiTier experiment;
+	experiment.Simulate (argc, argv);
 }
