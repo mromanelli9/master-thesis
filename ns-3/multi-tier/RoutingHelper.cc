@@ -218,7 +218,7 @@ RoutingHelper::ReceiveRoutingPacket (Ptr<Socket> socket)
 		GetRoutingStats ().IncRxPkts ();
 
 		uint32_t nodeId = socket->GetNode()->GetId ();
-    NS_LOG_DEBUG ("Node " << nodeId << " received packet "<< packet->GetUid () << " from " << srcAddress << ".");
+    NS_LOG_DEBUG ("Node " << nodeId << " received packet "<< packet->GetUid () << ".");
   }
 }
 
