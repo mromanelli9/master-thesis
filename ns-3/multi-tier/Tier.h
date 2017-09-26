@@ -23,6 +23,7 @@
 
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
+#include "ns3/mobility-module.h"
 
 #include "RoutingHelper.h"
 
@@ -123,6 +124,7 @@ protected:
 	 uint32_t												m_mobility; // mobility mode
 	 std::string										m_traceFile; // trace file path
 	 Ptr<RoutingHelper> 						m_routingHelper;	// routingHelper instance
+	 Ptr<PositionAllocator> 				m_positionAllocator; // position allocator
 	 double													m_dataStartTime;	// Time at which nodes start to transmit data
 	 double													m_totalSimTime; // simulation end time
 };

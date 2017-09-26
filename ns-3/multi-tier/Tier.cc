@@ -90,6 +90,10 @@ Tier::GetTypeId (void)
 									 StringValue (""),
 									 MakeStringAccessor (&Tier::m_traceFile),
 									 MakeStringChecker ())
+	 .AddAttribute ("PositionAllocator", "Position allocator.",
+										PointerValue (0),
+										MakePointerAccessor (&Tier::m_positionAllocator),
+										MakePointerChecker<PositionAllocator> ())
 	 .AddAttribute ("DataStartTime", "Time at which nodes start to transmit data [seconds],",
 										 DoubleValue (1),
 										 MakeDoubleAccessor (&Tier::m_dataStartTime),
@@ -141,7 +145,9 @@ Tier::Install ()
   ConfigureMobility ();
   ConfigureApplications ();
   ConfigureTracing ();
-  ProcessOutputs ();
+
+	// Schedule ProcessOutputs after simulation
+	Simulator::ScheduleDestroy (&Tier::ProcessOutputs, this);
 }
 
 void
@@ -276,17 +282,21 @@ Tier::ConfigureMobility ()
 	// DEBUG
 	if (m_mobility == 0)
 	{
-		ObjectFactory pos;
-		pos.SetTypeId ("ns3::RandomBoxPositionAllocator");
-		pos.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
-		pos.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
-		pos.Set ("Z", StringValue ("ns3::UniformRandomVariable[Min=70.0|Max=100.0]"));
+		// if not specified, choose randomly
+		if (m_positionAllocator == 0)
+		{
+			ObjectFactory pos;
+			pos.SetTypeId ("ns3::RandomBoxPositionAllocator");
+			pos.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
+			pos.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
+			pos.Set ("Z", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=0.0]"));
 
-		Ptr<PositionAllocator> taPositionAlloc = pos.Create ()->GetObject<PositionAllocator> ();
+			m_positionAllocator = pos.Create ()->GetObject<PositionAllocator> ();
+		}
 
 		MobilityHelper mobility;
 		mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-		mobility.SetPositionAllocator (taPositionAlloc);
+		mobility.SetPositionAllocator (m_positionAllocator);
 		mobility.Install (m_nodes);
 	}
 	else if (m_mobility == 1)
@@ -328,6 +338,13 @@ void
 Tier::ProcessOutputs ()
 {
 	NS_LOG_FUNCTION (this);
+
+	for (uint32_t i = 0; i < m_nNodes; i++)
+	{
+		Ptr<Node> node = m_nodes.Get (i);
+		Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
+		std::cout << "nodo " << node->GetId () << ", pos " << positionmodel->GetPosition () << std::endl;
+	}
 }
 
 void
