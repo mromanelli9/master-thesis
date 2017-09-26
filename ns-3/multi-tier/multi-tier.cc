@@ -180,29 +180,62 @@ MultiTier::SetupScenario ()
 	Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
 	Ptr<UniformRandomVariable> y = CreateObject<UniformRandomVariable> ();
 	Ptr<UniformRandomVariable> z = CreateObject<UniformRandomVariable> ();
-	x->SetAttribute ("Min", DoubleValue (0));
-	x->SetAttribute ("Max", DoubleValue (300));
-	y->SetAttribute ("Min", DoubleValue (0));
-	y->SetAttribute ("Max", DoubleValue (300));
-	z->SetAttribute ("Min", DoubleValue (70));
-	z->SetAttribute ("Max", DoubleValue (100));
 
 	Ptr<RandomBoxPositionAllocator> pos = CreateObject<RandomBoxPositionAllocator> ();
-	pos->SetX (x);
-	pos->SetY (y);
-	pos->SetZ (z);
 
-	// Create the bottom tier with drones
-	m_droneTier = CreateObjectWithAttributes<Tier>
-    ("Nodes", UintegerValue (m_nDrones),
-     "RoutingProtocol", StringValue ("DSDV"),
-     "PropagationLossModel", StringValue ("ns3::FriisPropagationLossModel"),
-     "Buildings", UintegerValue (0),
-		 "Mobility", UintegerValue (0),
-		 "PositionAllocator", PointerValue (pos),	
-     "DataStartTime", DoubleValue (m_dataStartTime),
-     "TotalSimTime", DoubleValue (m_totalSimTime));
-	m_droneTier->Install ();
+	if (m_nDrones > 0)
+	{
+		x->SetAttribute ("Min", DoubleValue (0));
+		x->SetAttribute ("Max", DoubleValue (300));
+		y->SetAttribute ("Min", DoubleValue (0));
+		y->SetAttribute ("Max", DoubleValue (300));
+		z->SetAttribute ("Min", DoubleValue (70));
+		z->SetAttribute ("Max", DoubleValue (100));
+
+		pos->SetX (x);
+		pos->SetY (y);
+		pos->SetZ (z);
+
+		// Create the bottom tier with drones
+		m_droneTier = CreateObjectWithAttributes<Tier>
+	    ("Nodes", UintegerValue (m_nDrones),
+	     "RoutingProtocol", StringValue ("DSDV"),
+	     "PropagationLossModel", StringValue ("ns3::FriisPropagationLossModel"),
+	     "Buildings", UintegerValue (0),
+			 "Mobility", UintegerValue (0),
+			 "PositionAllocator", PointerValue (pos),
+			 "NetworkAddress", Ipv4AddressValue ("10.1.0.0"),
+	     "DataStartTime", DoubleValue (m_dataStartTime),
+	     "TotalSimTime", DoubleValue (m_totalSimTime));
+		m_droneTier->Install ();
+	}
+
+	if (m_nVeichles > 0)
+	{
+		// Create position allocator for the vehicles
+		x->SetAttribute ("Min", DoubleValue (0));
+		x->SetAttribute ("Max", DoubleValue (300));
+		y->SetAttribute ("Min", DoubleValue (0));
+		y->SetAttribute ("Max", DoubleValue (300));
+		z->SetAttribute ("Min", DoubleValue (0));
+		z->SetAttribute ("Max", DoubleValue (0));
+
+		pos->SetX (x);
+		pos->SetY (y);
+		pos->SetZ (z);
+
+		m_vehiclesTier = CreateObjectWithAttributes<Tier>
+			("Nodes", UintegerValue (m_nVeichles),
+			 "RoutingProtocol", StringValue ("AODV"),
+			 "PropagationLossModel", StringValue ("ns3::TwoRayGroundPropagationLossModel"),
+			 "Buildings", UintegerValue (0),
+			 "Mobility", UintegerValue (0),
+			 "PositionAllocator", PointerValue (pos),
+			 "NetworkAddress", Ipv4AddressValue ("10.2.0.0"),
+			 "DataStartTime", DoubleValue (m_dataStartTime),
+			 "TotalSimTime", DoubleValue (m_totalSimTime));
+		m_vehiclesTier->Install ();
+	}
 }
 
 void
