@@ -198,7 +198,6 @@ RoutingHelper::SetupRoutingMessages (NodeContainer & c,
 				Ptr<UniformRandomVariable> var = CreateObject<UniformRandomVariable> ();
 				apps1.Start (Seconds (var->GetValue (m_dataStartTime, m_dataStartTime + 1)));
 				apps1.Stop (Seconds (m_TotalSimTime));
-
 		}
 	}
 }

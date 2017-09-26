@@ -276,16 +276,17 @@ Tier::ConfigureMobility ()
 	// DEBUG
 	if (m_mobility == 0)
 	{
-		MobilityHelper mobility;
-		Ptr<ListPositionAllocator> ltPositionAllocator = CreateObject<ListPositionAllocator> ();
-		ltPositionAllocator->Add (Vector (0.0, 0.0, 70.0));
-		ltPositionAllocator->Add (Vector (100.0, 30.0, 80.0));
-		ltPositionAllocator->Add (Vector (40.0, 60.0, 75.0));
-		ltPositionAllocator->Add (Vector (15.0, 60.0, 90.0));
-		ltPositionAllocator->Add (Vector (100.0, 100.0, 100.0));
+		ObjectFactory pos;
+		pos.SetTypeId ("ns3::RandomBoxPositionAllocator");
+		pos.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
+		pos.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]"));
+		pos.Set ("Z", StringValue ("ns3::UniformRandomVariable[Min=70.0|Max=100.0]"));
 
-		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
-		mobility.SetPositionAllocator (ltPositionAllocator);
+		Ptr<PositionAllocator> taPositionAlloc = pos.Create ()->GetObject<PositionAllocator> ();
+
+		MobilityHelper mobility;
+		mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+		mobility.SetPositionAllocator (taPositionAlloc);
 		mobility.Install (m_nodes);
 	}
 	else if (m_mobility == 1)
