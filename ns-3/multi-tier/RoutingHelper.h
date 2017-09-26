@@ -70,6 +70,9 @@ public:
    * \param totalTime the total time that nodes should attempt to
    * route data
    * \param protocol the routing protocol (1=OLSR;2=AODV;3=DSDV;4=DSR)
+	 * \param initial network number to use during allocation
+	 * \param network mask
+	 * \param initial address used for IP address allocation
    * \param nSinks the number of nodes which will act as data sinks
    * \return none
    */
@@ -79,6 +82,9 @@ public:
 								double startTime,
                 double totalTime,
                 int protocol,
+								Ipv4Address address,
+								Ipv4Mask mask,
+								Ipv4Address firstAddress,
                 uint32_t nSinks);
 
   /**
@@ -139,7 +145,10 @@ private:
 	double							m_dataStartTime;
   double 							m_TotalSimTime;	// seconds
   uint32_t 						m_protocol;	// routing protocol; 0=NONE, 1=OLSR, 2=AODV, 3=DSDV, 4=DSR
-  uint32_t 						m_port;
+	Ipv4Address					m_networkAddress;	// the initial network number to use during allocation
+	Ipv4Mask 						m_networkMask;	// network mask
+	Ipv4Address 				m_networkBase;	// initial address used for IP address allocation
+	uint32_t 						m_addressPort;
   uint32_t 						m_nSinks; // number of sink nodes (<= all nodes)
   RoutingStats 				routingStats;
   std::string 				m_protocolName;

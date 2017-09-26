@@ -94,6 +94,18 @@ Tier::GetTypeId (void)
 										PointerValue (0),
 										MakePointerAccessor (&Tier::m_positionAllocator),
 										MakePointerChecker<PositionAllocator> ())
+	 .AddAttribute ("NetworkAddress", "The initial network number to use during allocation.",
+	 									Ipv4AddressValue ("10.1.0.0"),
+	 									MakeIpv4AddressAccessor (&Tier::m_networkAddress),
+	 									MakeIpv4AddressChecker ())
+	 .AddAttribute ("NetworkMask", "The network mask.",
+									Ipv4MaskValue ("255.255.0.0"),
+									MakeIpv4MaskAccessor (&Tier::m_networkMask),
+									MakeIpv4MaskChecker ())
+	 .AddAttribute ("NetworkBase", "The initial address used for IP address allocation.",
+								 Ipv4AddressValue ("0.0.0.1"),
+								 MakeIpv4AddressAccessor (&Tier::m_networkBase),
+								 MakeIpv4AddressChecker ())
 	 .AddAttribute ("DataStartTime", "Time at which nodes start to transmit data [seconds],",
 										 DoubleValue (1),
 										 MakeDoubleAccessor (&Tier::m_dataStartTime),
@@ -121,6 +133,9 @@ Tier::Tier ()
 	m_txp (20),
 	m_mobility (1),
 	m_traceFile (""),
+	m_networkAddress ("10.1.0.0"),
+	m_networkMask ("255.255.0.0"),
+	m_networkBase ("0.0.0.1"),
 	m_dataStartTime (1.0),
 	m_totalSimTime (0.0)
 {
@@ -371,6 +386,9 @@ Tier::SetupRoutingMessages ()
 														m_dataStartTime,
 														m_totalSimTime,
 														m_protocol,
+														m_networkAddress,
+														m_networkMask,
+														m_networkBase,
 														m_nNodes);
 	Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::OnOffApplication/Tx",
 									MakeCallback (&RoutingHelper::OnOffTrace, m_routingHelper));

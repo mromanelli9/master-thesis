@@ -125,6 +125,9 @@ protected:
 	 std::string										m_traceFile; // trace file path
 	 Ptr<RoutingHelper> 						m_routingHelper;	// routingHelper instance
 	 Ptr<PositionAllocator> 				m_positionAllocator; // position allocator
+	 Ipv4Address										m_networkAddress;	// the initial network number to use during allocation
+	 Ipv4Mask 											m_networkMask;	// network mask
+	 Ipv4Address 										m_networkBase;	// initial address used for IP address allocation
 	 double													m_dataStartTime;	// Time at which nodes start to transmit data
 	 double													m_totalSimTime; // simulation end time
 };

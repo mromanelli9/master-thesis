@@ -49,7 +49,10 @@ RoutingHelper::RoutingHelper ()
   : m_dataStartTime (1.0),
 		m_TotalSimTime (300.01),
     m_protocol (0),
-    m_port (9),
+		m_networkAddress ("10.1.0.0"),
+		m_networkMask ("255.255.0.0"),
+		m_networkBase ("0.0.0.1"),
+		m_addressPort (9),
     m_nSinks (0)
 {
 	NS_LOG_FUNCTION (this);
@@ -67,13 +70,19 @@ RoutingHelper::Install (NodeContainer & c,
 												double startTime,
                         double totalTime,
                         int protocol,
+												Ipv4Address address,
+												Ipv4Mask mask,
+												Ipv4Address firstAddress,
                         uint32_t nSinks)
 {
-	NS_LOG_FUNCTION (this << &c << &d << &i << totalTime << protocol << nSinks);
+	NS_LOG_FUNCTION (this << &c << &d << &i << totalTime << protocol << address << mask << firstAddress << nSinks);
 
 	m_dataStartTime = startTime;
   m_TotalSimTime = totalTime;
   m_protocol = protocol;
+	m_networkAddress = address;
+	m_networkMask = mask;
+	m_networkBase = firstAddress;
   m_nSinks = nSinks;
 
   SetupRoutingProtocol (c);
@@ -88,7 +97,7 @@ RoutingHelper::SetupRoutingPacketReceive (Ipv4Address addr, Ptr<Node> node)
 
   TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
   Ptr<Socket> sink = Socket::CreateSocket (node, tid);
-  InetSocketAddress local = InetSocketAddress (addr, m_port);
+  InetSocketAddress local = InetSocketAddress (addr, m_addressPort);
   sink->Bind (local);
   sink->SetRecvCallback (MakeCallback (&RoutingHelper::ReceiveRoutingPacket, this));
 
@@ -162,7 +171,7 @@ RoutingHelper::AssignIpAddresses (NetDeviceContainer & d,
   Ipv4AddressHelper addressAdhoc;
   // we may have a lot of nodes, and want them all
   // in same subnet, to support broadcast
-  addressAdhoc.SetBase ("10.1.0.0", "255.255.0.0");
+  addressAdhoc.SetBase (m_networkAddress, m_networkMask, m_networkBase);
   adhocTxInterfaces = addressAdhoc.Assign (d);
 }
 
@@ -184,10 +193,10 @@ RoutingHelper::SetupRoutingMessages (NodeContainer & c,
 		for (uint32_t j = 0; j < m_nSinks; j++)
 		{
 			// Setup routing transmissions
-			OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address (InetSocketAddress (adhocTxInterfaces.GetAddress (j), m_port)));
+			OnOffHelper onoff1 ("ns3::UdpSocketFactory", Address (InetSocketAddress (adhocTxInterfaces.GetAddress (j), m_addressPort)));
 			onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
 			onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
-			AddressValue remoteAddress (InetSocketAddress (adhocTxInterfaces.GetAddress (i), m_port));
+			AddressValue remoteAddress (InetSocketAddress (adhocTxInterfaces.GetAddress (i), m_addressPort));
       onoff1.SetAttribute ("Remote", remoteAddress);
 
 			// Skip the same node
