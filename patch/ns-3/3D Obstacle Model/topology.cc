@@ -442,7 +442,11 @@ Topology::GetObstructedLossBetween(const Point_3 &p1, const Point_3 &p2, double 
       m_outputList.clear();
       m_rangeTree.window_query(win, std::back_inserter(m_outputList));
       std::vector<Key>::iterator current = m_outputList.begin();
-      while (current != m_outputList.end())
+			uint32_t index = 0;	// another check
+			uint32_t limit = m_outputList.size ();
+      while (current != m_outputList.end() && index < limit)
+			// don't know why, but without the second condition it goes SIGSEGV
+			// because <current> goes off limits
         {
           Obstacle obstacle = (*current).second;
           std::string id = obstacle.GetId();
@@ -491,6 +495,7 @@ Topology::GetObstructedLossBetween(const Point_3 &p1, const Point_3 &p2, double 
                 }
             }
           current++;
+					index++;
         }
     }
 
