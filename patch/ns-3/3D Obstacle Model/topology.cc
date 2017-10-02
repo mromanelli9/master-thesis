@@ -54,7 +54,7 @@ Topology::Run ()
 {
   NS_LOG_FUNCTION (this);
 
-  NS_LOG_UNCOND ("Topology::Run()");
+  NS_LOG_INFO ("Topology::Run()");
 }
 
 Topology **
@@ -163,7 +163,7 @@ static Range_tree_2_type m_rangeTree;
 void
 Topology::LoadBuildings(std::string bldgFilename)
 {
-  NS_LOG_UNCOND ("Load buildings");
+  NS_LOG_INFO ("Load buildings");
   std::ifstream file (bldgFilename.c_str (), std::ios::in);
   if (!(file.is_open ()))
     {
@@ -174,14 +174,14 @@ Topology::LoadBuildings(std::string bldgFilename)
       Topology * topology = Topology::GetTopology();
       NS_ASSERT(topology != 0);
 
-      NS_LOG_UNCOND ("Reading file: " << bldgFilename);
+      NS_LOG_DEBUG ("Reading file: " << bldgFilename);
       while (!file.eof () )
         {
           std::string line;
 
           getline (file, line);
 
-          NS_LOG_UNCOND (line);
+          NS_LOG_DEBUG (line);
 
           size_t posB = line.find("type=\"building");
           size_t posU = line.find("type=\"unknown");
@@ -216,7 +216,7 @@ Topology::LoadBuildings(std::string bldgFilename)
                 }
             }
         }
-      NS_LOG_UNCOND ("Topology buildings bounded by x:" << topology->GetMinX() << "," << topology->GetMaxX() << " y:" << topology->GetMinY() << "," << topology->GetMaxY());
+      NS_LOG_INFO ("Topology buildings bounded by x:" << topology->GetMinX() << "," << topology->GetMaxX() << " y:" << topology->GetMinY() << "," << topology->GetMaxY());
       // all obstacles have been loaded
       // so now create a searchable range tree based on those obstacles
       topology->MakeRangeTree();
@@ -263,7 +263,7 @@ Topology::GetObstructedDistance(const Point_3 &p1, const Point_3 &p2, Obstacle &
 			// as the height of the obstacle
 			Point_3 a(s.vertex(0).x (), s.vertex(0).y (), 0.0);
 			Point_3 b(s.vertex(1).x (), s.vertex(1).y (), 0.0);
-			Point_3 c(b.x (), b.y (),  obs.GetHeight ());
+			Point_3 c(b.x (), b.y (), (obs.GetHeight () != 0) ? obs.GetHeight () : 1);	// if height is not provided, take 1 meter
 			Plane_3 plane(a, b, c);
 
 			CGAL::Object result = CGAL::intersection(plane, r);
@@ -315,14 +315,14 @@ Topology::GetObstructedDistance(const Point_3 &p1, const Point_3 &p2, Obstacle &
 	// Handle the case in which one intersection is with the top of the obstacle (roof of the building)
 	double p1z = CGAL::to_double(p1.z());
 	double p2z = CGAL::to_double(p2.z());
-	Point_3 highest = (p1z > p2z) ? p1 : p2;
+	double highestz = (p1z > p2z) ? CGAL::to_double(p1.z()) : CGAL::to_double(p2.z());
 
-	if (CGAL::to_double(highest.z()) >= obs.GetHeight ())
+	if ((obs.GetHeight () != 0) && (highestz >= obs.GetHeight ()))
 	{
 		// Simulate the top of the obstacle with a plane in the 3d space
 		Point_3 a(poly.vertex (0).x (), poly.vertex (0).y (), obs.GetHeight ());
 		Point_3 b(poly.vertex (1).x (), poly.vertex (1).y (), obs.GetHeight ());
-		Point_3 c(poly.vertex (2).x (), poly.vertex (2).y (), obs.GetHeight ());
+		Point_3 c(poly.vertex (2).x (), poly.vertex (2).y (), (obs.GetHeight () > 0) ? obs.GetHeight () : 1);
 		Plane_3 roof(a, b, c);
 
 		CGAL::Object result = CGAL::intersection(roof, r);
@@ -465,8 +465,9 @@ Topology::GetObstructedLossBetween(const Point_3 &p1, const Point_3 &p2, double 
             {
               // obtstacle is within range
 
-							// Check if the points are over the top of the building:
-							if (std::min(p1z, p2z) >= obstacle.GetHeight ())
+							// Check if the points are over the top of the building
+							double minz = std::min(p1z, p2z);
+							if ((obstacle.GetHeight () > 0) && (minz >= obstacle.GetHeight ()))
 							{
 								// If so, skip the current obstacle
 								current++;
