@@ -1,0 +1,169 @@
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{backcolor}{rgb}{0.98,0.98,0.98}
+\definecolor{RoyalBlue}{rgb}{0.25, 0.41, 0.88}
+\definecolor{Peach}{rgb}{1.0, 0.9, 0.71}
+\definecolor{SeaGreen}{rgb}{0.18, 0.55, 0.34}
+\definecolor{gray}{rgb}{0.4,0.4,0.4}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+
+\renewcommand{\lstlistingname}{Codice}% Listing -> codice
+\renewcommand{\lstlistlistingname}{Frammenti di codice}% List of Listings -> Frammenti di codice
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolor},
+    commentstyle=\color{Peach}\ttfamily,
+    keywordstyle=\color{RoyalBlue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{SeaGreen}\ttfamily,
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=trbl, % draw a frame at the top, right, left and bottom of the listing
+	frameround=ftff, % angolo in basso a destro curvo
+	framesep=4pt, % quarter circle size of the round corners,
+	inputencoding=utf8x,
+    %extendedchars=true,
+    %literate={á}{{\'a}}1 {à}{{\`a}}1 {é}{{\'e}}1 {è}{{\`e}}1 {ù}{{\`u}}1 {ò}{{\`o}}1 {ì}{{\`i}}1,
+    belowskip=1em,
+    aboveskip=1em,
+}
+\lstset{style=mystyle}
+
+\lstdefinelanguage{JavaScript}
+{
+  % list of keywords
+  morekeywords={ true, false, catch, function, break,	new, class, extends, var, require, switch, return, import, if, while, for, this, View, Text, StyleSheet},
+  sensitive=false, % keywords are not case-sensitive
+  morecomment=[l]{//}, % l is for line comment
+  morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+  morestring=[b]' % defines that strings are enclosed in double quotes
+}
+
+\lstdefinelanguage{Properties}
+{
+	% list of keywords
+	morekeywords={ true, false, catch, function, break,	new, class, extends, var, require, switch, return, import, if, while, for, this, View, Text, StyleSheet},
+	sensitive=false, % keywords are not case-sensitive
+	morecomment=[l]{\#}, % l is for line comment
+	morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+	morestring=[b]' % defines that strings are enclosed in double quotes
+}
+
+\lstdefinelanguage{JSON}
+{
+  % list of keywords
+  morekeywords={string, boolean, int, Array, Node, Asset, AssetDetail, Filter, FilterItem},
+  sensitive=false, % keywords are not case-sensitive
+  morecomment=[l]{//}, % l is for line comment
+  morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+  morestring=[b] % defines that strings are enclosed in double quotes
+}
+
+\colorlet{punct}{red!60!black}
+\definecolor{background}{HTML}{EEEEEE}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+\lstdefinelanguage{json}{
+    basicstyle=\normalfont\ttfamily,
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=lines,
+    backgroundcolor=\color{background},
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      {9}{{{\color{numb}9}}}{1}
+      {:}{{{\color{punct}{:}}}}{1}
+      {,}{{{\color{punct}{,}}}}{1}
+      {\{}{{{\color{delim}{\{}}}}{1}
+      {\}}{{{\color{delim}{\}}}}}{1}
+      {[}{{{\color{delim}{[}}}}{1}
+      {]}{{{\color{delim}{]}}}}{1},
+}
+
+\lstdefinelanguage{URM}
+{
+	% list of keywords
+	morekeywords={ S, J, T, Z, I},
+	sensitive=false, % keywords are not case-sensitive
+	morecomment=[l]{//}, % l is for line comment
+	morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+	morestring=[b]' % defines that strings are enclosed in double quotes
+}
+
+\lstdefinelanguage{RDFA}{
+	language=html,
+	sensitive=true,
+	alsoletter={<>=-},
+	ndkeywords={
+		% General
+		=,
+		% HTML attributes
+		charset=, id=, width=, height=, property=, about=, rel=, rev=, prefix=, vocab=, content=, datatype=
+	},
+	morecomment=[s]{<!--}{-->},
+	tag=[s]
+}
+
+\lstdefinestyle{BashStyle}{
+  language=bash,
+  basicstyle=\small\sffamily,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=3pt,
+  frame=tb,
+  columns=fullflexible,
+  backgroundcolor=\color{yellow!20},
+  linewidth=0.9\linewidth,
+  xleftmargin=0.1\linewidth,
+  framexleftmargin=0.2em}
+
+\lstdefinestyle{myJSON}{
+    language=json,
+    basicstyle=\tiny,
+	numbers=none}
+
+
+% \lstdefinestyle{makefile}{
+%   otherkeywords={.SUFFIXES},
+%   alsoletter={:},
+%   morekeywords=[1]{SUFFIX, CPP_},
+%   morekeywords=[2]{vasp:,makeparam:,zgemmtest:,dgemmtest:,ffttest:,kpoints:,clean:},
+%   style=global,%
+%   morecomment=[l][commentstyle]{\#},%
+%   emphstyle={\color{vimvert}},%
+%   moredelim=[s][\color{vimvert}]{\$(}{)}%
+%   }
+
+\lstdefinelanguage{XML}
+{
+  morestring=[b]",
+  morestring=[s]{>}{<},
+  morecomment=[s]{<?}{?>},
+  stringstyle=\color{black},
+  identifierstyle=\color{darkblue},
+  keywordstyle=\color{cyan},
+  morekeywords={xmlns,version,type}% list your attributes here
+}
