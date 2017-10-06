@@ -27,26 +27,6 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("obstacle");
 
-NS_OBJECT_ENSURE_REGISTERED (Obstacle);
-
-TypeId
-Obstacle::GetTypeId (void)
-{
-	static TypeId tid = TypeId ("ns3::Obstacle")
-		.SetParent<Object> ()
-		.AddConstructor<Obstacle> ()
-		.AddAttribute ("Beta", "Per-wall attenuation parameter.",
- 										 DoubleValue (9),
- 										 MakeDoubleAccessor (&Obstacle::m_beta),
- 										 MakeDoubleChecker<double> ())
-	  .AddAttribute ("Gamma", "Per-meter attenuation parameter",
-										 DoubleValue (0.4),
-										 MakeDoubleAccessor (&Obstacle::m_gamma),
-										 MakeDoubleChecker<double> ());
-
-	return tid;
-}
-
 Obstacle::Obstacle() :
   // default values for per-wall and per-meter attenuation,
   // (per Obstacle instance)

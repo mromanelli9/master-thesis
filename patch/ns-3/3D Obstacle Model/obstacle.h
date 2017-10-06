@@ -61,11 +61,9 @@ namespace ns3 {
  * polygon representation of an Obstacle and per-wall and per-meter
  * attenuation values.
  */
-class Obstacle : public Object
+class Obstacle
 {
 public:
-	static TypeId GetTypeId (void);
-
   /**
    * \brief Constructor
    * \return none
