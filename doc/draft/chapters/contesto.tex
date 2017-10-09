@@ -11,12 +11,23 @@ dovuta alla distanza, cammini multipli per effetto della riflessione, ombreggiat
 L'utilizzo di un'idonea rappresentazione per questo tipo di ostacoli è, quindi, necessaria nel contesto di simulazioni di reti VANET (\textit{Vehicular Ad-hoc Networks}) in ambienti urbani
 e suburbani.
 
-Nel corso degli anni, diversi MRP msono stati proposti.
+Nel corso degli anni, diversi MRP sono stati proposti.
 Il più semplice di questi si chiama modello a disco unitario (\textit{unit-disk model}), nel quale i veicoli possono comunicare fra loro se si trovano entro una certa soglia
 di distanza, mentre non possono altrimenti~\cite{6554832}.
 Un modello molto utilizzato nelle simuazioni di VANET è il modello a doppio raggio (\textit{Two-ray ground-reflection model}),
 nel quale il segnale in fase di ricezione è composto da una componente in linea diretta e una seconda derivante dalla riflessione causata dal terreno~\cite{DBLP:books/daglib/0091821}.
+In~\cite{Schmitz:2006:ERW:1164717.1164730} e in~\cite{Souley2005RealisticUS}, modelli più sviluppati prendono in considerazione anche le properità riflettenti delle superfici e degli ostacoli.
 
+Tuttavia, un approcio diretto di questo tipo difficilmente scala al numero di nodi necessario in un classico scenario VANET e per questo motivo
+spesso questi modelli si affidano a una fase di pre-elaborazione che può richiedere tempi elevati~\cite{Stepanov:2008:IMR:1293378.1293656}.
+Per ovviare a questo problema, alcune proposte astraggono dalle informazioni sui singoli edifici, modellando l'ambiente urbano in modo omogeneo
+così da creare un modello analitico per l'ombreggiatura~\cite{1492678}.
+Questo tipo di modelli riducono il costo computazionale e generalmente si raffrontano bene con i risultati reali;
+ciò nonostante, non riescono a catturare effetti a livello mesoscopico, come eventuali spazi fra edifici che permetterebbero trasmissioni a corto raggio~\cite{Giordano:2010:CST:1860058.1860065}.
+
+Sono affetti dallo stesso problema anche  i modelli (puramente) stocastici; questi modellano l'effetto dell'ombraggiatura tramite distribuzione stocastiche,
+fra cui Rice, Rayleigh, Nakagami-m, lognormale Weibull~\cite{6554832}~\cite{Rappaport:2001:WCP:559977}, in quanto non tengono in considerazione la geometria urbana sottostante.
+%
 \section{Modellazione di ostacoli}
 
 
