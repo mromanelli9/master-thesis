@@ -56,7 +56,7 @@ def get_options(args=None):
 def generate_one(idx, depart, departPos, laneFrom, laneTo):
 	return '<trip id="%s" depart="%.2f" departPos="%d" from="%s" to="%s" type="car"/>' % (idx, depart, departPos, laneFrom, laneTo)
 
-def isFeasibleRoad(lane):
+def isFeasibleLane(lane):
 	# Roads must be >= 4 meters long (lenth of an average car)
 	if (int(lane.getLength()) <=4):
 		return False
@@ -68,38 +68,36 @@ def isFeasibleRoad(lane):
 	return True
 
 def main(options):
+	print("[+] Reading net file...")
 	net = sumolib.net.readNet(options.netfile)
 
-	nEdges = len(net._edges)
-	print("[+] There are %d roads." % nEdges)
+	edges = net.getEdges()
+	print("[+] Found %d edges." % len(edges))
 
-	minStep = __minDistance
-	maxStep = __maxDistance
+	print("[+] Running...")
 	trips = []
 	tripId = 0
 
-	print("[+] Running...")
-
-	for i in range(0, nEdges):
-		lane = net._edges[i]
-
+	# For each edge/lane
+	# (i assume that each edge has only one lane)
+	for lane in edges:
 		# Check if the lane is a road
-		if (not isFeasibleRoad(lane)):
+		if (not isFeasibleLane(lane)):
 			continue
 
 		idx = lane.getID()
 		length = int(lane.getLength())
 
 		pos = 1
-		while (pos < (length - minStep)):
+		while (pos < (length - __minDistance)):
 			current = generate_one(tripId, 0, pos, idx, idx)
 			trips.append(current)
 
-			pos += random.randint(minStep, maxStep)
+			pos += random.randint(__minDistance, __maxDistance)
 			tripId += 1
 
-	print("[+] I create %d vehicles." % (tripId + 1))
-	print("[+] Creating trips file.")
+	print("[+] I created %d vehicles." % (tripId + 1))
+	print("[+] Writing trips file.")
 
 	with open(options.tripfile, 'w') as fouttrips:
 		sumolib.writeXMLHeader(fouttrips, "$Id: randomTrips.py 23999 2017-04-21 09:04:47Z behrisch $", "routes")
@@ -110,6 +108,7 @@ def main(options):
 			fouttrips.write("\t%s\n" % trip)
 
 		fouttrips.write("</routes>\n")
+
 
 # info: print([method_name for method_name in dir(net._edges[0])])
 
