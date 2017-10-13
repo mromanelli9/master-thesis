@@ -57,17 +57,29 @@ def get_options(args=None):
 def generate_one(idx, depart, departPos, laneFrom, laneTo):
 	return '<trip id="%s" depart="%.2f" departPos="%d" from="%s" to="%s" type="car"/>' % (idx, depart, departPos, laneFrom, laneTo)
 
-def isFeasibleLane(lane):
+def isFeasibleRoad(edge):
+	# Road with no connection (fringe)
+	if edge.is_fringe():
+		return False
+
 	# Roads must be >= 4 meters long (lenth of an average car)
-	if (int(lane.getLength()) <=4):
+	if (int(edge.getLength()) <=4):
 		return False
 
 	# Min allowed speed must be greaterh then 13 m/s (~50 km/h)
-	if (float(lane.getSpeed()) < 13.0):
+	if (float(edge.getSpeed()) < 13.0):
 		return False
 
-	# Allowed road type (http://sumo.dlr.de/wiki/Definition_of_Vehicles,_Vehicle_Types,_and_Routes)
-	return (lane.allows("passenger") or lane.allows("private") or lane.allows("custom1") or lane.allows("custom2"))
+	# Allowed edge type (http://sumo.dlr.de/wiki/Definition_of_Vehicles,_Vehicle_Types,_and_Routes)
+	return (edge.allows("passenger") or edge.allows("private") or lane.allows("custom1") or edge.allows("custom2"))
+
+def getOppositeDirection(idx):
+	# If the id is in the form "-111288429"
+	if (idx[0] == '-'):
+		return idx[1:]
+	else:
+	# the id is in the form "111288429"
+		return '-' + idx
 
 def main(options):
 	print("[+] Reading net file...")
@@ -78,17 +90,27 @@ def main(options):
 
 	print("[+] Running...")
 	trips = []
+	visited = {}
 	tripId = 0
 
 	# For each edge/lane
 	# (i assume that each edge has only one lane)
-	for lane in edges:
+	for road in edges:
 		# Check if the lane is a road
-		if (not isFeasibleLane(lane)):
+		if (not isFeasibleRoad(road)):
 			continue
 
-		idx = lane.getID()
-		length = int(lane.getLength())
+		idx = str(road.getID())
+		length = int(road.getLength())
+
+		# Check if i already visited the opposite direction
+		opposite = getOppositeDirection(idx)
+		if opposite in visited:
+			# I already done the opposite direction, so skip
+			continue
+
+		# Otherwise go on
+		visited[idx] = 1
 
 		pos = 1
 		while (pos < (length - __minDistance)):
