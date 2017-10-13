@@ -52,12 +52,8 @@ def isFeasibleRoad(edge):
 	if (int(edge.getLength()) <=4):
 		return False
 
-	# Min allowed speed must be greaterh then 13 m/s (~50 km/h)
-	if (float(edge.getSpeed()) < 13.0):
-		return False
-
 	# Allowed edge type (http://sumo.dlr.de/wiki/Definition_of_Vehicles,_Vehicle_Types,_and_Routes)
-	return (edge.allows("passenger") or edge.allows("private") or edge.allows("custom1") or edge.allows("custom2"))
+	return (edge.allows("custom1") or edge.allows("custom2") or edge.allows("passenger") or edge.allows("private"))
 
 def getOppositeDirection(idx):
 	# If the id is in the form "-111288429"
@@ -98,12 +94,13 @@ def main(options):
 		# Otherwise go on
 		visited[idx] = 1
 
-		pos = 1
-		while (pos < (length - __minDistance)):
+		pos = 0
+		while (pos < (length - __maxDistance)):
+			rnd = random.randint(__minDistance, __maxDistance)
+			pos += rnd
 			current = generate_one(tripId, 0, pos, idx, idx)
 			trips.append(current)
 
-			pos += random.randint(__minDistance, __maxDistance)
 			tripId += 1
 
 	print("[+] I created %d vehicles." % (tripId + 1))
