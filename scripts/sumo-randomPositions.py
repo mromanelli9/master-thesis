@@ -57,7 +57,7 @@ def isFeasibleRoad(edge):
 		return False
 
 	# Allowed edge type (http://sumo.dlr.de/wiki/Definition_of_Vehicles,_Vehicle_Types,_and_Routes)
-	return (edge.allows("passenger") or edge.allows("private") or lane.allows("custom1") or edge.allows("custom2"))
+	return (edge.allows("passenger") or edge.allows("private") or edge.allows("custom1") or edge.allows("custom2"))
 
 def getOppositeDirection(idx):
 	# If the id is in the form "-111288429"
