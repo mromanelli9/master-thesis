@@ -38,6 +38,7 @@ import optparse
 import sumolib
 from sumolib import route2trips
 from sumolib.miscutils import euclidean
+from sumolib.net.lane import SUMO_VEHICLE_CLASSES
 
 def get_options(args=None):
 	optParser = optparse.OptionParser()
@@ -65,7 +66,8 @@ def isFeasibleLane(lane):
 	if (float(lane.getSpeed()) < 13.0):
 		return False
 
-	return True
+	# Allowed road type (http://sumo.dlr.de/wiki/Definition_of_Vehicles,_Vehicle_Types,_and_Routes)
+	return (lane.allows("passenger") or lane.allows("private") or lane.allows("custom1") or lane.allows("custom2"))
 
 def main(options):
 	print("[+] Reading net file...")
