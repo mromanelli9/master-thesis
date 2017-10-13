@@ -1,22 +1,8 @@
 #!/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
 """
-@file    randomTrips.py
-@author  Daniel Krajzewicz
-@author  Jakob Erdmann
-@author  Michael Behrisch
-@date    2010-03-06
-@version $Id: randomTrips.py 23999 2017-04-21 09:04:47Z behrisch $
-
-Generates random trips for the given network.
-
-SUMO, Simulation of Urban MObility; see http://sumo.dlr.de/
-Copyright (C) 2010-2017 DLR (http://www.dlr.de/) and contributors
-
-This file is part of SUMO.
-SUMO is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+@file    randomPositions.py
+@author  Marco Romanelli, marco.romanelli.1@studenti.unipd.it
+@date    2017-10-12
 """
 
 from __future__ import print_function
