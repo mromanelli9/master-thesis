@@ -104,7 +104,7 @@ def main(options):
 	with open(options.tripfile, 'w') as fouttrips:
 		sumolib.writeXMLHeader(fouttrips, "$Id: randomTrips.py 23999 2017-04-21 09:04:47Z behrisch $", "routes")
 
-		fouttrips.write('\t<vType id="car" accel="0.8" decel="4.5" sigma="0.5" length="1" maxSpeed="50"/>\n\n')
+		fouttrips.write('\t<vType id="car" accel="0.8" decel="4.5" sigma="0.5" length="4" maxSpeed="50"/>\n\n')
 
 		for trip in trips:
 			fouttrips.write("\t%s\n" % trip)
