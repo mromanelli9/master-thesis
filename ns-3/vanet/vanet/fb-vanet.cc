@@ -481,7 +481,7 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	// allow command line overrides
 	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
-	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C1000", m_staticProtocol);
+	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C500", m_staticProtocol);
 	cmd.AddValue ("flooding", "Enable flooding", m_flooding);
 	cmd.AddValue ("alertGeneration", "Time at which the first Alert Message should be generated.", m_alertGeneration);
 	cmd.AddValue ("area", "Radius of the area of interest", m_areaOfInterest);
