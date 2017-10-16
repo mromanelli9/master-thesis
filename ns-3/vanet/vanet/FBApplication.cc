@@ -463,7 +463,6 @@ void
 FBApplication::PrintStats (std::stringstream &dataStream)
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("------------------ STATISTICS ------------------");
 
 	uint32_t bord= (4000/300)-1;
 	uint32_t cover=1;

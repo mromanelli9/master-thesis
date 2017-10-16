@@ -45,6 +45,8 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("fb-vanet");
 
+std::ofstream g_out;	// output file handler
+
 /* -----------------------------------------------------------------------------
 *			CLASS AND METHODS PROTOTIPES
 * ------------------------------------------------------------------------------
@@ -71,12 +73,18 @@ public:
 	virtual ~FBVanetExperiment ();
 
 	/**
-	 * \brief Enacts simulation of an ns-3  application
+	 * \brief Configure simulation of an ns-3  application
 	 * \param argc program arguments count
 	 * \param argv program arguments
 	 * \return none
 	 */
-	void Simulate (int argc, char **argv);
+	void Configure (int argc, char **argv);
+
+	/**
+	 * \brief Enacts simulation of an ns-3  application
+	 * \return none
+	 */
+	void Simulate ();
 
 protected:
 	/**
@@ -257,18 +265,23 @@ FBVanetExperiment::~FBVanetExperiment ()
 }
 
 void
-FBVanetExperiment::Simulate (int argc, char **argv)
+FBVanetExperiment::Configure (int argc, char **argv)
 {
 	// Initial configuration and parameters parsing
 	ParseCommandLineArguments (argc, argv);
 	ConfigureDefaults ();
 
+	ConfigureTracingAndLogging ();
+}
+
+void
+FBVanetExperiment::Simulate ()
+{
 	// Configure the network and all the elements in it
 	ConfigureNodes ();
 	ConfigureMobility ();
 	SetupAdhocDevices ();
 	ConfigureConnections ();
-	ConfigureTracingAndLogging ();
 
 	ConfigureFBApplication ();
 
@@ -424,32 +437,6 @@ FBVanetExperiment::ConfigureTracingAndLogging ()
 	NS_LOG_FUNCTION (this);
 
 	Packet::EnablePrinting ();
-
-	// If CSV filename is the default one, rewrite it
-	if (m_CSVfileName == "fb-vanet.csv")
-	{
-		std::stringstream filename;
-		filename << "fb-vanet_" << m_actualRange << "_" << m_staticProtocol << "_" << m_loadBuildings << ".csv";
-		m_CSVfileName = filename.str();
-	}
-
-	// Open CSV file and write header
-
-	std::ofstream out (m_CSVfileName.c_str ());
-  out << "id," <<
-    "m_range," <<
-    "param," <<
-		"buildings," <<
-    "nWifis," <<
-    "circCont," <<
-    "cover," <<
-    "circ," <<
-    "nums," <<
-    "slots," <<
-    "sent," <<
-    "received" <<
-    std::endl;
-  out.close ();
 }
 
 void
@@ -646,14 +633,12 @@ FBVanetExperiment::ProcessOutputs ()
 	std::stringstream dataStream;
 	m_fbApplication->PrintStats (dataStream);
 
-	std::ofstream out (m_CSVfileName.c_str (), std::ios::app);
-	out << RngSeedManager::GetRun () << ","
+	g_out << RngSeedManager::GetRun () << ","
 			<< m_actualRange << ","
 			<< m_staticProtocol << ","
 			<< m_loadBuildings << ","
 			<< m_nNodes << ","
 			<< dataStream.str () << std::endl;
-	out.close ();
 }
 
 void
@@ -738,6 +723,32 @@ int main (int argc, char *argv[])
 {
 	NS_LOG_UNCOND ("FB Vanet Experiment.");
 
-	FBVanetExperiment experiment;
-	experiment.Simulate (argc, argv);
+	std::string m_CSVfileName = "fb-vanet.csv";
+	uint32_t maxRun = RngSeedManager::GetRun ();
+
+	// Open CSV file and write header
+	g_out.open(m_CSVfileName.c_str());
+	g_out << "id," <<
+		"m_range," <<
+		"param," <<
+		"buildings," <<
+		"nWifis," <<
+		"circCont," <<
+		"cover," <<
+		"circ," <<
+		"nums," <<
+		"slots," <<
+		"sent," <<
+		"received" << std::endl;
+
+	for (uint32_t runId = 1; runId <= maxRun; runId++)
+	{
+		RngSeedManager::SetRun (runId);
+
+		FBVanetExperiment experiment;
+		experiment.Configure (argc, argv);
+		experiment.Simulate ();
+	}
+
+	g_out.close ();
 }
