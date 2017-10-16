@@ -31,8 +31,8 @@
 namespace ns3 {
 
 static const uint32_t PROTOCOL_FB = 0;
-static const uint32_t PROTOCOL_STATIC_300 = 1;
-static const uint32_t PROTOCOL_STATIC_1000 = 2;
+static const uint32_t PROTOCOL_STATIC_300 = 300;
+static const uint32_t PROTOCOL_STATIC_500 = 500;
 
 /**
  * \ingroup network
@@ -74,9 +74,10 @@ public:
 
 	/**
 	 * \brief Print value of some useful field
+	 * \param dataStream output data
 	 * \return none
 	 */
-	void PrintStats (void);
+	void PrintStats (std::stringstream &dataStream);
 
 private:
 	/**

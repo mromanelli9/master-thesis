@@ -78,19 +78,20 @@ FBApplication::~FBApplication ()
 void
 FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t aoi, bool flooding, uint32_t cwMin, uint32_t cwMax)
 {
+
 	if (protocol == PROTOCOL_FB)
 	{
-		m_estimatedRange = 0;
+		m_estimatedRange = PROTOCOL_FB;
 		m_staticProtocol = false;
 	}
 	else if (protocol == PROTOCOL_STATIC_300)
 	{
-		m_estimatedRange = 300;
+		m_estimatedRange = PROTOCOL_STATIC_300;
 		m_staticProtocol = true;
 	}
-	else if (protocol == PROTOCOL_STATIC_1000)
+	else if (protocol == PROTOCOL_STATIC_500)
 	{
-		m_estimatedRange = 1000;
+		m_estimatedRange = PROTOCOL_STATIC_500;
 		m_staticProtocol = true;
 	}
 	else
@@ -223,6 +224,7 @@ FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 	maxi = std::max (LMBR, CMBR);
 
 	Vector position = fbNode->UpdatePosition ();
+
 	FBHeader fbHeader;
 	fbHeader.SetType (ALERT_MESSAGE);
 	fbHeader.SetMaxRange (maxi);
@@ -237,7 +239,7 @@ FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 	fbNode->Send (packet);
 
 	fbNode->SetSent(true);
-	StopNode (fbNode);
+	// StopNode (fbNode);
 }
 
 void
@@ -298,7 +300,7 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 				{
 					uint32_t sl = fbHeader.GetSlot ();
 					fbNode->SetSlot (fbNode->GetSlot() + sl);
-					StopNode (fbNode);
+					// StopNode (fbNode);
 					fbNode->SetReceived (true);
 					if (fbNode->GetNum( ) == 0)
 						fbNode->SetNum (phase);
@@ -458,11 +460,12 @@ FBApplication::GetFBNode (Ptr<Node> node)
 }
 
 void
-FBApplication::PrintStats (void)
+FBApplication::PrintStats (std::stringstream &dataStream)
 {
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("------------------ STATISTICS ------------------");
 
+	uint32_t bord= (4000/300)-1;
 	uint32_t cover=1;
 	uint32_t circ = 0, circCont = 0;
 	for (uint32_t i = 0; i < m_nNodes; i++)
@@ -492,34 +495,29 @@ FBApplication::PrintStats (void)
 			cover++;
 	}
 
-	NS_LOG_INFO ("Actual range: " << m_actualRange << " meter.");
-	std::string protocolName = "";
-	if (m_estimatedRange == 0)
-		protocolName = "FAST_BROADCAST";
-	else if (m_estimatedRange == 300)
-		protocolName = "STATIC_300";
-	else
-		protocolName = "STATIC_1000";
-	NS_LOG_INFO ("Protocol used: " << protocolName << ".");
-	NS_LOG_INFO ("Total number of vehicles: " << m_nNodes << ".");
-	NS_LOG_INFO ("Number of vehicles covered (whole area): "
-									<< ((double)cover/(double)m_nNodes)*100 << "% ("
-									<< cover << "/" << m_nNodes << ").");
-	NS_LOG_INFO ("Number of vehicles covered (outer limit): "
-									<< ((double)circ/(double)circCont)*100 << "% ("
-									<< circ << "/" << circCont << ").");
-
-	uint32_t bord = (4000 / 300) -1;
-	std::string nums = "";
+	std::stringstream nums;
+	nums << "\"";
 	for (uint i=0; i<(bord*4); i++)
 	{
-		nums += std::to_string (m_nodes.at (i)->GetNum());
-		nums += " ";
+		nums << m_nodes.at(i)->GetNum() << ",";
 	}
-	NS_LOG_INFO ("Nums: " << nums << ".");
+	nums << "\"";
 
-	NS_LOG_INFO ("Total messages sent: " << m_sent << ".");
-	NS_LOG_INFO ("Total messages received: " << m_received << ".");
+	std::stringstream slots;
+	slots << "\"";
+	for (uint i=0; i<(bord*4); i++)
+	{
+		slots << m_nodes.at(i)->GetSlot() << ",";
+	}
+	slots << "\"";
+
+	dataStream << circCont << ","
+			<< cover << ","
+			<< circ << ","
+			<< nums.str () << ","
+			<< slots.str () << ","
+			<< m_sent << ","
+			<< m_received;
 }
 
 uint32_t

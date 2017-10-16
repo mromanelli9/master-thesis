@@ -215,6 +215,7 @@ private:
 	std::string												m_traceFile;
 	std::string												m_bldgFile;
 	std::string												m_animationFileName;
+	std::string												m_CSVfileName;
 	double														m_TotalSimTime;
 };
 
@@ -233,7 +234,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_actualRange (300),
 		m_startingNode (0),
 		m_staticProtocol (1),
-		m_flooding (1),
+		m_flooding (0),
 		m_alertGeneration (20),
 		m_areaOfInterest (1000),
 		m_mobility (1),
@@ -243,9 +244,12 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_traceFile (""),
 		m_bldgFile (""),
 		m_animationFileName ("fb-vanet.animation.xml"),
+		m_CSVfileName ("fb-vanet.csv"),
 		m_TotalSimTime (30)
 {
 	srand (time (0));
+
+	RngSeedManager::SetSeed (time (0));
 }
 
 FBVanetExperiment::~FBVanetExperiment ()
@@ -266,11 +270,11 @@ FBVanetExperiment::Simulate (int argc, char **argv)
 	ConfigureConnections ();
 	ConfigureTracingAndLogging ();
 
-	// Configure FB Application
 	ConfigureFBApplication ();
 
 	// Run simulation and print some results
 	RunSimulation ();
+
 	ProcessOutputs ();
 }
 
@@ -288,7 +292,7 @@ FBVanetExperiment::ConfigureDefaults ()
 	else if (m_staticProtocol == 2)
 		m_staticProtocol = PROTOCOL_STATIC_300;
 	else if (m_staticProtocol == 3)
-		m_staticProtocol = PROTOCOL_STATIC_1000;
+		m_staticProtocol = PROTOCOL_STATIC_500;
 }
 
 void
@@ -320,16 +324,16 @@ FBVanetExperiment::ConfigureMobility ()
 		MobilityHelper mobility;
 
 		// Install nodes in a constant velocity mobility model
-		mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
+		mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
 		mobility.SetPositionAllocator (m_adhocPositionAllocator);
 		mobility.Install (m_adhocNodes);
 
 		// Set the velocity value (constant) to zero
-		for (uint32_t i = 0 ; i < m_nNodes; i++)
-		{
-			Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
-			mob->SetVelocity (Vector(0, 0, 0));
-		}
+		// for (uint32_t i = 0 ; i < m_nNodes; i++)
+		// {
+		// 	Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
+		// 	mob->SetVelocity (Vector(0, 0, 0));
+		// }
 	}
 	else if (m_mobility == 2)
 	{
@@ -420,6 +424,32 @@ FBVanetExperiment::ConfigureTracingAndLogging ()
 	NS_LOG_FUNCTION (this);
 
 	Packet::EnablePrinting ();
+
+	// If CSV filename is the default one, rewrite it
+	if (m_CSVfileName == "fb-vanet.csv")
+	{
+		std::stringstream filename;
+		filename << "fb-vanet_" << m_actualRange << "_" << m_staticProtocol << "_" << m_loadBuildings << ".csv";
+		m_CSVfileName = filename.str();
+	}
+
+	// Open CSV file and write header
+
+	std::ofstream out (m_CSVfileName.c_str ());
+  out << "id," <<
+    "m_range," <<
+    "param," <<
+		"buildings," <<
+    "nWifis," <<
+    "circCont," <<
+    "cover," <<
+    "circ," <<
+    "nums," <<
+    "slots," <<
+    "sent," <<
+    "received" <<
+    std::endl;
+  out.close ();
 }
 
 void
@@ -427,6 +457,10 @@ FBVanetExperiment::ConfigureFBApplication ()
 {
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure FB application.");
+
+	// Delete pre-existing application
+	if (m_fbApplication)
+		m_fbApplication = 0;
 
 	// Create the application and schedule start and end time
 	m_fbApplication = CreateObject<FBApplication> ();
@@ -468,6 +502,7 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("scenario", "1=grid layout, 2=real world", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
 	cmd.AddValue ("animation", "Enable netanim animation.", m_animation);
+	cmd.AddValue ("CSVfileName", "The name of the CSV output file name", m_CSVfileName);
 	cmd.AddValue ("totalTime", "Simulation end time", m_TotalSimTime);
 
 	cmd.Parse (argc, argv);
@@ -491,7 +526,7 @@ FBVanetExperiment::SetupScenario ()
 
 		m_txp = 7.5;
 		m_TotalSimTime = 990000.0;
-		m_alertGeneration = 45000 - 500; // 500 = fbApplication start time
+		m_alertGeneration = 45000 + 500; // 500 = fbApplication start time
 		m_areaOfInterest = 1000;
 		m_mobility = 1;
 		m_bldgFile = "Griglia.poly.xml";
@@ -597,7 +632,7 @@ void
 FBVanetExperiment::RunSimulation ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Run simulation...");
+	NS_LOG_INFO ("Run simulation.");
 
 	Run ();
 }
@@ -608,7 +643,17 @@ FBVanetExperiment::ProcessOutputs ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Process outputs.");
 
-	m_fbApplication->PrintStats ();
+	std::stringstream dataStream;
+	m_fbApplication->PrintStats (dataStream);
+
+	std::ofstream out (m_CSVfileName.c_str (), std::ios::app);
+	out << RngSeedManager::GetRun () << ","
+			<< m_actualRange << ","
+			<< m_staticProtocol << ","
+			<< m_loadBuildings << ","
+			<< m_nNodes << ","
+			<< dataStream.str () << std::endl;
+	out.close ();
 }
 
 void
@@ -626,9 +671,9 @@ FBVanetExperiment::Run ()
 		// anim.EnableIpv4L3ProtocolCounters (Seconds (1), Seconds (m_TotalSimTime));
 		// anim.EnableWifiMacCounters (Seconds (1), Seconds (m_TotalSimTime));
 		// anim.EnableWifiPhyCounters (Seconds (1), Seconds (m_TotalSimTime));
-
-		Simulator::Stop (Seconds (m_TotalSimTime));
 	}
+
+	Simulator::Stop (Seconds (m_TotalSimTime));
 
 	Simulator::Run ();
 
