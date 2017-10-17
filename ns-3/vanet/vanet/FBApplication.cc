@@ -341,7 +341,7 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader)
 	Vector senderPosition = fbHeader.GetPosition ();
 
 	// Compute distance
-	double distance_double = CalculateDistance (senderPosition, currentPosition);
+	double distance_double = ComputeDistance (senderPosition, currentPosition);
 	uint32_t distance = std::floor (distance_double);
 
 	// Update new values
@@ -464,50 +464,55 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 {
 	NS_LOG_FUNCTION (this);
 
-	uint32_t bord= (4000/300)-1;
-	uint32_t cover=1;
+	uint32_t vehicleDist = 14;	// NB: Warning: check this value when you change scenario
+	uint32_t cover = 1;	// 'cause we count m_startingNode
 	uint32_t circ = 0, circCont = 0;
-	for (uint32_t i = 0; i < m_nNodes; i++)
-	{
-		Ptr<FBNode> current = m_nodes.at (i);
-		Ptr<FBNode> startingNode = m_nodes.at (m_startingNode);
 
-		// NB: UpdatePosition will cause an assert error in constant-velocity-helper.cc
-		Vector currentPosition = current->GetPosition ();
-		Vector startingNodePosition = startingNode->GetPosition ();
-		// Vector currentPosition = current->UpdatePosition ();
-		// Vector startingNodePosition = startingNode->UpdatePosition ();
-
-		double distStart = CalculateDistance (currentPosition, startingNodePosition);
-
-		uint32_t dist = 12; 	// TODO cambiare (distanza fra mezzi)
-		uint32_t rCirc = 1000;
-		if (i != m_startingNode && distStart > 0 &&
-				((distStart - rCirc <= (dist/2) && distStart - rCirc >= 0) || (rCirc - distStart <= (dist/2) && distStart - rCirc <= 0)))
-		{
-			circCont++;
-			if (current->GetReceived ())
-				circ++;
-		}
-
-		if (current->GetReceived ())
-			cover++;
-	}
+	double radiusMin = m_aoi - vehicleDist;
+	double radiusMax = m_aoi + vehicleDist;
 
 	std::stringstream nums;
-	nums << "\"";
-	for (uint i=0; i<(bord*4); i++)
-	{
-		nums << m_nodes.at(i)->GetNum() << ",";
-	}
-	nums << "\"";
-
 	std::stringstream slots;
+
+	nums << "\"";
 	slots << "\"";
-	for (uint i=0; i<(bord*4); i++)
+
+	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
-		slots << m_nodes.at(i)->GetSlot() << ",";
+		// Skip the starting node
+		if (i == m_startingNode)
+			continue;
+
+		Ptr<FBNode> current = m_nodes.at (i);
+
+		// Update the total cover value
+		if (current->GetReceived ())
+			cover++;
+
+		// Compute cover on circumference of radius m_aoi
+		Ptr<FBNode> startingNode = m_nodes.at (m_startingNode);
+
+		Vector currentPosition = current->GetPosition ();
+		Vector startingNodePosition = startingNode->GetPosition ();
+
+		double distance = ComputeDistance (currentPosition, startingNodePosition);
+
+		// Check if the current vehicle is in the circumference and within the range
+		if ((distance >= radiusMin) && (distance <= radiusMax))
+		{
+			// Update the number of vehicles in the circumference
+			circCont++;
+
+			// Update the cover value
+			if (current->GetReceived ())
+				circ++;
+
+			// Update the count of nums and slots
+			nums << current->GetNum() << ",";
+			slots << current->GetSlot() << ",";
+		}
 	}
+	nums << "\"";
 	slots << "\"";
 
 	dataStream << circCont << ","

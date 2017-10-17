@@ -86,6 +86,12 @@ public:
 	 */
 	void Simulate ();
 
+	/**
+	 * \brief Process outputs
+	 * \return none
+	 */
+	void ProcessOutputs ();
+
 protected:
 	/**
 	 * \brief Process command line arguments
@@ -148,12 +154,6 @@ protected:
 	 * \return none
 	 */
 	void RunSimulation ();
-
-	/**
-	 * \brief Process outputs
-	 * \return none
-	 */
-	void ProcessOutputs ();
 
 private:
 	/**
@@ -287,8 +287,6 @@ FBVanetExperiment::Simulate ()
 
 	// Run simulation and print some results
 	RunSimulation ();
-
-	ProcessOutputs ();
 }
 
 void
@@ -356,10 +354,17 @@ FBVanetExperiment::ConfigureMobility ()
 
 		ns2.Install (); // configure movements for each node, while reading trace file
 
+		// Disable movements
+		for (uint32_t i = 0 ; i < m_nNodes; i++)
+		{
+			Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
+			mob->SetVelocity (Vector(0, 0, 0));
+		}
+
 		// Configure callback for logging
-		// std::ofstream m_os;
-		// Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
-		// 								 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
+		std::ofstream m_os;
+		Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
+										 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
 	}
 	else
 		NS_LOG_ERROR ("Invalid mobility mode specified. Values must be [1-2].");
@@ -486,7 +491,7 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("alertGeneration", "Time at which the first Alert Message should be generated.", m_alertGeneration);
 	cmd.AddValue ("area", "Radius of the area of interest", m_areaOfInterest);
 	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
-	cmd.AddValue ("scenario", "1=grid layout, 2=real world", m_scenario);
+	cmd.AddValue ("scenario", "1=Padova, 2=Los Angeles", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
 	cmd.AddValue ("animation", "Enable netanim animation.", m_animation);
 	cmd.AddValue ("CSVfileName", "The name of the CSV output file name", m_CSVfileName);
@@ -503,107 +508,24 @@ FBVanetExperiment::SetupScenario ()
 
 	if (m_scenario == 1)
 	{
-		// Barichello's Grid
-		uint32_t road = 4000;	// meter
-		uint32_t block = 300;	// meters
-		uint32_t bord= (road / block) - 1;
-		// uint32_t rCirc = 1000;
-		uint32_t dist = 12;
-		m_startingNode = (dist = 12) ? 2242 : 1137;
+		// Padova
+		m_bldgFile = "Padova.poly.xml";
+		m_traceFile = "Padova.ns2mobility.xml";
 
 		m_txp = 7.5;
 		m_TotalSimTime = 990000.0;
 		m_alertGeneration = 45000 + 500; // 500 = fbApplication start time
 		m_areaOfInterest = 1000;
-		m_mobility = 1;
-		m_bldgFile = "Griglia.poly.xml";
+		m_mobility = 2;
 
-		m_adhocPositionAllocator = CreateObject<ListPositionAllocator> ();
-
-		// Position of the nodes
-		// Left side
-		uint32_t borders = 0, cont = 0;
-		while (cont < bord)
-		{
-			m_adhocNodes.Add(CreateObject<Node> ());
-			m_adhocPositionAllocator->Add (Vector (0.0, (cont+1) * block, 0.0));
-
-			cont++;
-			borders++;
-			m_nNodes++;
-		}
-
-		// Bottom side
-		cont = 0;
-		while (cont < bord)
-		{
-			m_adhocNodes.Add(CreateObject<Node> ());
-			m_adhocPositionAllocator->Add (Vector ((cont + 1) * block, road, 0.0));
-
-			cont++;
-			borders++;
-			m_nNodes++;
-		}
-
-		// Right side
-		cont = 0;
-		while (cont < bord)
-		{
-			m_adhocNodes.Add(CreateObject<Node> ());
-			m_adhocPositionAllocator->Add (Vector (road, (cont + 1) * block, 0.0));
-
-			cont++;
-			borders++;
-			m_nNodes++;
-		}
-
-		// Top side
-		cont = 0;
-		while (cont < bord)
-		{
-			m_adhocNodes.Add(CreateObject<Node> ());
-			m_adhocPositionAllocator->Add (Vector ((cont + 1) * block, 0.0, 0.0));
-
-			cont++;
-			borders++;
-			m_nNodes++;
-		}
-
-		// Other nodes
-		for (uint32_t i = 0; i < bord; i++)
-		{
-			int r=road;
-			int d=dist;
-			while(r>0)
-			{
-				m_adhocNodes.Add (CreateObject<Node> ());
-				m_adhocPositionAllocator->Add (Vector ((i+1)*300, d, 0.0));
-
-				borders++;
-				d = d + dist;
-				r = r - dist;
-				m_nNodes++;
-			}
-		}
-		for (uint32_t i=0; i < bord; i++)
-		{
-			int r = road;
-			int d = dist;
-			while(r > 0)
-			{
-				m_adhocNodes.Add (CreateObject<Node> ());
-				m_adhocPositionAllocator->Add (Vector (d, (i+1)*300, 0.0));
-
-				borders++;
-				d = d + dist;
-				r = r - dist;
-				m_nNodes++;
-			}
-		}
+		m_nNodes = 11938;
+		m_startingNode = 1463;
 	}
 	else if (m_scenario == 2)
 	{
-		// Real word scenario
+		// L.A.
+		m_bldgFile = "LA.poly.xml";
+		m_traceFile = "LA.ns2mobility.xml";
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
@@ -745,9 +667,12 @@ int main (int argc, char *argv[])
 	{
 		RngSeedManager::SetRun (runId);
 
-		FBVanetExperiment experiment;
-		experiment.Configure (argc, argv);
-		experiment.Simulate ();
+		{
+			FBVanetExperiment experiment;
+			experiment.Configure (argc, argv);
+			experiment.Simulate ();
+			experiment.ProcessOutputs ();
+		}
 	}
 
 	g_out.close ();
