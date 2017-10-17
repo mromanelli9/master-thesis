@@ -505,11 +505,13 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 
 			// Update the cover value
 			if (current->GetReceived ())
+			{
 				circ++;
 
-			// Update the count of nums and slots
-			nums << current->GetNum() << ",";
-			slots << current->GetSlot() << ",";
+				// Update the count of nums and slots
+				nums << current->GetNum() << ",";
+				slots << current->GetSlot() << ",";
+			}
 		}
 	}
 	nums << "\"";
