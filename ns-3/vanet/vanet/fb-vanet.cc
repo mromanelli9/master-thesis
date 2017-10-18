@@ -45,12 +45,114 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("fb-vanet");
 
-std::ofstream g_out;	// output file handler
-
 /* -----------------------------------------------------------------------------
 *			CLASS AND METHODS PROTOTIPES
 * ------------------------------------------------------------------------------
 */
+
+class CSVManager
+{
+public:
+	CSVManager ();
+	~CSVManager ();
+
+	void Setup (std::string filename);
+
+	void WriteHeader(std::string header);
+
+	void AddValue(int value);
+	void AddValue(double value);
+	void AddValue(std::string value);
+	void AddValue(std::stringstream value);
+	void AddMultipleValues(std::stringstream& value);
+
+	void CloseRow(void);
+
+private:
+	std::string					m_csvFilename;
+	std::stringstream		m_currentRow;
+};
+
+CSVManager::CSVManager ()
+:	m_csvFilename ("")
+{
+	NS_LOG_FUNCTION (this);
+}
+
+CSVManager::~CSVManager ()
+{
+	NS_LOG_FUNCTION (this);
+}
+
+void
+CSVManager::Setup (std::string filename)
+{
+	NS_LOG_FUNCTION (this);
+
+	m_csvFilename = filename;
+}
+
+void
+CSVManager::WriteHeader (std::string header)
+{
+	NS_LOG_FUNCTION (this);
+
+	std::ofstream out (m_csvFilename.c_str ());
+	out << header.c_str() << std::endl;
+	out.close ();
+}
+
+void
+CSVManager::AddValue(std::stringstream value)
+{
+	NS_LOG_FUNCTION (this);
+
+	m_currentRow << value << ",";
+}
+
+void
+CSVManager::AddValue(int value)
+{
+	NS_LOG_FUNCTION (this);
+
+	m_currentRow << value << ",";
+}
+
+void
+CSVManager::AddValue(double value)
+{
+	NS_LOG_FUNCTION (this);
+
+	m_currentRow << value << ",";
+}
+
+void
+CSVManager::AddValue(std::string value)
+{
+	NS_LOG_FUNCTION (this);
+
+	m_currentRow << value << ",";
+}
+
+void
+CSVManager::AddMultipleValues(std::stringstream& value)
+{
+	NS_LOG_FUNCTION (this);
+
+	m_currentRow << value.str();
+}
+
+void
+CSVManager::CloseRow (void)
+{
+	NS_LOG_FUNCTION (this);
+
+	std::ofstream out (m_csvFilename.c_str (), std::ios::app);
+	out << m_currentRow.rdbuf() << std::endl;
+	out.close ();
+}
+
+CSVManager			g_csvData; // CSV file manager
 
 /**
  * \ingroup obstacle
@@ -562,12 +664,14 @@ FBVanetExperiment::ProcessOutputs ()
 	std::stringstream dataStream;
 	m_fbApplication->PrintStats (dataStream);
 
-	g_out << RngSeedManager::GetRun () << ","
-			<< m_actualRange << ","
-			<< m_staticProtocol << ","
-			<< m_loadBuildings << ","
-			<< m_nNodes << ","
-			<< dataStream.str () << std::endl;
+	g_csvData.AddValue((int) RngSeedManager::GetRun ());
+	g_csvData.AddValue((int) m_scenario);
+	g_csvData.AddValue((int) m_actualRange);
+	g_csvData.AddValue((int) m_staticProtocol);
+	g_csvData.AddValue((int) m_loadBuildings);
+	g_csvData.AddValue((int) m_nNodes);
+	g_csvData.AddMultipleValues(dataStream);
+	g_csvData.CloseRow ();
 }
 
 void
@@ -655,20 +759,11 @@ int main (int argc, char *argv[])
 	std::string m_CSVfileName = "fb-vanet.csv";
 	uint32_t maxRun = RngSeedManager::GetRun ();
 
-	// Open CSV file and write header
-	g_out.open(m_CSVfileName.c_str());
-	g_out << "id," <<
-		"m_range," <<
-		"param," <<
-		"buildings," <<
-		"nWifis," <<
-		"circCont," <<
-		"cover," <<
-		"circ," <<
-		"nums," <<
-		"slots," <<
-		"sent," <<
-		"received" << std::endl;
+	// Manage data storage
+	g_csvData.Setup (m_CSVfileName);
+	g_csvData.WriteHeader ("\"id\",\"Scenario\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\
+											\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Hops\",\"Slots\",\
+											\"Messages sent\",\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
 	{
@@ -681,6 +776,4 @@ int main (int argc, char *argv[])
 			experiment.ProcessOutputs ();
 		}
 	}
-
-	g_out.close ();
 }
