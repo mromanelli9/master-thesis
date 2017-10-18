@@ -309,16 +309,16 @@
 	  \textit{Relatore} \hfill \textit{Candidato}\\
 	  \vspace{1pt}
 	  \@advisor \hfill \@author\\
-	  Università di Padova \\
+	  % Università di Padova \\
 	  \vspace{6pt}
-	  % \textit{Co-supervisor} \\
-	  % \@coadvisorOne \\
+	  \textit{Co-relatore} \\
+	  \@coadvisorOne \\
 	  % \@coadvisorOneUniversity
 	  % \vspace{10pt}
 	\end{flushleft}
 	\end{normalsize}
 
-	\vspace{100pt}
+	\vspace{50pt}
 	\small{Anno Accademico \@academicyear} \\
 
 	\end{center}
