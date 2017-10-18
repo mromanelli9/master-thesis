@@ -53,7 +53,7 @@ MOBILITY_FILE="$BASENAME.ns2mobility.xml"
 $NETCONVERT_CC --osm-files="$OSM_FILE" -o "$NET_FILE" &&
 
 # Generate buildings
-$POLYCONVERT_CC --osm-files="$OSM_FILE" --net-file="$NET_FILE" --osm.keep-full-type=true -o "$BUILDINGS_FILE" &&
+$POLYCONVERT_CC --osm-files="$OSM_FILE" --net-file="$NET_FILE" --shapefile.add-param=true --prune.in-net=true --prune.explicit="fountain" -o "$BUILDINGS_FILE" &&
 
 # Generate routes
 $RANDOM_TRIPS_CC -n "$NET_FILE" -e "$SIMULATION_END_TIME" -o "$ROUTES_FILE" &&
