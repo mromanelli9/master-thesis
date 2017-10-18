@@ -68,6 +68,7 @@ FBApplication::FBApplication ()
 	NS_LOG_FUNCTION (this);
 
 	srand (time (0));
+	RngSeedManager::SetSeed (time (0));
 }
 
 FBApplication::~FBApplication ()

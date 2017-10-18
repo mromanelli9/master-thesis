@@ -526,6 +526,15 @@ FBVanetExperiment::SetupScenario ()
 		// L.A.
 		m_bldgFile = "LA.poly.xml";
 		m_traceFile = "LA.ns2mobility.xml";
+
+		m_txp = 7.5;
+		m_TotalSimTime = 990000.0;
+		m_alertGeneration = 45000 + 500; // 500 = fbApplication start time
+		m_areaOfInterest = 1000;
+		m_mobility = 2;
+
+		m_nNodes = 15429;
+		m_startingNode = 13545;
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
