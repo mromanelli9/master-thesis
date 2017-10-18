@@ -1,7 +1,7 @@
 #!/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
 """
 @file    randomPositions.py
-@author  Marco Romanelli, marco.romanelli.1@studenti.unipd.it
+@author  Marco Romanelli [marco.romanelli.1@studenti.unipd.it]
 @date    2017-10-12
 """
 
@@ -103,7 +103,7 @@ def main(options):
 
 			tripId += 1
 
-	print("[+] I created %d vehicles." % (tripId + 1))
+	print("[+] I created %d vehicles." % tripId)
 	print("[+] Writing trips file.")
 
 	with open(options.tripfile, 'w') as fouttrips:
