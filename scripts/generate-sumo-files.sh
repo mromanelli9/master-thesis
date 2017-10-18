@@ -11,6 +11,10 @@ RANDOM_TRIPS_CC="$(which sumo-randomTrips)"
 SUMO_CC="$(which sumo)"
 TRACE_EXPORTER="$(which sumo-traceExporter)"
 
+CUSTOM_SCRIPT_DIR="$HOME/GitLab/tesi/scripts/"
+RANDOM_POSITION="$CUSTOM_SCRIPT_DIR/sumo-randomPositions.py"
+PRUNE_POLY="$CUSTOM_SCRIPT_DIR/prunePoly.py"
+
 # Check if software exitsts
 I="0"
 if [ "$NETCONVERT_CC" == "" ]; then
@@ -43,6 +47,7 @@ fi
 # Generate data
 NET_FILE="$BASENAME.net.xml"
 BUILDINGS_FILE="$BASENAME.poly.xml"
+BUILDINGS_FILE_2="$BASENAME.poly.2.xml"
 ROUTES_FILE="$BASENAME.trips.xml"
 SUMO_CFG_FILE="$BASENAME.sumo.cfg"
 TRACE_FILE="$BASENAME.trace.xml"
@@ -51,13 +56,19 @@ MOBILITY_FILE="$BASENAME.ns2mobility.xml"
 
 # Generate network
 $NETCONVERT_CC --osm-files="$OSM_FILE" -o "$NET_FILE" &&
+sleep 1 &&
 
 # Generate buildings
 $POLYCONVERT_CC --osm-files="$OSM_FILE" --net-file="$NET_FILE" --shapefile.add-param=true --prune.in-net=true --prune.explicit="fountain" -o "$BUILDINGS_FILE" &&
+sleep 1 &&
+
+# Prune buildings
+$PRUNE_POLY --poly-file="$BUILDINGS_FILE" --output-file="$BUILDINGS_FILE_2" &&
+sleep 1 &&
 
 # Generate routes
-$RANDOM_TRIPS_CC -n "$NET_FILE" -e "$SIMULATION_END_TIME" -o "$ROUTES_FILE" &&
-
+$RANDOM_POSITION -n "$NET_FILE" -o "$ROUTES_FILE"  &&
+sleep 1 &&
 
 # Generate config file
 cat >> "$SUMO_CFG_FILE" <<EOF
@@ -76,10 +87,11 @@ cat >> "$SUMO_CFG_FILE" <<EOF
     </time>
 </configuration>
 EOF
-
-sleep 2
+sleep 2 &&
 
 $SUMO_CC -c "$SUMO_CFG_FILE"  &&
+sleep 1 &&
+
 $TRACE_EXPORTER -i "$TRACE_FILE" --ns2mobility-out "$MOBILITY_FILE"
 
 # Exit
