@@ -38,7 +38,6 @@
 #include "ns3/topology.h"
 #include "ns3/wifi-80211p-helper.h"
 #include "ns3/wave-mac-helper.h"
-#include "ns3/netanim-module.h"
 
 #include "FBApplication.h"
 
@@ -176,13 +175,8 @@ CSVManager::EnableAlternativeFilename(std::string base)
 	gettimeofday(&tp, NULL);
 	long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
 
-	// Get program name
-	CommandLine cmd;
-	std::string name = cmd.GetName ();
-
 	// Create the new filename
 	new_filename.append(base);
-	new_filename.append(name);
 	new_filename.append(separators, 1, 1);	// only '_'
 	new_filename.append(std::to_string(ms));
 	new_filename.append(extension);
@@ -411,14 +405,10 @@ private:
 	uint32_t													m_flooding;
 	uint32_t													m_alertGeneration;
 	uint32_t													m_areaOfInterest;
-	uint32_t													m_mobility;
 	uint32_t													m_scenario;
 	uint32_t													m_loadBuildings;
-	uint32_t													m_animation;
 	std::string												m_traceFile;
 	std::string												m_bldgFile;
-	std::string												m_animationFileName;
-	std::string												m_CSVfileName;
 	double														m_TotalSimTime;
 };
 
@@ -440,14 +430,10 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_flooding (0),
 		m_alertGeneration (20),
 		m_areaOfInterest (1000),
-		m_mobility (1),
 		m_scenario (1),
 		m_loadBuildings (0),
-		m_animation (0),
 		m_traceFile (""),
 		m_bldgFile (""),
-		m_animationFileName ("fb-vanet.animation.xml"),
-		m_CSVfileName ("fb-vanet.csv"),
 		m_TotalSimTime (30)
 {
 	srand (time (0));
@@ -523,46 +509,25 @@ void
 FBVanetExperiment::ConfigureMobility ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Configure current mobility mode (" << m_mobility << ").");
+	NS_LOG_INFO ("Configure current mobility mode.");
 
-	if (m_mobility == 1)
+	// Create Ns2MobilityHelper with the specified trace log file as parameter
+	Ns2MobilityHelper ns2 = Ns2MobilityHelper (m_traceFile);
+	NS_LOG_INFO ("Loading ns2 mobility file \"" << m_traceFile << "\".");
+
+	ns2.Install (); // configure movements for each node, while reading trace file
+
+	// Disable movements
+	for (uint32_t i = 0 ; i < m_nNodes; i++)
 	{
-		MobilityHelper mobility;
-
-		// Install nodes in a constant velocity mobility model
-		mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-		mobility.SetPositionAllocator (m_adhocPositionAllocator);
-		mobility.Install (m_adhocNodes);
-
-		// Set the velocity value (constant) to zero
-		// for (uint32_t i = 0 ; i < m_nNodes; i++)
-		// {
-		// 	Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
-		// 	mob->SetVelocity (Vector(0, 0, 0));
-		// }
+		Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
+		mob->SetVelocity (Vector(0, 0, 0));
 	}
-	else if (m_mobility == 2)
-	{
-		// Create Ns2MobilityHelper with the specified trace log file as parameter
-		Ns2MobilityHelper ns2 = Ns2MobilityHelper (m_traceFile);
-		NS_LOG_INFO ("Loading ns2 mobility file \"" << m_traceFile << "\".");
 
-		ns2.Install (); // configure movements for each node, while reading trace file
-
-		// Disable movements
-		for (uint32_t i = 0 ; i < m_nNodes; i++)
-		{
-			Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
-			mob->SetVelocity (Vector(0, 0, 0));
-		}
-
-		// Configure callback for logging
-		std::ofstream m_os;
-		Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
-										 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
-	}
-	else
-		NS_LOG_ERROR ("Invalid mobility mode specified. Values must be [1-2].");
+	// Configure callback for logging
+	std::ofstream m_os;
+	Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
+									 MakeBoundCallback (&FBVanetExperiment::CourseChange, &m_os));
 }
 
 void
@@ -685,11 +650,8 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	cmd.AddValue ("flooding", "Enable flooding", m_flooding);
 	cmd.AddValue ("alertGeneration", "Time at which the first Alert Message should be generated.", m_alertGeneration);
 	cmd.AddValue ("area", "Radius of the area of interest", m_areaOfInterest);
-	cmd.AddValue ("mobility", "Node mobility: 1=stationary, 2=moving", m_mobility);
 	cmd.AddValue ("scenario", "1=Padova, 2=Los Angeles", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
-	cmd.AddValue ("animation", "Enable netanim animation.", m_animation);
-	cmd.AddValue ("CSVfileName", "The name of the CSV output file name", m_CSVfileName);
 	cmd.AddValue ("totalTime", "Simulation end time", m_TotalSimTime);
 
 	cmd.Parse (argc, argv);
@@ -710,7 +672,6 @@ FBVanetExperiment::SetupScenario ()
 		m_TotalSimTime = 990000.0;
 		m_alertGeneration = 45000 + 500; // 500 = fbApplication start time
 		m_areaOfInterest = 1000;
-		m_mobility = 2;
 
 		m_nNodes = 11938;
 		m_startingNode = 1463;
@@ -724,7 +685,6 @@ FBVanetExperiment::SetupScenario ()
 		m_TotalSimTime = 990000.0;
 		m_alertGeneration = 45000 + 500; // 500 = fbApplication start time
 		m_areaOfInterest = 1000;
-		m_mobility = 2;
 
 		m_nNodes = 15437;
 		m_startingNode = 13537;
@@ -771,18 +731,6 @@ void
 FBVanetExperiment::Run ()
 {
 	NS_LOG_FUNCTION (this);
-
-	if (m_animation != 0)
-	{
-		// Create the animation object and configure for specified output
-		AnimationInterface anim (m_animationFileName);
-		anim.SetMobilityPollInterval (Seconds (0.250));
-		anim.EnablePacketMetadata (true);
-		// TODO: this will cause a SIGSEGV
-		// anim.EnableIpv4L3ProtocolCounters (Seconds (1), Seconds (m_TotalSimTime));
-		// anim.EnableWifiMacCounters (Seconds (1), Seconds (m_TotalSimTime));
-		// anim.EnableWifiPhyCounters (Seconds (1), Seconds (m_TotalSimTime));
-	}
 
 	Simulator::Stop (Seconds (m_TotalSimTime));
 
@@ -852,6 +800,7 @@ int main (int argc, char *argv[])
 	uint32_t maxRun = RngSeedManager::GetRun ();
 
 	// Manage data storage
+	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet");	// cluster
 	g_csvData.EnableAlternativeFilename ("fb-vanet");
 	g_csvData.WriteHeader ("\"id\",\"Scenario\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Hops\",\"Slots\",\"Messages sent\",\"Messages received\"");
 
