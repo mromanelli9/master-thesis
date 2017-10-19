@@ -5,16 +5,12 @@ My version of barichello's code.
 ns-3.23+, Obstacle Shadowing Model
 
 ### Installation
-```
-cd vanet/
-cp -r vanet $NS3_HOME/scratch
-cp Griglia.poly.xml $NS3_HOME
-```
-where $NS3_HOME is your ns-3 main folder.
-Then compile the code (e.g. using waf utility).
+* Copy vanet folder into $NS3_HOME/scratch
+* Copy ns2 mobility file and polygon data file into $NS3_HOME
+* Compile code (e.g. using waf)
 
 ### Usage
-Inside the ns-3 main folder, run:
+Run vanet program:
 ```
 ./waf --run vanet
 ```
