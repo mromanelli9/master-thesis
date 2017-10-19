@@ -26,6 +26,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sys/time.h>
 
 #include "ns3/core-module.h"
 #include "ns3/node-list.h"
@@ -53,19 +54,78 @@ NS_LOG_COMPONENT_DEFINE ("fb-vanet");
 class CSVManager
 {
 public:
+	/**
+	 * \brief Constructor
+	 * \return none
+	 */
 	CSVManager ();
+
+	/**
+	 * \brief Destructor
+	 * \return none
+	 */
 	~CSVManager ();
 
+	/**
+	 * \brief Set the filename of the csv file
+	 * \param filename path of the file
+	 * \return none
+	 */
 	void Setup (std::string filename);
 
+	/**
+	 * \brief Write the header of the csv
+	 * \param header header of the csv
+	 * \return none
+	 */
 	void WriteHeader(std::string header);
 
+	/**
+	 * \brief Create a new filename adding a timestamp to a provided base
+	 * \param base first part of the new filename
+	 * \return none
+	 */
+	void EnableAlternativeFilename(std::string base);
+
+	/**
+	 * \brief Add a value (cell) in the current row
+	 * \param value int value to be written
+	 * \return none
+	 */
 	void AddValue(int value);
+
+	/**
+	 * \brief Add a value (cell) in the current row
+	 * \param value double value to be written
+	 * \return none
+	 */
 	void AddValue(double value);
+
+	/**
+	 * \brief Add a value (cell) in the current row
+	 * \param value string value to be written
+	 * \return none
+	 */
 	void AddValue(std::string value);
+
+	/**
+	 * \brief Add a value (cell) in the current row
+	 * \param value stream value to be written
+	 * \return none
+	 */
 	void AddValue(std::stringstream value);
+
+	/**
+	 * \brief Add multiple values in the current row
+	 * \param value stream to be written
+	 * \return none
+	 */
 	void AddMultipleValues(std::stringstream& value);
 
+	/**
+	 * \brief Write the current row and initilize a new one
+	 * \return none
+	 */
 	void CloseRow(void);
 
 private:
@@ -101,6 +161,35 @@ CSVManager::WriteHeader (std::string header)
 	out << header.c_str() << std::endl;
 	out.close ();
 }
+
+void
+CSVManager::EnableAlternativeFilename(std::string base)
+{
+	NS_LOG_FUNCTION (this);
+
+	std::string new_filename;
+	std::string separators = "/_,.";
+	std::string extension = ".csv";
+
+	// Get unix time
+	struct timeval tp;
+	gettimeofday(&tp, NULL);
+	long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+
+	// Get program name
+	CommandLine cmd;
+	std::string name = cmd.GetName ();
+
+	// Create the new filename
+	new_filename.append(base);
+	new_filename.append(name);
+	new_filename.append(separators, 1, 1);	// only '_'
+	new_filename.append(std::to_string(ms));
+	new_filename.append(extension);
+
+	m_csvFilename = new_filename;
+}
+
 
 void
 CSVManager::AddValue(std::stringstream value)
@@ -147,9 +236,13 @@ CSVManager::CloseRow (void)
 {
 	NS_LOG_FUNCTION (this);
 
+	// write current row
 	std::ofstream out (m_csvFilename.c_str (), std::ios::app);
 	out << m_currentRow.rdbuf() << std::endl;
 	out.close ();
+
+	// Delete (old) row
+	m_currentRow.str("");
 }
 
 CSVManager			g_csvData; // CSV file manager
@@ -756,14 +849,11 @@ int main (int argc, char *argv[])
 {
 	NS_LOG_UNCOND ("FB Vanet Experiment.");
 
-	std::string m_CSVfileName = "fb-vanet.csv";
 	uint32_t maxRun = RngSeedManager::GetRun ();
 
 	// Manage data storage
-	g_csvData.Setup (m_CSVfileName);
-	g_csvData.WriteHeader ("\"id\",\"Scenario\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\
-											\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Hops\",\"Slots\",\
-											\"Messages sent\",\"Messages received\"");
+	g_csvData.EnableAlternativeFilename ("fb-vanet");
+	g_csvData.WriteHeader ("\"id\",\"Scenario\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Hops\",\"Slots\",\"Messages sent\",\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
 	{
