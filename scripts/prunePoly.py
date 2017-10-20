@@ -57,10 +57,6 @@ def prunePoly(polyFilename, outputFilename):
 				root.remove(el)
 				end = False
 
-	for el in root:
-		if ("shape" in el.attrib):
-			el.attrib["shape"] += ' '
-
 	writeXml(outputFilename, xmlTree)
 
 def writeXml(filename, data):
