@@ -136,6 +136,10 @@ public:
    */
   double GetGamma();
 
+	/**
+   * \brief Gets the height of the obstacle in meters
+   * \return the height
+   */
 	double GetHeight();
 
   /**
@@ -154,6 +158,11 @@ public:
    */
   void SetGamma(double gamma);
 
+	/**
+   * \brief Sets the value of the height in meters
+   * \param height, the value of the height
+   * \return none
+   */
 	void SetHeight(double height);
 
 private:
@@ -179,7 +188,7 @@ private:
   double m_beta;  // per-wall attenuation parameter
   double m_gamma; // per-meter attenuation parameter
 
-	double m_height; // height of the building [in meters]
+	double m_height; // height of the obstacle [in meters]
 };
 
 }

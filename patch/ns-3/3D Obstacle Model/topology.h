@@ -131,9 +131,10 @@ public:
    * \brief Create a shape for the topolgy
    * \param id identifier (i.e., name) of the shape
    * \param vertices string of vertices that define the shape
+	 * \param height string containing the value of the height
    * \return none
    */
-  void CreateShape(std::string id, std::string vertices);
+  void CreateShape(std::string id, std::string vertices, std::string height);
 
   /**
    * \brief Create a vertex

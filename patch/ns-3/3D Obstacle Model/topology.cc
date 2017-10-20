@@ -122,12 +122,22 @@ CreateVertex(Obstacle &obstacle, std::string vertex)
 
 void
 Topology::
-CreateShape(std::string id, std::string vertices)
+CreateShape(std::string id, std::string vertices, std::string height)
 {
   // create an obstacle
   Obstacle obstacle;
   // name the obstacle
   obstacle.SetId(id);
+
+	// If height is defined, set it
+	if (!height.empty())
+		{
+			double h = atof(height.c_str ());
+			obstacle.SetHeight (h);
+		}
+
+	// Fix "hidden last vertex" problem
+	vertices.append(" ");
 
   // tokenize each vertex
   size_t pos1 = 0;
@@ -136,6 +146,7 @@ CreateShape(std::string id, std::string vertices)
   while (pos2 != std::string::npos)
     {
       vertex = vertices.substr(pos1, pos2-pos1);
+
       CreateVertex(obstacle, vertex);
       pos1 = pos2 + 1;
       pos2 = vertices.find(" ", pos1);
@@ -163,7 +174,10 @@ static Range_tree_2_type m_rangeTree;
 void
 Topology::LoadBuildings(std::string bldgFilename)
 {
-  NS_LOG_INFO ("Load buildings");
+  NS_LOG_INFO ("Load buildings.");
+
+	uint32_t nBuildings = 0;
+
   std::ifstream file (bldgFilename.c_str (), std::ios::in);
   if (!(file.is_open ()))
     {
@@ -185,8 +199,7 @@ Topology::LoadBuildings(std::string bldgFilename)
 
           size_t posB = line.find("type=\"building");
           size_t posU = line.find("type=\"unknown");
-          if ((posB != std::string::npos)
-              || (posU != std::string::npos))
+          if ((posB != std::string::npos) || (posU != std::string::npos))
             {
               // could *possibly* use XML-DOM here, but
               // seems faster to just read through the file
@@ -195,13 +208,15 @@ Topology::LoadBuildings(std::string bldgFilename)
               // get the building id (name) and shape (vertices)
               std::string polyid;
               std::string shape;
-              size_t pos = line.find("<poly id=\"");
-              if (pos != std::string::npos)
+							std::string height;
+              size_t posP = line.find("<poly");
+							size_t pos = line.find("id=\"");
+							if ((posP != std::string::npos) || (pos != std::string::npos))
                 {
-                  size_t pos2 = line.find("\"", pos + 11);
+                  size_t pos2 = line.find("\"", pos + 4);
                   if (pos2 != std::string::npos)
                     {
-                      polyid = line.substr(pos + 10, pos2 - pos - 10);
+                      polyid = line.substr(pos + 4, pos2 - (pos + 4));
                       pos = line.find("shape=\"");
                       if (pos != std::string::npos)
                       {
@@ -209,14 +224,28 @@ Topology::LoadBuildings(std::string bldgFilename)
                         if (pos2 != std::string::npos)
                         {
                           shape = line.substr(pos + 7, pos2 - pos - 7);
+
+													// Search for the height value
+													pos = line.find("height=\"");
+		                      if (pos != std::string::npos)
+														{
+															size_t pos2 = line.find("\"", pos + 8);
+			                        if (pos2 != std::string::npos)
+			                        {
+			                          height = line.substr(pos + 8, pos2 - (pos + 8));
+															}
+														}
+
+													topology->CreateShape(polyid, shape, height);
+													nBuildings++;
                         }
                       }
-                      topology->CreateShape(polyid, shape);
                     }
                 }
             }
         }
-      NS_LOG_INFO ("Topology buildings bounded by x:" << topology->GetMinX() << "," << topology->GetMaxX() << " y:" << topology->GetMinY() << "," << topology->GetMaxY());
+			NS_LOG_INFO ("Number of buildings found: " << nBuildings << ".");
+      NS_LOG_INFO ("Topology buildings bounded by x:" << topology->GetMinX() << "," << topology->GetMaxX() << " y:" << topology->GetMinY() << "," << topology->GetMaxY() << ".");
       // all obstacles have been loaded
       // so now create a searchable range tree based on those obstacles
       topology->MakeRangeTree();
