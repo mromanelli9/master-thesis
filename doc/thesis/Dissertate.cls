@@ -285,7 +285,7 @@
 
 	\setstretch{1.5}
 
-	\scshape{\Large{\bfseries{Università degli Studi di Padova}}} \\
+	\scshape{\Large{Università degli Studi di Padova}} \\
 	\line(1, 0){400} \\
 	\scshape{\large{Dipartimento di Matematica}} \\
 
