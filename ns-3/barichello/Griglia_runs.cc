@@ -1,6 +1,5 @@
 #include <fstream>
 #include <iostream>
-
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
@@ -13,8 +12,6 @@
 #include "ns3/dsr-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/netanim-module.h"
-#include "ns3/stats-module.h"
-
 
 using namespace ns3;
 //using namespace dsr;
@@ -23,9 +20,11 @@ NS_LOG_COMPONENT_DEFINE ("Wireless");
 
 //Avoid useless messages on the screen
 int state=-1;
-bool flooding=false;
+bool flooding=true;
 int received=0, sent=0;
+
 std::ofstream g_out;	// output file handler
+
 
 class RoutingExperiment
 {
@@ -219,9 +218,9 @@ RoutingExperiment::Broad (Ptr<Node> node, int phase, uint32_t rs, int sx, int sy
 		p->AddHeader(header);
 		Ptr<Socket>sock=node->getBroadcast();
 		//My address
-		// Ipv4Address addri = GetAddress(node);
+		Ipv4Address addri = GetAddress(node);
 		state=phase;
-		// std::cout<<"\n"<<addri<<" ("<<phase<< "): forwarding alert";
+		std::cout<<"\n"<<addri<<" ("<<phase<< "): forwarding alert";
 		sock->Send(p);
 		node->SetSent(true);
 		sent++;
@@ -312,8 +311,8 @@ RoutingExperiment::GenerateAlertTraffic (Ptr<Node> node, NodeContainer adhocNode
 	p->AddHeader(header);
 	Ptr<Socket> sock=node->getBroadcast();
 	//My address
-	// Ipv4Address addri = GetAddress(node);
-	// std::cout<<"\n"<<addri<<": sending Alert";
+	Ipv4Address addri = GetAddress(node);
+	std::cout<<"\n"<<addri<<": sending Alert";
 	sock->Send(p);
 	node->SetSent(true);
 	StopNode(node);
@@ -380,9 +379,9 @@ RoutingExperiment::Hello (NodeContainer adhocNodes, int count)
 void
 RoutingExperiment::PrintPositions (Ptr<Node> node)
 {
-	// Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
-	// Vector pos = positionmodel->GetPosition ();
-	// std::cout << "\nx= "<< pos.x << "; y=" << pos.y << "; z=" << pos.z;
+	Ptr<MobilityModel> positionmodel = node->GetObject<MobilityModel> ();
+	Vector pos = positionmodel->GetPosition ();
+	std::cout << "\nx= "<< pos.x << "; y=" << pos.y << "; z=" << pos.z;
 }
 
 //Stop a node
@@ -398,18 +397,14 @@ main (int argc, char *argv[])
 {
 	std::cout<<"Main\n";
 
-	std::string m_CSVfileName = "Griglia_runs.csv";
-
-	RoutingExperiment experiment;
-	experiment.CommandSetup (argc,argv);
 	double txp = 7.5;
+	unsigned int seconds = 2;
 
 	g_out.open(m_CSVfileName.c_str());
 	// g_out (m_CSVfileName.c_str (), std::ios::out | std::ios::app | std::ios::binary);
-	g_out << "id,time,m_range,param,nWifis,buildings,cover,circ,nums,slots,sent,received" << std::endl;
+	g_out << "id,m_range,param,nWifis,circCont,buildings,cover,circ,nums,slots,sent,received" << std::endl;
 
-	unsigned int seconds = 2;
-	for (uint32_t id = 1; id <= 10; id++)
+	for (uint32_t id = 1; id <= 50; id++)
 	{
 		g_out << id << ",";
 
@@ -418,8 +413,10 @@ main (int argc, char *argv[])
 		received=0;
 		sent=0;
 
-		std::cout<<"Starting #" << id << std::endl;
-		experiment.Run (txp, "griglia_runs_other.csv");
+		RoutingExperiment experiment;
+		std::string CSVfileName = experiment.CommandSetup (argc,argv);
+
+		experiment.Run (txp, "griglia_runs.csv");
 
 		// rest
 		sleep(seconds);
@@ -434,10 +431,10 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	Packet::EnablePrinting ();
 	m_txp = txp;
 
-	// std::cout<<"Setting parameters\n";
+	std::cout<<"Setting parameters\n";
 	srand(time(0));
 	//Starting CMFR, LMFR, CMBR and LMBR
-	int param = 0; //0 for FB, 300 for C300 and 1000 for C1000
+	int param = 300; //0 for FB, 300 for C300 and 1000 for C1000
 	//Number of cars
 	int nWifis = 0;
 	int dist=12;
@@ -469,7 +466,7 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 		Topology::LoadBuildings (m_bldgFile);
 	}
 
-	// std::cout<<"Creating nodes\n";
+	std::cout<<"Creating nodes\n";
 
 	//Left side
 	uint32_t borders=0, cont=0;
@@ -602,9 +599,9 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 		}
 	}
 
-	// std::cout<<"Nodes created\n";
+	std::cout<<"Nodes created\n";
 	//Nodes with constant speed
-	// std::cout<<"Setting mobility model\n";
+	std::cout<<"Setting mobility model\n";
 	mobility.SetPositionAllocator (positionAlloc);
 	mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
 	mobility.Install (adhocNodes);
@@ -614,7 +611,7 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 		//mob->SetVelocity(Vector(-1, 0, 0));
 		mob->SetVelocity(Vector(0, 0, 0));
 	}
-	// std::cout<<"Mobility model set\n";
+	std::cout<<"Mobility model set\n";
 
 	//Setting up wifi phy and channel using helpers
 	WifiHelper wifi;
@@ -655,7 +652,7 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 	onoff1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"));
 	onoff1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"));
 
-	// std::cout<<"Setting connections\n";
+	std::cout<<"Setting connections\n";
 	//Receiver j (da sistemare un attimo)
 	for (int j = 0; j < nWifis; j++)
 	{
@@ -673,16 +670,13 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 		//Add the socket to the node
 		adhocNodes.Get(i)->setBroadcast(sender);
 	}
-	// std::cout<<"Connections set\n";
 
 	//Hello messages
-	Simulator::Schedule (Seconds (500), &RoutingExperiment::Hello, adhocNodes, 60);
-	// std::cout<<"Hello scheduled\n";
+	// Schedule hello
+	//Simulator::Schedule (Seconds (500), &RoutingExperiment::Hello, adhocNodes, 60);
 
 	//Generate alert message
 	Simulator::ScheduleWithContext (adhocNodes.Get (start)->GetId (), Seconds (45000), &RoutingExperiment::GenerateAlertTraffic, adhocNodes.Get (start), adhocNodes);
-	// std::cout<<"Alert scheduled\n";
-	// std::cout<<"Run Simulation\n\n----------------------------------------\n";
 	NS_LOG_INFO ("Run Simulation.");
 
 	Simulator::Stop (Seconds (TotalTime));
@@ -707,36 +701,24 @@ RoutingExperiment::Run (double txp, std::string CSVfileName)
 		}
 		if(adhocNodes.Get(i)->GetReceived())
 			cover++;
-		else
-		{
-			// std::cout<<i<<" didn't receive: ("<<GetNodeXPosition(adhocNodes.Get (i))<<";"<<GetNodeYPosition(adhocNodes.Get (i))<<")\n";
-		}
-		if (!adhocNodes.Get(i)->GetSent())
-		{
-			// std::cout<<i<<" didn't send: ("<<GetNodeXPosition(adhocNodes.Get (i))<<";"<<GetNodeYPosition(adhocNodes.Get (i))<<")\n";
-		}
 	}
 
 	std::stringstream nums;
+	std::stringstream slots;
 	nums << "\"";
+	slots << "\"";
 	for (uint i=0; i<(bord*4); i++)
 	{
 		nums << adhocNodes.Get(i)->GetNum() << ",";
-	}
-	nums << "\"";
-
-	std::stringstream slots;
-	slots << "\"";
-	for (uint i=0; i<(bord*4); i++)
-	{
 		slots << adhocNodes.Get(i)->GetSlot() << ",";
 	}
+	nums << "\"";
 	slots << "\"";
 
-	g_out << (Simulator::Now ()).GetMilliSeconds () << ","
-			<< m_range << ","
+	g_out << m_range << ","
 			<< param << ","
 			<< nWifis << ","
+			<< circCont << ","
 			<< m_loadBuildings << ","
 			<< cover << ","
 			<< circ << ","
