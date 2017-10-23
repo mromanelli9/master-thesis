@@ -39,7 +39,11 @@ In~\cite{Giordano:2010:CST:1860058.1860065}, gli autori utilizzavano tecniche di
 informazioni sulla topologia della rete stradale in stile Manhattan. Da qui, veniva derivata la geometria degli edifici utilizzata
 per differenziare i casi in cui i due veicoli comunicanti avessero la visuale libera (LOS) o meno (\textit{Non Line Of Sight}, NLOS)
 e calcolare di conseguenza la potenza del segnale in ricezione.
-
-
-
-%
+In~\cite{4020783}, invece, le informazioni sugli edifici erano codificate direttamente all'interno dell'ambiente sviluppato, chiamato
+EGRESS (\textit{Enviroment for Generating REalistic Scenarios for Simulations}), e permettavano di definire tre tipologie di edificie altrettanti
+percorsi per simulare la mobilità dei nodi; il modello permette anche di configurare, con alcuni limiti, diversi tipi di materiale dei pavimenti e dei muri degli edifici.
+Gli autori di~\cite{Carpenter:2015:OMI:2756509.2756512} prendevano le informazioni per la geometria degli edifici da una piattaforma gratuita
+chiamata OpenStreetMap (OSM)~\cite{osmWebsite}; poi queste venivano elaborate da un software per la simuazione della mobilità di veicoli
+che generava un file contenente i dati sugli edifici e un altro per la mobilità dei veicoli;
+il modello di propagazione teneva conto della distanza interna percorsa del segnale e del numero di muri esterni che questo attraversava.
+% NB: ultima parte non bellissima
