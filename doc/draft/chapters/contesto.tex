@@ -25,14 +25,20 @@ così da creare un modello analitico per l'ombreggiatura~\cite{1492678}.
 Questo tipo di modelli riducono il costo computazionale e generalmente si raffrontano bene con i risultati reali;
 ciò nonostante, non riescono a catturare effetti a livello mesoscopico, come eventuali spazi fra edifici che permetterebbero trasmissioni a corto raggio~\cite{Giordano:2010:CST:1860058.1860065}.
 
-Sono affetti dallo stesso problema anche  i modelli (puramente) stocastici; questi modellano l'effetto dell'ombraggiatura tramite distribuzione stocastiche,
-fra cui Rice, Rayleigh, Nakagami-m, lognormale Weibull~\cite{6554832}~\cite{Rappaport:2001:WCP:559977}, in quanto non tengono in considerazione la geometria urbana sottostante.
+Sono affetti dallo stesso problema anche i modelli (puramente) probabilistici, in quanto non tengono in considerazione la geometria urbana sottostante.
+Questi modellano l'effetto dell'ombraggiatura tramite distribuzione stocastiche, fra cui Rice, Rayleigh, Nakagami-m, lognormale e Weibull~\cite{6554832}~\cite{Rappaport:2001:WCP:559977},
 %
 \section{Modellazione di ostacoli}
+Nelle simulazioni di alcuni scenari, come possono essere le VANET, un'accurata rappresentazione della topologia dell'ambiente è necessaria,
+in quanto questa limita non solo la mobilità dei veicoli ma interferisce anche con le trasmissioni radio~\cite{7543980}~\cite{amjad2015impact}.
+L'attenuazione radio viene spesso modellata in modo deterministico basandosi principalmente sulla distanza della visuale (\textit{Line Of Sight}, LOS)
+fra i veicoli, aggiungendo i modelli stocastici per considerare l'ombreggiatura.
 
-
-
-
+Negli ultimi anni, diversi studi hanno cercato di rappresentare l'effetto ombreggiatura causato dagli edifici.
+In~\cite{Giordano:2010:CST:1860058.1860065}, gli autori utilizzavano tecniche di geocodifica inversa (\textit{reverse geocoding}) per estrapolare
+informazioni sulla topologia della rete stradale in stile Manhattan. Da qui, veniva derivata la geometria degli edifici utilizzata
+per differenziare i casi in cui i due veicoli comunicanti avessero la visuale libera (LOS) o meno (\textit{Non Line Of Sight}, NLOS)
+e calcolare di conseguenza la potenza del segnale in ricezione.
 
 
 
