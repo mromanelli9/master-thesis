@@ -9,11 +9,13 @@ Dopo aver illustrato il protocollo in esame e il modello di propagazione utilizz
 Verranno prima illustrati brevemente il programma utilizzato per le simulazioni e gli applicativi di supporto.
 Il capitolo procederà, quindi, nel dettaglio delle varie simulazioni effettuate analizzando i relativi risultati.
 %
-\section{Applicativi}
+\section{Applicativi}\label{sec:applicativi}
 %
 % \section{Panoramica}
+%
 % - come sono strutturate le simulazioni?
 % - è importante fare simulazioni differenti (barichello e scenario reale, vedi paper)?
+%  - come genero i dati per le simulazioni reali?
 \section{Configurazione a griglia}
 \subsection{Panoramica}
 % Simulazioni codice barichello:
@@ -67,13 +69,37 @@ A fini statistici, la simulazione di ogni scenario è stata ripetuta per 50 volt
 \end{table}
 %
 \subsection{Risulati}
-
-
-
-
-
-
-
+%
+%%
+\section{Scenario urbano reale} % un titolo migliore no?
+Le configurazioni avevano il difetto di essere poco veritiere per quanto rigarda la topologia stradale.
+In questo gruppo di simulazioni, invece, sono stati scelte due scenari diversi con le informazioni prese da due città,
+Los Angeles e Padova, secondo i paremetri indicati in Tabella~\ref{tab:parametri-simulazioni-pd-la}.
+La prima ha una topologia a griglia in stile Manhattan, simile anche allo scenario precedente, mentre la seconda è caratteristica delle città storiche italiane.
+%
+\begin{table}[!h]
+	\begin{center}
+	  \begin{tabular}{| l | c | c | c | c |}
+			\hline
+			\multicolumn{3}{|m{.3\linewidth}|}{\multirow{2}{*}{}}														&		\multicolumn{2}{c|}{Scenario}				\\ \cline{4-5}
+			\multicolumn{3}{|m{.3\linewidth}|}{}																						&		Padova				&			Los Angeles			\\ \hline \hline
+			\multicolumn{2}{|m{.25\linewidth}|}{\multirow{2}{*}{Latitudine}}				&		N	 	& 	45,4160				&			33,9750					\\ \cline{3-5}
+			\multicolumn{2}{|m{.25\linewidth}|}{}																		&		S	 	& 	45,3810				&			33,9396					\\ \hline
+			\multicolumn{2}{|l|}{\multirow{2}{*}{Longitudine}}											&		O	 	& 	11,8593				&			-118,3283				\\ \cline{3-5}
+			\multicolumn{2}{|l|}{}																									&		E	 	& 	11,9112				&			-118,2865				\\ \hline
+			\multicolumn{3}{|l|}{Area approssimativa (km$^2$)}															&			16					&					16					\\ \hline
+			\multicolumn{3}{|l|}{Veicoli}																										&		11938					&					15437				\\ \hline
+			\multicolumn{3}{|l|}{Distanza fra veicoli (metri)}															&		12$\pm$2			&			12$\pm$2				\\ \hline
+			\multicolumn{3}{|l|}{Edifici}																										&		18132					&					33278				\\
+			\hline
+	  \end{tabular}
+	\end{center}
+	\caption{Parametri per gli scenari urbani}
+	\label{tab:parametri-simulazioni-pd-la}
+\end{table}
+%
+I veicoli sono stati posizionati su ogni strada a una distanza scelta casulamente fra i 10 e i 14 metri.
+La rete stradale come anche la geometria degli edifici è estratta seguendo il metodo descritto in Sezione~\ref{sec:applicativi}.
 
 
 
