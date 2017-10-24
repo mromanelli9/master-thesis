@@ -25,14 +25,40 @@ Lo scenario è una città fittizia con strade a griglia in stile Manhattan di lu
 I veicoli sono disposti a 12 metri di distanza per un totale di 8064.
 Seguendo l'idea originale, è stata definita anche un circonferenza di ragggio pari a 1000$\pm$12 metri, utilizzata per definire alcune metriche che verranno descritte in seguito.
 Il raggio trasmissivo effettivo assume due valori possibili: 300 metri o 500 metri.
-Il tutto è riassunto in Tabella?.
+Il tutto è riassunto in Tabella~\ref{tab:parametri-simulazioni-barichello}.
 
 Per valutare il protocollo sono presi in esame diversi parametri: la copertura totale e la copertura sulla circonferenza (in percentuale),
 il numero di salti necessari per raggiungere il bordo della griglia, il numero totale di messaggi di inoltro ricevuti e inviati.
 In modo da aver un metro di paragone per il protocollo Fast Broadcast, quest'ultimo è stato comparato con altri due metodi, chiamati STATIC300 e STATIC500,
 che utilizzano una stima fissa del raggio trasmissimo, di 300 e 500 metri rispettivamente.
 
-Infine, oigni scenario è stato eseguito per 50 volte. % così non mi piace
+Per quanto riguarda gli edifici, il file dati contenente i poligoni è stato appositamente creato, in modo da avere un edificio di forma quadrata di lato 300 metri
+posizionato all'interno di ogni ``blocco'' della griglia, come mostrato in Figura~\ref{fig:griglia-dettaglio}.
+Gli edifici sono distanziati di 5 metri dalla strada su ogni lato, in modo da non far aderire i muri degli edifici al bordo la strada.
 
-
-% TODO tabella riassuntiva configurazione scenario
+Infine, la simulazione di uno scenario è stata ripetuta per 50 volte. % così non mi piace
+\begin{figure}[!h]
+	\centering
+	\begin{center}
+		\includegraphics[width=.4\textwidth]{griglia-dettaglio.png}	% l'immagine fa un po' schifo
+	\end{center}
+	\label{fig:griglia-dettaglio}\caption{Dettaglio della configurazione a griglia: in nero le strade e in grigio gli edifici.}
+\end{figure}
+%
+% TODO: verificare stile tabella: così mi piace?
+\begin{table}[!h]
+	\caption{Configurazione dei parametri per le simulazioni}
+	\label{tab:parametri-simulazioni-barichello}
+	\begin{center}
+	  \begin{tabular}{ | m{.5\linewidth} | r  c | }
+			\hline
+			Parametro											&			\multicolumn{2}{c|}{Valore}			\\ \hline \hline
+			Configurazione								&			\multicolumn{2}{c|}{Griglia}		\\ \hline
+			Lunghezza delle strade				&			4000 								& [metri]		\\ \hline
+			Distanza fra le strade				&			300 								& [metri]		\\ \hline
+			Distanza fra i veicoloi 			&			12 									& [metri]		\\ \hline
+			Raggio trasmissivo effettivo	&			300 - 500						& [metri]		\\
+			\hline
+	  \end{tabular}
+	\end{center}
+\end{table}
