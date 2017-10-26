@@ -16,6 +16,8 @@ import subprocess
 from collections import defaultdict
 import math
 import optparse
+from math import sqrt
+import Queue
 
   # SUMO_HOME = os.environ.get('SUMO_HOME',
 						   # os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
@@ -25,6 +27,21 @@ import sumolib
 from sumolib import route2trips
 from sumolib.miscutils import euclidean
 from sumolib.net.lane import SUMO_VEHICLE_CLASSES
+
+class Point:
+	def __init__(self,x_init,y_init):
+		self.x = x_init
+		self.y = y_init
+
+	def shift(self, x, y):
+		self.x += x
+		self.y += y
+
+	def __repr__(self):
+		return "".join(["Point(", str(self.x), ",", str(self.y), ")"])
+
+def distance(a, b):
+	return sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
 
 def get_options(args=None):
 	optParser = optparse.OptionParser()
@@ -49,7 +66,7 @@ def isFeasibleRoad(edge):
 		return False
 
 	# Roads must be >= 4 meters long (lenth of an average car)
-	if (int(edge.getLength()) <=4):
+	if (int(edge.getLength()) <= 4):
 		return False
 
 	# Allowed edge type (http://sumo.dlr.de/wiki/Definition_of_Vehicles,_Vehicle_Types,_and_Routes)
@@ -63,47 +80,72 @@ def getOppositeDirection(idx):
 	# the id is in the form "111288429"
 		return '-' + idx
 
+def dfs_search(nodes, edges, trips):
+	tripId = 0
+	visited = {}
+
+	# DFS colors: dict with edge id as key and color as value
+	colors = {}
+	for e in edges:
+		colors[str(e.getID())] = 'W'
+
+	for e in edges:
+		if colors[str(e.getID())] == 'W':
+			visit_node(e, colors, visited, trips)
+
+def visit_node(edge, colors, visited, trips, missingPos = None):
+	# Set color to grey
+	colors[str(edge.getID())] = 'G'
+
+	miss = None
+	if isFeasibleRoad(edge):
+		idx = str(edge.getID())
+		length = int(edge.getLength())
+
+		# Check if i already visited the opposite direction
+		opposite = getOppositeDirection(idx)
+		if not (opposite in visited):
+			visited[idx] = 1
+
+			# Check where i put the last vehicle
+			pos = missingPos if (missingPos != None) else 1
+
+			while (pos < length):
+				current = generate_one(len(trips), 0, pos, idx, idx)
+				trips.append(current)
+
+				pos += __vDistance
+
+			miss = pos - length
+
+	for out, itr in edge.getOutgoing().iteritems():
+		if colors[str(out.getID())] == 'W':
+			visit_node(out, colors, visited, trips, miss)
+
+	# Set color to black
+	colors[str(edge.getID())] = 'B'
+
+def getLastId(trip):
+	pos = str.index(trip, "\"") + 1
+	pos2 = str.index(trip[pos:], "\"")
+
+	return int(trip[pos:(pos2 + pos)]) + 1
+
 def main(options):
 	print("[+] Reading net file...")
 	net = sumolib.net.readNet(options.netfile)
 
+	nodes = net.getNodes()
 	edges = net.getEdges()
-	print("[+] Found %d edges." % len(edges))
+	print("[+] %d nodes and %d edges." % (len(nodes), len(edges)))
 
 	print("[+] Running...")
 	trips = []
-	visited = {}
-	tripId = 0
+	dfs_search(nodes, edges, trips)
 
-	# For each edge/lane
-	# (i assume that each edge has only one lane)
-	for road in edges:
-		# Check if the lane is a road
-		if (not isFeasibleRoad(road)):
-			continue
+	lastId = getLastId(trips[len(trips)-1])
 
-		idx = str(road.getID())
-		length = int(road.getLength())
-
-		# Check if i already visited the opposite direction
-		opposite = getOppositeDirection(idx)
-		if opposite in visited:
-			# I already done the opposite direction, so skip
-			continue
-
-		# Otherwise go on
-		visited[idx] = 1
-
-		pos = 0
-		while (pos < (length - __maxDistance)):
-			rnd = random.randint(__minDistance, __maxDistance)
-			pos += rnd
-			current = generate_one(tripId, 0, pos, idx, idx)
-			trips.append(current)
-
-			tripId += 1
-
-	print("[+] I created %d vehicles." % tripId)
+	print("[+] I created %d vehicles." % lastId)
 	print("[+] Writing trips file.")
 
 	with open(options.tripfile, 'w') as fouttrips:
@@ -120,10 +162,10 @@ def main(options):
 # info: print([method_name for method_name in dir(net._edges[0])])
 
 if __name__ == "__main__":
-	__minDistance = 10	# meters
-	__maxDistance = 14	# meters
+	# Increase the recursion limit
+	sys.setrecursionlimit(10000)
 
-	random.seed(datetime.datetime.now().microsecond)
+	__vDistance = 250
 
 	print("[+] %s" % sys.argv[0])
 
