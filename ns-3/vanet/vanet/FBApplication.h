@@ -56,12 +56,13 @@ public:
 	 * \param broadcastPhaseStart time after which broadcast phase will start (seconds)
 	 * \param actualRange actual transmission range (meters)
 	 * \param aoi radius of area of interest (meters)
+	 * \param aoi_error distance +/- with respect to the radius (meters)
 	 * \param flooding enable or disable flooding
 	 * \param cwMin minumum size of the contention window (slots)
 	 * \param cwMin maximum size of the contention window (slots)
 	 * \return none
 	 */
-	void Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t aoi, bool flooding, uint32_t cwMin, uint32_t cwMax);
+	void Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t aoi, uint32_t aoi_error, bool flooding, uint32_t cwMin, uint32_t cwMax);
 
 	/**
 	 * \brief Add a new node to the applicatin and set up protocol parameters
@@ -207,6 +208,7 @@ private:
 	uint32_t													 			m_actualRange;	// real transmission range
 	uint32_t													 			m_estimatedRange;	// range of transmission to be estimated
 	uint32_t																m_aoi;	// radius of the area of interest (meters)
+	uint32_t																m_aoi_error;	// meters +/- with respect to the radius
 	uint32_t													 			m_packetPayload; // size of the packet payload
 	uint32_t													 			m_received;	// number of hello messages sent
 	uint32_t																m_sent; // // number of alert messages sent

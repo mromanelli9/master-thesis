@@ -61,6 +61,7 @@ FBApplication::FBApplication ()
 		m_actualRange (300),
 		m_estimatedRange (0),
 		m_aoi (m_actualRange * 2),
+		m_aoi_error (0),
 		m_packetPayload (100),
 		m_received (0),
 		m_sent (0)
@@ -77,7 +78,7 @@ FBApplication::~FBApplication ()
 }
 
 void
-FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t aoi, bool flooding, uint32_t cwMin, uint32_t cwMax)
+FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_t actualRange, uint32_t aoi, uint32_t aoi_error, bool flooding, uint32_t cwMin, uint32_t cwMax)
 {
 
 	if (protocol == PROTOCOL_FB)
@@ -100,6 +101,7 @@ FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_
 
 	m_broadcastPhaseStart = broadcastPhaseStart;
 	m_aoi = aoi;
+	m_aoi_error = aoi_error;
 	m_actualRange = actualRange;
 	m_flooding = flooding;
 	m_cwMin = cwMin;
@@ -171,12 +173,12 @@ FBApplication::GenerateHelloTraffic (uint32_t count)
 			he.push_back (pos);
 			Ptr<FBNode> fbNode = m_nodes.at(pos);
 			Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (),
-																			Seconds (i * 40),
+																			MicroSeconds (i*10),
 																			&FBApplication::GenerateHelloMessage, this, fbNode);
 		}
 
 		// Other nodes must send Hello messages
-		Simulator::Schedule (Seconds (250), &FBApplication::GenerateHelloTraffic, this, count - 1);
+		Simulator::Schedule (MilliSeconds (1), &FBApplication::GenerateHelloTraffic, this, count - 1);
 	}
 }
 
@@ -465,12 +467,11 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 {
 	NS_LOG_FUNCTION (this);
 
-	uint32_t vehicleDist = 14;	// NB: Warning: check this value when you change scenario
 	uint32_t cover = 1;	// 'cause we count m_startingNode
 	uint32_t circ = 0, circCont = 0;
 
-	double radiusMin = m_aoi - vehicleDist;
-	double radiusMax = m_aoi + vehicleDist;
+	double radiusMin = m_aoi - m_aoi_error;
+	double radiusMax = m_aoi + m_aoi_error;
 
 	std::stringstream nums;
 	std::stringstream slots;

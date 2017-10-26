@@ -405,6 +405,7 @@ private:
 	uint32_t													m_flooding;
 	uint32_t													m_alertGeneration;
 	uint32_t													m_areaOfInterest;
+	uint32_t													m_vehiclesDistance;
 	uint32_t													m_scenario;
 	uint32_t													m_loadBuildings;
 	std::string												m_traceFile;
@@ -430,6 +431,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_flooding (0),
 		m_alertGeneration (20),
 		m_areaOfInterest (1000),
+		m_vehiclesDistance (250),
 		m_scenario (1),
 		m_loadBuildings (0),
 		m_traceFile (""),
@@ -515,14 +517,10 @@ FBVanetExperiment::ConfigureMobility ()
 	Ns2MobilityHelper ns2 = Ns2MobilityHelper (m_traceFile);
 	NS_LOG_INFO ("Loading ns2 mobility file \"" << m_traceFile << "\".");
 
-	ns2.Install (); // configure movements for each node, while reading trace file
+	// Disable node movements
+	ns2.DisableNodeMovements ();
 
-	// Disable movements
-	for (uint32_t i = 0 ; i < m_nNodes; i++)
-	{
-		Ptr<ConstantVelocityMobilityModel> mob = m_adhocNodes.Get(i)->GetObject<ConstantVelocityMobilityModel>();
-		mob->SetVelocity (Vector(0, 0, 0));
-	}
+	ns2.Install (); // configure movements for each node, while reading trace file
 
 	// Configure callback for logging
 	std::ofstream m_os;
@@ -546,7 +544,7 @@ FBVanetExperiment::SetupAdhocDevices ()
 	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100));
 	if (m_loadBuildings != 0)
 	{
-		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel", "Radius", DoubleValue (m_actualRange + 100));
+		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel", "Radius", DoubleValue (m_actualRange));
 	}
 	wifiPhy.SetChannel (wifiChannel.Create ());
 
@@ -620,9 +618,10 @@ FBVanetExperiment::ConfigureFBApplication ()
 														m_alertGeneration,
 														m_actualRange,
 														m_areaOfInterest,
+														m_vehiclesDistance,
 														(m_flooding==1) ? true : false,
 														32, 1024);
-	m_fbApplication->SetStartTime (Seconds (500));
+	m_fbApplication->SetStartTime (Seconds (1));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
 	// Add nodes to the application
@@ -663,18 +662,27 @@ FBVanetExperiment::SetupScenario ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
 
-	if (m_scenario == 1)
+	m_alertGeneration = 6;	// 5 + 1 (start time of the application)
+	m_TotalSimTime = 990000.0;
+	m_areaOfInterest = 1000;	// meters
+	m_vehiclesDistance = 250;	// meters
+
+	if (m_scenario == 0)
+	{
+		// DEBUG, TODO: delete this scenario
+		m_bldgFile = "Griglia.poly.xml";
+		m_traceFile = "Griglia.ns2mobility.xml";
+
+		m_nNodes = 209;
+		m_startingNode = 88;
+	} else if (m_scenario == 1)
 	{
 		// Padova
 		m_bldgFile = "Padova.poly.xml";
 		m_traceFile = "Padova.ns2mobility.xml";
 
-		m_TotalSimTime = 990000.0;
-		m_alertGeneration = 45000 + 500; // 500 = fbApplication start time
-		m_areaOfInterest = 1000;
-
-		m_nNodes = 11938;
-		m_startingNode = 1463;
+		m_nNodes = 1397;
+		m_startingNode = 552;
 	}
 	else if (m_scenario == 2)
 	{
@@ -682,12 +690,8 @@ FBVanetExperiment::SetupScenario ()
 		m_bldgFile = "LA.poly.xml";
 		m_traceFile = "LA.ns2mobility.xml";
 
-		m_TotalSimTime = 990000.0;
-		m_alertGeneration = 45000 + 500; // 500 = fbApplication start time
-		m_areaOfInterest = 1000;
-
-		m_nNodes = 15437;
-		m_startingNode = 13537;
+		m_nNodes = 1274;
+		m_startingNode = 1075;
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
