@@ -1,0 +1,106 @@
+Index: src/mobility/helper/ns2-mobility-helper.cc
+===================================================================
+--- a/src/mobility/helper/ns2-mobility-helper.cc
++++ b/src/mobility/helper/ns2-mobility-helper.cc
+@@ -19,7 +19,6 @@
+  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
+  * Contributors: Thomas Waldecker <twaldecker@rocketmail.com>
+  *               Martín Giachino <martin.giachino@gmail.com>
+- * Modified by:  Marco Romanelli <marco.romanelli.1@studenti.unipd.it>
+  *
+  * Brief description: Implementation of a ns2 movement trace file reader.
+  *
+@@ -107,7 +106,7 @@ struct DestinationPoint
+  */
+ static ParseResult ParseNs2Line (const std::string& str);
+ 
+-/**
++/** 
+  * Put out blank spaces at the start and end of a line
+  */
+ static std::string TrimNs2Line (const std::string& str);
+@@ -128,20 +127,20 @@ static bool IsVal (const std::string& str, T& ret);
+ 
+ /**
+  * Checks if the value between brackets is a correct nodeId number
+- */
++ */ 
+ static bool HasNodeIdNumber (std::string str);
+ 
+-/**
++/** 
+  * Gets nodeId number in string format from the string like $node_(4)
+  */
+ static std::string GetNodeIdFromToken (std::string str);
+ 
+-/**
++/** 
+  * Get node id number in int format
+  */
+ static int GetNodeIdInt (ParseResult pr);
+ 
+-/**
++/**  
+  * Get node id number in string format
+  */
+ static std::string GetNodeIdString (ParseResult pr);
+@@ -151,12 +150,12 @@ static std::string GetNodeIdString (ParseResult pr);
+  */
+ static Vector SetOneInitialCoord (Vector actPos, std::string& coord, double value);
+ 
+-/**
++/** 
+  * Check if this corresponds to a line like this: $node_(0) set X_ 123
+  */
+ static bool IsSetInitialPos (ParseResult pr);
+ 
+-/**
++/** 
+  * Check if this corresponds to a line like this: $ns_ at 1 "$node_(0) setdest 2 3 4"
+  */
+ static bool IsSchedSetPos (ParseResult pr);
+@@ -177,18 +176,17 @@ static DestinationPoint SetMovement (Ptr<ConstantVelocityMobilityModel> model, V
+  */
+ static Vector SetInitialPosition (Ptr<ConstantVelocityMobilityModel> model, std::string coord, double coordVal);
+ 
+-/**
++/** 
+  * Schedule a set of position for a node
+  */
+ static Vector SetSchedPosition (Ptr<ConstantVelocityMobilityModel> model, double at, std::string coord, double coordVal);
+ 
+ 
+ Ns2MobilityHelper::Ns2MobilityHelper (std::string filename)
+-  : m_filename (filename),
+-		m_movementsEnabled (true)
++  : m_filename (filename)
+ {
+   std::ifstream file (m_filename.c_str (), std::ios::in);
+-  if (!(file.is_open ())) NS_FATAL_ERROR("Could not open trace file " << m_filename.c_str() << " for reading, aborting here \n");
++  if (!(file.is_open ())) NS_FATAL_ERROR("Could not open trace file " << m_filename.c_str() << " for reading, aborting here \n"); 
+ }
+ 
+ Ptr<ConstantVelocityMobilityModel>
+@@ -296,11 +294,6 @@ Ns2MobilityHelper::ConfigNodesMovements (const ObjectStore &store) const
+ 
+   // The reason the file is parsed again is to make this helper robust
+   // to handle trace files with the initial node positions at the end.
+-
+-	if (!m_movementsEnabled) {
+-		return;
+-	}
+-
+   file.open (m_filename.c_str (), std::ios::in);
+   if (file.is_open ())
+     {
+@@ -820,10 +813,4 @@ Ns2MobilityHelper::Install (void) const
+   Install (NodeList::Begin (), NodeList::End ());
+ }
+ 
+-void
+-Ns2MobilityHelper::DisableNodeMovements (void)
+-{
+-  m_movementsEnabled = false;
+-}
+-
+ } // namespace ns3
