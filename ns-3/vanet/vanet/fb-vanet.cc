@@ -564,9 +564,9 @@ FBVanetExperiment::SetupAdhocDevices ()
 
 	// Set Tx Power
 	if (m_actualRange == 300)
-		m_txp = 1.5;
+		m_txp = 4.4;
 	else if (m_actualRange == 500)
-		m_txp = 6;
+		m_txp = 8.8;
 
   wifiPhy.Set ("TxPowerStart",DoubleValue (m_txp));
   wifiPhy.Set ("TxPowerEnd", DoubleValue (m_txp));
