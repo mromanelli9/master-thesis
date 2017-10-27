@@ -422,8 +422,8 @@ FBVanetExperiment::FBVanetExperiment ()
 	:	m_nNodes (0),	// random value, it will be set later
 		m_packetSize ("64"),
 		m_rate ("2048bps"),
-		m_phyMode ("DsssRate11Mbps"),
-		m_txp (7.5),
+		m_phyMode ("OfdmRate6MbpsBW10MHz"),
+		m_txp (20),
 		m_port (9),
 		m_actualRange (300),
 		m_startingNode (0),
@@ -534,31 +534,45 @@ FBVanetExperiment::SetupAdhocDevices ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure channels.");
 
-	WifiHelper wifi;
-	wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
+	// 802.11p 5.9 GHz
+	double freq = 5.9e9;
 
-	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
 	YansWifiChannelHelper wifiChannel;
-
-	wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-	wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (m_actualRange + 100));
+  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+	wifiChannel.AddPropagationLoss ("ns3::TwoRayGroundPropagationLossModel", "Frequency", DoubleValue (freq), "HeightAboveZ", DoubleValue (1.5));
 	if (m_loadBuildings != 0)
 	{
 		wifiChannel.AddPropagationLoss ("ns3::ObstacleShadowingPropagationLossModel", "Radius", DoubleValue (m_actualRange));
 	}
-	wifiPhy.SetChannel (wifiChannel.Create ());
 
-	WifiMacHelper wifiMac;
-	wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-																"DataMode",StringValue (m_phyMode),
-																"ControlMode",StringValue (m_phyMode));
+	// the channel
+  Ptr<YansWifiChannel> channel = wifiChannel.Create ();
+
+  // The below set of helpers will help us to put together the wifi NICs we want
+  YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
+  wifiPhy.SetChannel (channel);
+	wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);
+
+	// The below set of helpers will help us to put together the wifi NICs we want
+	NqosWaveMacHelper wifi80211pMac = NqosWaveMacHelper::Default ();
+  Wifi80211pHelper wifi80211p = Wifi80211pHelper::Default ();
+
+	// Setup 802.11p stuff
+	wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
+																			"DataMode",StringValue (m_phyMode),
+																			"ControlMode",StringValue (m_phyMode));
+
 	// Set Tx Power
+	if (m_actualRange == 300)
+		m_txp = 1.5;
+	else if (m_actualRange == 500)
+		m_txp = 6;
+
   wifiPhy.Set ("TxPowerStart",DoubleValue (m_txp));
   wifiPhy.Set ("TxPowerEnd", DoubleValue (m_txp));
+	// wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue ());
 
-	wifiMac.SetType ("ns3::AdhocWifiMac");
-
-	m_adhocDevices = wifi.Install (wifiPhy, wifiMac, m_adhocNodes);
+	m_adhocDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, m_adhocNodes);
 }
 
 void
