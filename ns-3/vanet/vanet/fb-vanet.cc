@@ -818,8 +818,8 @@ int main (int argc, char *argv[])
 	uint32_t maxRun = RngSeedManager::GetRun ();
 
 	// Manage data storage
-	g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet");	// cluster
-	// g_csvData.EnableAlternativeFilename ("fb-vanet");
+	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet");	// cluster
+	g_csvData.EnableAlternativeFilename ("fb-vanet");
 	g_csvData.WriteHeader ("\"id\",\"Scenario\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Hops\",\"Slots\",\"Messages sent\",\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
