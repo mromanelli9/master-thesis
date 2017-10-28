@@ -695,8 +695,8 @@ FBVanetExperiment::SetupScenario ()
 		m_bldgFile = "Padova.poly.xml";
 		m_traceFile = "Padova.ns2mobility.xml";
 
-		m_nNodes = 1397;
-		m_startingNode = 552;
+		m_nNodes = 1779;
+		m_startingNode = 587;
 	}
 	else if (m_scenario == 2)
 	{
@@ -704,8 +704,8 @@ FBVanetExperiment::SetupScenario ()
 		m_bldgFile = "LA.poly.xml";
 		m_traceFile = "LA.ns2mobility.xml";
 
-		m_nNodes = 1274;
-		m_startingNode = 1075;
+		m_nNodes = 1773;
+		m_startingNode = 1426;
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
@@ -818,8 +818,8 @@ int main (int argc, char *argv[])
 	uint32_t maxRun = RngSeedManager::GetRun ();
 
 	// Manage data storage
-	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet");	// cluster
-	g_csvData.EnableAlternativeFilename ("fb-vanet");
+	g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet");	// cluster
+	// g_csvData.EnableAlternativeFilename ("fb-vanet");
 	g_csvData.WriteHeader ("\"id\",\"Scenario\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Hops\",\"Slots\",\"Messages sent\",\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)

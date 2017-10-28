@@ -165,7 +165,7 @@ if __name__ == "__main__":
 	# Increase the recursion limit
 	sys.setrecursionlimit(10000)
 
-	__vDistance = 250
+	__vDistance = 150
 
 	print("[+] %s" % sys.argv[0])
 
