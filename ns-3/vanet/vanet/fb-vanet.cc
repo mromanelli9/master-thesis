@@ -676,10 +676,10 @@ FBVanetExperiment::SetupScenario ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
 
-	m_alertGeneration = 6;	// 5 + 1 (start time of the application)
+	m_alertGeneration = 9;	// 9 + 1 (start time of the application)
 	m_TotalSimTime = 990000.0;
 	m_areaOfInterest = 1000;	// meters
-	m_vehiclesDistance = 250;	// meters
+	m_vehiclesDistance = 150;	// meters
 
 	if (m_scenario == 0)
 	{

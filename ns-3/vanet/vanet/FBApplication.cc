@@ -20,6 +20,7 @@
  */
 
 #include <numeric>
+#include <math.h>
 
 #include "ns3/log.h"
 #include "ns3/uinteger.h"
@@ -144,7 +145,7 @@ FBApplication::StartApplication (void)
 	{
 		// Start Estimation Phase
 		NS_LOG_INFO ("Start Estimation Phase.");
-		GenerateHelloTraffic (60);
+		GenerateHelloTraffic (5);
 	}
 
 	// Schedule Broadcast Phase
@@ -163,7 +164,8 @@ FBApplication::GenerateHelloTraffic (uint32_t count)
 	NS_LOG_FUNCTION (this << count);
 
 	std::vector<int> he;
-	uint32_t hel = 20;
+	uint32_t hel = (int) m_nNodes / 100 * 50;		// 40% of total nodes
+	uint32_t time_factor = 10;
 
 	if (count > 0)
 	{
@@ -173,12 +175,13 @@ FBApplication::GenerateHelloTraffic (uint32_t count)
 			he.push_back (pos);
 			Ptr<FBNode> fbNode = m_nodes.at(pos);
 			Simulator::ScheduleWithContext (fbNode->GetNode ()->GetId (),
-																			MicroSeconds (i*10),
+																			MicroSeconds (i * time_factor),
 																			&FBApplication::GenerateHelloMessage, this, fbNode);
 		}
 
 		// Other nodes must send Hello messages
-		Simulator::Schedule (MilliSeconds (1), &FBApplication::GenerateHelloTraffic, this, count - 1);
+		double s = ceil((hel * time_factor) / 1000000.0);
+		Simulator::Schedule (Seconds (s), &FBApplication::GenerateHelloTraffic, this, count - 1);
 	}
 }
 
