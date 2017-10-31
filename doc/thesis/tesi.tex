@@ -4,9 +4,32 @@
 
 \documentclass{Dissertate}
 
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND SETTINGS
+%----------------------------------------------------------------------------------------
+
 \usepackage[italian]{babel}
+\usepackage{graphicx}	% graphics
+% \usepackage[utf8x]{inputenc} % codec
+% % \usepackage{amsmath}	% formulas
+\usepackage{hyperref}	% hyperlinks
+\usepackage{algorithm}	% pseudocode for algorithms
+\usepackage[noend]{algpseudocode} % same as above
+\usepackage{../utils/mymacros} % macros
+\usepackage{xcolor} % for colors (like in codes)
+\usepackage{colortbl} %
+\usepackage{listings}	% code
+\input{../utils/listings-style.tex} %
+\lccode`~=0 %
+\usepackage{multirow}		% merge cell vertically in tabels
+
+\graphicspath{{figures/}}	% image path
 
 \begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE AND HEADERS
+%----------------------------------------------------------------------------------------
 
 % the front matter
 \input{frontmatter/personalize}
@@ -23,15 +46,22 @@
 
 % \doublespacing
 
-% include each chapter...
+%----------------------------------------------------------------------------------------
+%	BODY
+%----------------------------------------------------------------------------------------
 \setcounter{chapter}{0}  % start chapter numbering at 1
 \include{chapters/introduction}
 \include{chapters/chapter1}
 \include{chapters/conclusion}
 
+%----------------------------------------------------------------------------------------
+%	FOOTERS
+%----------------------------------------------------------------------------------------
+
 \addcontentsline{toc}{chapter}{References}
 %\bibliographystyle{unstr}
-\bibliography{references}
+\bibliography{../utils/biblio.bib}
+\bibliographystyle{ieeetr}
 \cleardoublepage
 \phantomsection
 \acknowledgments
@@ -41,4 +71,7 @@
 % \addcontentsline{toc}{chapter}{References}
 % \bibliographystyle{apalike2}
 
+%----------------------------------------------------------------------------------------
+%	END
+%----------------------------------------------------------------------------------------
 \end{document}
