@@ -11,7 +11,7 @@
 \usepackage[italian]{babel}
 \usepackage{graphicx}	% graphics
 % \usepackage[utf8x]{inputenc} % codec
-% % \usepackage{amsmath}	% formulas
+% \usepackage{amsmath}	% formulas
 \usepackage{hyperref}	% hyperlinks
 \usepackage{algorithm}	% pseudocode for algorithms
 \usepackage[noend]{algpseudocode} % same as above
@@ -22,7 +22,7 @@
 \input{../utils/listings-style.tex} %
 \lccode`~=0 %
 \usepackage{multirow}		% merge cell vertically in tabels
-\usepackage{babelbib}	% bibliography language
+\usepackage[fixlanguage]{babelbib}	% bibliography language
 \selectbiblanguage{italian}
 
 \graphicspath{{figures/}}	% image path
@@ -53,8 +53,7 @@
 %----------------------------------------------------------------------------------------
 \setcounter{chapter}{0}  % start chapter numbering at 1
 \include{chapters/introduzione}
-\include{chapters/chapter1}
-\include{chapters/conclusion}
+\include{chapters/protocollo-fb}
 
 %----------------------------------------------------------------------------------------
 %	FOOTERS
