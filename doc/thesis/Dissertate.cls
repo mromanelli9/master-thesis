@@ -33,7 +33,7 @@
 % Line Spacing
 %   Define two line spacings: one for the body, and one that is more compressed.
 \iftoggle{DissertateSingleSpace}{
-    \newcommand{\dnormalspacing}{1.2}
+    \newcommand{\dnormalspacing}{1.5}
     \newcommand{\dcompressedspacing}{1.0}
 }{
     \newcommand{\dnormalspacing}{2.0}
