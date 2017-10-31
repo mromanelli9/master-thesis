@@ -1,0 +1,50 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+%!TeX spellcheck = it_IT
+%!TEX root = ../tesi.tex
+
+\chapter{Introduzione}\label{chap:introduction}
+\section{Contesto}\label{sec:contesto}
+% TODO
+\section{Modelli di radiopropagazione}\label{sec:modelli-propagazione}
+Un modello di radiopropagazione (MRP) simula gli effetti dell'attenuazione del segnale radio (segnali elettromagnetici nello spazio libero o etere, in contrasto con la propagazione guidata)
+dovuta alla distanza, cammini multipli per effetto della riflessione, ombreggiatura causata da grandi ostacoli come edifici.
+L'utilizzo di un'idonea rappresentazione per questo tipo di ostacoli è, quindi, necessaria nel contesto di simulazioni di reti VANET (\textit{Vehicular Ad-hoc Networks}) in ambienti urbani
+e suburbani.
+
+Nel corso degli anni, diversi MRP sono stati proposti.
+Il più semplice di questi si chiama modello a disco unitario (\textit{unit-disk model}), nel quale i veicoli possono comunicare fra loro se si trovano entro una certa soglia
+di distanza, mentre non possono altrimenti~\cite{6554832}.
+Un modello molto utilizzato nelle simuazioni di VANET è il modello a doppio raggio (\textit{Two-ray ground-reflection model}),
+nel quale il segnale in fase di ricezione è composto da una componente in linea diretta e una seconda derivante dalla riflessione causata dal terreno~\cite{DBLP:books/daglib/0091821}.
+In~\cite{Schmitz:2006:ERW:1164717.1164730} e in~\cite{Souley2005RealisticUS}, modelli più sviluppati prendono in considerazione anche le properità riflettenti delle superfici e degli ostacoli.
+
+Tuttavia, un approcio diretto di questo tipo difficilmente scala al numero di nodi necessario in un classico scenario VANET e per questo motivo
+spesso questi modelli si affidano a una fase di pre-elaborazione che può richiedere tempi elevati~\cite{Stepanov:2008:IMR:1293378.1293656}.
+Per ovviare a questo problema, alcune proposte astraggono dalle informazioni sui singoli edifici, modellando l'ambiente urbano in modo omogeneo
+così da creare un modello analitico per l'ombreggiatura~\cite{1492678}.
+Questo tipo di modelli riducono il costo computazionale e generalmente si raffrontano bene con i risultati reali;
+ciò nonostante, non riescono a catturare effetti a livello mesoscopico, come eventuali spazi fra edifici che permetterebbero trasmissioni a corto raggio~\cite{Giordano:2010:CST:1860058.1860065}.
+
+Sono affetti dallo stesso problema anche i modelli (puramente) probabilistici, in quanto non tengono in considerazione la geometria urbana sottostante.
+Questi modellano l'effetto dell'ombraggiatura tramite distribuzione stocastiche, fra cui Rice, Rayleigh, Nakagami-m, lognormale e Weibull~\cite{6554832}~\cite{Rappaport:2001:WCP:559977}.
+%
+\section{Modellazione di ostacoli}\label{sec:modellazione-ostacoli}
+Nelle simulazioni di alcuni scenari, come possono essere le VANET, un'accurata rappresentazione della topologia dell'ambiente è necessaria,
+in quanto questa limita non solo la mobilità dei veicoli ma interferisce anche con le trasmissioni radio~\cite{7543980}~\cite{amjad2015impact}.
+L'attenuazione radio viene spesso modellata in modo deterministico basandosi principalmente sulla distanza della visuale (\textit{Line Of Sight}, LOS)
+fra i veicoli, aggiungendo i modelli stocastici per considerare l'ombreggiatura.
+
+Negli ultimi anni, diversi studi hanno cercato di rappresentare l'effetto ombreggiatura causato dagli edifici.
+In~\cite{Giordano:2010:CST:1860058.1860065}, gli autori utilizzavano tecniche di geocodifica inversa (\textit{reverse geocoding}) per estrapolare
+informazioni sulla topologia della rete stradale in stile Manhattan. Da qui, veniva derivata la geometria degli edifici utilizzata
+per differenziare i casi in cui i due veicoli comunicanti avessero la visuale libera (LOS) o meno (\textit{Non Line Of Sight}, NLOS)
+e calcolare di conseguenza la potenza del segnale in ricezione.
+In~\cite{4020783}, invece, le informazioni sugli edifici erano codificate direttamente all'interno dell'ambiente sviluppato, chiamato
+EGRESS (\textit{Enviroment for Generating REalistic Scenarios for Simulations}), e permettavano di definire tre tipologie di edifici e altrettanti
+percorsi per simulare la mobilità dei nodi; il modello permetteva anche di configurare, con alcuni limiti, diversi tipi di materiale dei pavimenti e dei muri degli edifici.
+Gli autori di~\cite{Carpenter:2015:OMI:2756509.2756512} estraevano le informazioni per la geometria degli edifici da una piattaforma gratuita
+chiamata OpenStreetMap (OSM)~\cite{osmWebsite}; poi queste venivano elaborate da un software per la simuazione della mobilità di veicoli
+che generava un file contenente i dati sugli edifici e un altro per la mobilità dei veicoli;
+il modello di propagazione teneva conto della distanza interna percorsa del segnale e del numero di muri esterni che questo attraversava.
+% NB: ultima parte non bellissima

@@ -22,6 +22,8 @@
 \input{../utils/listings-style.tex} %
 \lccode`~=0 %
 \usepackage{multirow}		% merge cell vertically in tabels
+\usepackage{babelbib}	% bibliography language
+\selectbiblanguage{italian}
 
 \graphicspath{{figures/}}	% image path
 
@@ -50,7 +52,7 @@
 %	BODY
 %----------------------------------------------------------------------------------------
 \setcounter{chapter}{0}  % start chapter numbering at 1
-\include{chapters/introduction}
+\include{chapters/introduzione}
 \include{chapters/chapter1}
 \include{chapters/conclusion}
 
@@ -59,17 +61,8 @@
 %----------------------------------------------------------------------------------------
 
 \addcontentsline{toc}{chapter}{References}
-%\bibliographystyle{unstr}
 \bibliography{../utils/biblio.bib}
 \bibliographystyle{ieeetr}
-\cleardoublepage
-\phantomsection
-\acknowledgments
-
-% \clearpage
-% \bibliography{references}
-% \addcontentsline{toc}{chapter}{References}
-% \bibliographystyle{apalike2}
 
 %----------------------------------------------------------------------------------------
 %	END
