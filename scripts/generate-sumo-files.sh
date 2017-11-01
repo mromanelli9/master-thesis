@@ -55,20 +55,16 @@ MOBILITY_FILE="$BASENAME.ns2mobility.xml"
 
 
 # Generate network
-$NETCONVERT_CC --osm-files="$OSM_FILE" -o "$NET_FILE" &&
-sleep 1 &&
+$NETCONVERT_CC --osm-files="$OSM_FILE" -o "$NET_FILE"
 
 # Generate buildings
-$POLYCONVERT_CC --osm-files="$OSM_FILE" --net-file="$NET_FILE" --shapefile.add-param=true --prune.in-net=true --prune.explicit="fountain" -o "$BUILDINGS_FILE" &&
-sleep 1 &&
+$POLYCONVERT_CC --osm-files="$OSM_FILE" --net-file="$NET_FILE" --shapefile.add-param=true --prune.in-net=true --prune.explicit="fountain" -o "$BUILDINGS_FILE"
 
 # Prune buildings
-$PRUNE_POLY --poly-file="$BUILDINGS_FILE" --output-file="$BUILDINGS_FILE_2" &&
-sleep 1 &&
+$PRUNE_POLY --poly-file="$BUILDINGS_FILE" --output-file="$BUILDINGS_FILE_2"
 
 # Generate routes
-$RANDOM_POSITION -n "$NET_FILE" -o "$ROUTES_FILE"  &&
-sleep 1 &&
+$RANDOM_POSITION -n "$NET_FILE" -o "$ROUTES_FILE"
 
 # Generate config file
 cat >> "$SUMO_CFG_FILE" <<EOF
@@ -87,10 +83,10 @@ cat >> "$SUMO_CFG_FILE" <<EOF
     </time>
 </configuration>
 EOF
-sleep 2 &&
 
-$SUMO_CC -c "$SUMO_CFG_FILE"  &&
-sleep 1 &&
+$SUMO_CC -c "$SUMO_CFG_FILE"
+
+sleep 2
 
 $TRACE_EXPORTER -i "$TRACE_FILE" --ns2mobility-out "$MOBILITY_FILE"
 
