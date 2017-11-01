@@ -260,7 +260,13 @@
 	\phantomsection
 	\cleardoublepage
 
-	% \acronyms
+	% table listing - required if you have any tables
+	\addcontentsline{toc}{chapter}{Frammenti di codice}
+	\lstlistoflistings
+	\phantomsection
+	\cleardoublepage
+
+	\acronyms
 
 	\cleardoublepage
 	\setcounter{page}{1}
