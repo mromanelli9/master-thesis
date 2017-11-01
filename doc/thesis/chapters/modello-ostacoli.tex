@@ -16,7 +16,7 @@ e quella derivante dalla superficie interna (\textit{per-meter attenuation}):
 \end{gather}
 Nella formula precedente, $n$ indica il numero di volte che il bordo dell'ostacolo viene intersecato dalla visuale diretta (LOS),
 mentre $d_o$ è la distanza, in metri, attraversata all'interno dell'ostacolo.
-Il parametro $\alpha$ rappresenta l'attenuazione per-parete espressa in decibels per parete (dB per parete), mentre
+Il parametro $\alpha$ rappresenta l'attenuazione per-parete espressa in decibels (dB per parete), mentre
 $\beta$ l'attenuazione per-metro, sempre in decibels per metro (dB/m).
 
 I due fattori di calibrazione permettono di rappresentare più tipologie di edificio.
@@ -39,14 +39,12 @@ Si evince come, con questa quantità di attenuazione, sia difficile che la trasm
 %
 \section{L'implementazione}\label{sec:implementazione}
 Nel dettaglio, gli ostacoli sono rappresentati da poligoni bidimensionali che ne definiscono i bordi (spigoli).
-Riprendendo l'esempio in Figura~\ref{fig:scenario-urbano-1}, la linea di visibilità (in questo caso \textit{obstructed-line-of-sight}, OLOS), fra i due veicoli potrebbe
-intersecare diversi muri e percorrere una certa distanza internamente a uno o più edifici.
 Il modello \textit{Obstacle Shadowing} conta il numero di intersezioni con gli spigoli dell'ostacolo, calcola la distanza percorsa internamente a esso e, utilizzando
 il modello matematico visto in precedenza, restituisce l'attenuazione della trasmissione wireless fra i due veicoli.
 
-Il tutto è implementato in ns-3 tramite tre classi: \textsf{Obstacle} contiente la rappresentazione geometrica dell'ostacolo, utilizzando le Computational Geometry Algorithms Library (CGAL),
+Il tutto è implementato in ns-3 tramite tre classi: \textsf{Obstacle} contiente la rappresentazione geometrica dell'ostacolo utilizzando le Computational Geometry Algorithms Library (CGAL),
 come anche i parametri dell'attenuazione per-parete e per-muro.
-\textsf{Topology} legge i dati degli edifici da un file specifico, generato dall'utility Polyconvert del software SUMO (Simulator for Urban Mobility)~\cite{sumoWebsite}
+\textsf{Topology} legge i dati degli edifici da un file specifico generato dall'utility Polyconvert del software SUMO (Simulator for Urban Mobility)~\cite{sumoWebsite}
 a partire dalle informazioni ottenute da OpenStreetMap (OSM)~\cite{osmWebsite}.
 L'oggetto \textsf{Topology} così creato è poi utilizzato per determinare la perdita di segnale fra due punti (e.g. veicoli), utilizzando l'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween}.
 %
@@ -96,7 +94,7 @@ OSM prevede la possibilità di definire l'altezza totale in metri e/o specificar
 presenti.
 Questa informazione può essere sfruttata per creare una forma tridimensionale semplificata dell'edificio.
 %
-\begin{lstlisting}[language=XML,style=mystyle,linewidth=\textwidth,label={lst:esempio-dati-blocco-torre},caption={Esempio di informazioni di un edificio estratte da OSM.}]
+\begin{lstlisting}[language=XML,style=mystyle,numbers=none,label={lst:esempio-dati-blocco-torre},caption={Esempio di informazioni di un edificio estratte da OSM.}]
 <way id="62332429" visible="true" version="13" changeset="44057933" timestamp="2016-11-30T11:53:34Z" user="Agno-phi" uid="731498" >
  <nd ref="778692594"/>
  <nd ref="778692588"/>
@@ -119,22 +117,22 @@ Questa informazione può essere sfruttata per creare una forma tridimensionale s
 </way>
 \end{lstlisting}
 %
-Nell'esempio indicato in Figura~\ref{lst:esempio-dati-blocco-torre}, manca la misura dell'altezza ma è presente
+Nell'esempio indicato nel Codice~\ref{lst:esempio-dati-blocco-torre}, manca la misura dell'altezza ma è presente
 il numero di piani: è sufficiente moltiplicare questo numero, qui $8$, per l'altezza media un piano, per esempio $2,7$ metri,
 per ottenere una stima dell'altezza pari a $21,6$ metri.
-Questo calcolo è stato incluso in uno \textit{script}\footnote{\url{https://gitlab.com/mromanelli/tesi}.} creato appositamente per integrare i dati sulle altezze nel file
+Questo calcolo è stato incluso in uno \textit{script}\footnote{\url{https://gitlab.com/mromanelli/tesi}} creato appositamente per integrare i dati sulle altezze nel file
 dei poligoni generati dall'utility Polyconvert.
 %
-\begin{lstlisting}[language=XML,style=mystyle,linewidth=\textwidth,label={lst:esempio-poly-blocco-torre},caption={Forma di un edificio estratta da OSM e convertita con Polyconvert con l'aggiunta dell'altezza.}]
+\begin{lstlisting}[language=XML,style=mystyle,numbers=none,linewidth=\textwidth,label={lst:esempio-poly-blocco-torre},caption={Forma di un edificio estratta da OSM e convertita con Polyconvert con l'aggiunta dell'altezza.}]
 <poly id="62332429" type="amenity.university" color="237,199,199" fill="1" layer="-1.00" height="21.6" shape="79.68,73.38 119.66,61.39 108.52,24.49 88.84,30.39 68.53,36.48 79.68,73.38" />
 \end{lstlisting}
 %
 %
 \subsection{Modifica dell'algoritmo}\label{subsec:modifica-all-algoritmo}
-Il resto dell'algoritmo \textsf{GetObstuctedDistanceBetween} (Figura~\ref{algo:algoritmo-getobstucteddistancebetween})
+Il resto dell'algoritmo \textsf{GetObstuctedDistanceBetween} (Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween})
 rimane sostanzialmente lo stesso e, nello specifico, la ricerca dei potenziali ostacoli rimane invariata.
 Infatti gli ostacoli che si interpongono fra due punti nello spazio tridimensionale saranno gli stessi che sul piano bidimensionale
-(creato dalla perdita della terza componente \textit{z}) in quanto gli ostacoli che vengono considerati sono "ancorati" al terreno ($z=0$).
+(creato dalla perdita della terza componente \textit{z}) in quanto gli ostacoli che vengono considerati sono ``ancorati'' al terreno ($z=0$).
 Anche l'oggetto \textsf{Obstacle} rimane quasi del tutto invariato, fatta eccezione per il valore l'altezza.
 
 Le modifiche significative risiedono quasi totalmente nel calcolo delle intersezioni fra l'ostacolo e il raggio che collega i due nodi.
@@ -147,22 +145,21 @@ A questo punto si rende necessario però controllare che il punto trovato sia ``
 perpendicolari che congiungono le estemità di questi due segmenti.
 Per chiarire il concetto, si pensi a un semplice edificio: definita la forma alla base (al suolo) i muri sono perpendicolari
 al terreno e, a una certa altezza, si trova il tetto.
-Il punto d'intersezione che ci interessa si trova sulla faccia del muro (in questa semplificazione i muri non hanno spessore);
-una volta generato il piano va quindi controllato che il punto sia un punto del muro.
+Il punto d'intersezione che interessa si trova sulla faccia del muro (in questa semplificazione i muri non hanno spessore);
+una volta generato il piano va controllato che il punto sia un punto valido.
 
 L'ultimo passo, non necessario nel caso bidimensionale, consiste nel controllare che il raggio (fra i nodi)
 non intersechi la faccia superiore dell'oggetto (il tetto in un edificio); questo viene fatto esattamente come nei passi precedenti.
-Le nuove modiche possono essere così riassunte:
-%
+Le modifiche sono riassunte nello pseudocodice riportato nell'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween-modificato}.
 %
 \begin{italianalgorithm}[!h]
-\caption{Algoritmo per determinare il numero di intersezioni con i bordi dell'ostacolo e la distanza interna percorsa fra due punti.}\label{algo:algoritmo-getobstucteddistancebetween}
+\caption{Modifica all'algoritmo per includere la terza dimensione.}\label{algo:algoritmo-getobstucteddistancebetween-modificato}
 \begin{algorithmic}[1]
 	\Procedure{GetObstuctedDistanceBetween}{$p_1, p_2, B$}
 	\State{\ldots}
 	\setcounter{ALG@line}{7}
 	\ForEach{ostacolo $o \in O$}
-		\If{(distance($p_1$, o.center) $< r$) OR (distance($p_2$, o.center) $< r$)}
+		\If{(distanza($p_1$, o.centro) $< r$) $\vee$ (distanza($p_2$, o.centro) $< r$)}
 			\ForEach{spigolo $e \in o$}
 				\TextState{Crea un piano $pl$ passante per $e$ e perpendicalare al suolo}
 				\If{$pl$ interseca un raggio da $p_1$ a $p_2$ e il punto è valido}

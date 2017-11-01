@@ -61,9 +61,6 @@
     {\begin{spacing}{\dcompressedspacing}\oldenumerate}
     {\endoldenumerate\end{spacing}}
 
-% lstlisting with compressed spacing
-% TODO
-
 % Text layout.
 \RequirePackage[outer=1in, inner=1.55in, twoside, a4paper]{geometry}
 \usepackage{ragged2e}
