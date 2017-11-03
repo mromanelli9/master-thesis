@@ -188,14 +188,6 @@ private:
 	 */
 	uint32_t ComputeContetionWindow (uint32_t maxRange, uint32_t distance);
 
-	/**
-	 * \brief Compute distance between two nodes
-	 * \param a position of the first node
-	 * \param a position of the second node
-	 * \return the value of the distance
-	 */
-	static double ComputeDistance (Vector a, Vector b);
-
 private:
 	uint32_t																m_nNodes;	// number of nodes
 	std::vector<Ptr<FBNode>>								m_nodes;	// nodes that run this application

@@ -277,52 +277,52 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 		Vector senderPosition = fbHeader.GetPosition ();
 
 		// Compute the distance between the sender and me (the node who received the message)
-	 	double distanceSenderToCurrent = ComputeDistance(senderPosition, currentPosition);
+	 	double distanceSenderToCurrent = ns3::CalculateDistance(senderPosition, currentPosition);
 		uint32_t distanceSenderToCurrent_uint = std::floor (distanceSenderToCurrent);
 
 		// If the node is in range I can read the packet
-		if (distanceSenderToCurrent_uint <= m_actualRange)
+		// uint32_t estimatedRange = fbNode->GetCMBR ();
+		// if (distanceSenderToCurrent_uint <= estimatedRange)
+		// {
+		if (messageType == HELLO_MESSAGE)
+			HandleHelloMessage (fbNode, fbHeader);
+		else if (messageType == ALERT_MESSAGE)
 		{
-			if (messageType == HELLO_MESSAGE)
-				HandleHelloMessage (fbNode, fbHeader);
-			else if (messageType == ALERT_MESSAGE)
+			m_received++;
+
+			// Get the phase
+			int32_t phase = fbHeader.GetPhase ();
+
+			// Get the position of the node who start the broadcast
+			Vector starterPosition = fbHeader.GetStarterPosition ();
+
+			// Compute the two distances
+			double distanceSenderToStarter = ns3::CalculateDistance(senderPosition, starterPosition);
+			double distanceCurrentToStarter = ns3::CalculateDistance(currentPosition, starterPosition);
+
+			// If starter-to-sender distance is less than starter-to-current distance,
+			// then the message is coming from the front and it needs to be menaged,
+			// otherwise do nothing
+			if (distanceCurrentToStarter > distanceSenderToStarter && !fbNode->GetReceived ())
 			{
-				m_received++;
+				uint32_t sl = fbHeader.GetSlot ();
+				fbNode->SetSlot (fbNode->GetSlot() + sl);
+				// StopNode (fbNode);
+				fbNode->SetReceived (true);
+				if (fbNode->GetNum( ) == 0)
+					fbNode->SetNum (phase);
 
-				// Get the phase
-				int32_t phase = fbHeader.GetPhase ();
-
-				// Get the position of the node who start the broadcast
-				Vector starterPosition = fbHeader.GetStarterPosition ();
-
-				// Compute the two distances
-				double distanceSenderToStarter = ComputeDistance(senderPosition, starterPosition);
-				double distanceCurrentToStarter = ComputeDistance(currentPosition, starterPosition);
-
-				// If starter-to-sender distance is less than starter-to-current distance,
-				// then the message is coming from the front and it needs to be menaged,
-				// otherwise do nothing
-				if (distanceCurrentToStarter > distanceSenderToStarter && !fbNode->GetReceived ())
+				// check if the message is coming fron the front
+				if (phase > fbNode->GetPhase ())
 				{
-					uint32_t sl = fbHeader.GetSlot ();
-					fbNode->SetSlot (fbNode->GetSlot() + sl);
-					// StopNode (fbNode);
-					fbNode->SetReceived (true);
-					if (fbNode->GetNum( ) == 0)
-						fbNode->SetNum (phase);
-
-					// check if the message is coming fron the front
-					if (phase > fbNode->GetPhase ())
-					{
-						fbNode->SetPhase (phase);
-						HandleAlertMessage (fbNode, fbHeader, distanceSenderToCurrent_uint);
-					}
+					fbNode->SetPhase (phase);
+					HandleAlertMessage (fbNode, fbHeader, distanceSenderToCurrent_uint);
 				}
-				else
-				{
-					if (fbNode->GetPhase() < phase)
-						fbNode->SetPhase (phase);
-				}
+			}
+			else
+			{
+				if (fbNode->GetPhase() < phase)
+					fbNode->SetPhase (phase);
 			}
 		}
   }
@@ -347,7 +347,7 @@ FBApplication::HandleHelloMessage (Ptr<FBNode> fbNode, FBHeader fbHeader)
 	Vector senderPosition = fbHeader.GetPosition ();
 
 	// Compute distance
-	double distance_double = ComputeDistance (senderPosition, currentPosition);
+	double distance_double = ns3::CalculateDistance (senderPosition, currentPosition);
 	uint32_t distance = std::floor (distance_double);
 
 	// Update new values
@@ -500,7 +500,7 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 		Vector currentPosition = current->GetPosition ();
 		Vector startingNodePosition = startingNode->GetPosition ();
 
-		double distance = ComputeDistance (currentPosition, startingNodePosition);
+		double distance = ns3::CalculateDistance (currentPosition, startingNodePosition);
 
 		// Check if the current vehicle is in the circumference and within the range
 		if ((distance >= radiusMin) && (distance <= radiusMax))
@@ -550,19 +550,4 @@ FBApplication::ComputeContetionWindow (uint32_t maxRange, uint32_t distance)
 
 	return std::floor (cwnd);
 }
-
-double
-FBApplication::ComputeDistance (Vector a, Vector b)
-{
-	NS_LOG_FUNCTION ("ComputeDistance" << a << b);
-	double distance = 0;
-
-	uint32_t diffx = (b.x - a.x) * (b.x - a.x);
-	uint32_t diffy = (b.y - a.y) * (b.y - a.y);
-
-	distance = sqrt (diffx + diffy);
-
-	return distance;
-}
-
 } // namespace ns3
