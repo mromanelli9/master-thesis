@@ -325,7 +325,7 @@
 	\end{flushleft}
 	\end{normalsize}
 
-	\vspace{50pt}
+	\vspace{30pt}
 	\small{Anno Accademico \@academicyear} \\
 
 	\end{center}
