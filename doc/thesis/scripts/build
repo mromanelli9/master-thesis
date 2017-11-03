@@ -4,13 +4,13 @@ cd $BASEDIR
 cd ..
 
 # Check if the directory ../misc/ exists
-misctest=""$(dirname "$(pwd)")"/misc"
+misctest="misc"
 if [ -d "$misctest" ]
 then
-   echo "../misc/ exists!"
+   echo "misc/ exists!"
 	 cp misc/* .
 else
-   echo "../misc/ does not exist! Making..."
+   echo "misc/ does not exist! Making..."
    mkdir "$misctest"
 fi
 
