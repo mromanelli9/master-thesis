@@ -28,6 +28,8 @@ from sumolib import route2trips
 from sumolib.miscutils import euclidean
 from sumolib.net.lane import SUMO_VEHICLE_CLASSES
 
+global __vDistance
+
 class Point:
 	def __init__(self,x_init,y_init):
 		self.x = x_init
@@ -49,6 +51,8 @@ def get_options(args=None):
 						 help="define the net file (mandatory)")
 	optParser.add_option("-o", "--output-trip-file", dest="tripfile",
 						 default="trips.trips.xml", help="define the output trip filename")
+ 	optParser.add_option("-d", "--distance", dest="vDistance", type="float",
+ 						 default="50.0", help="define the distance between vehicles")
 	(options, args) = optParser.parse_args(args=args)
 	if not options.netfile:
 		optParser.print_help()
@@ -80,7 +84,7 @@ def getOppositeDirection(idx):
 	# the id is in the form "111288429"
 		return '-' + idx
 
-def dfs_search(nodes, edges, trips):
+def dfs_search(nodes, edges, trips, vdistance = 50):
 	tripId = 0
 	visited = {}
 
@@ -91,9 +95,9 @@ def dfs_search(nodes, edges, trips):
 
 	for e in edges:
 		if colors[str(e.getID())] == 'W':
-			visit_node(e, colors, visited, trips)
+			visit_node(e, colors, visited, trips, vdistance)
 
-def visit_node(edge, colors, visited, trips, missingPos = None):
+def visit_node(edge, colors, visited, trips, vdistance, missingPos = None):
 	# Set color to grey
 	colors[str(edge.getID())] = 'G'
 
@@ -114,13 +118,13 @@ def visit_node(edge, colors, visited, trips, missingPos = None):
 				current = generate_one(len(trips), 0, pos, idx, idx)
 				trips.append(current)
 
-				pos += __vDistance
+				pos += vdistance
 
 			miss = pos - length
 
 	for out, itr in edge.getOutgoing().iteritems():
 		if colors[str(out.getID())] == 'W':
-			visit_node(out, colors, visited, trips, miss)
+			visit_node(out, colors, visited, trips, vdistance, miss)
 
 	# Set color to black
 	colors[str(edge.getID())] = 'B'
@@ -135,13 +139,15 @@ def main(options):
 	print("[+] Reading net file...")
 	net = sumolib.net.readNet(options.netfile)
 
+	print(options)
+
 	nodes = net.getNodes()
 	edges = net.getEdges()
 	print("[+] %d nodes and %d edges." % (len(nodes), len(edges)))
 
 	print("[+] Running...")
 	trips = []
-	dfs_search(nodes, edges, trips)
+	dfs_search(nodes, edges, trips, options.vDistance)
 
 	lastId = getLastId(trips[len(trips)-1])
 
@@ -164,8 +170,6 @@ def main(options):
 if __name__ == "__main__":
 	# Increase the recursion limit
 	sys.setrecursionlimit(10000)
-
-	__vDistance = 150
 
 	print("[+] %s" % sys.argv[0])
 
