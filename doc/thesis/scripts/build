@@ -3,8 +3,22 @@ BASEDIR=$(dirname $0)
 cd $BASEDIR
 cd ..
 
+# Check if the directory ../misc/ exists
+misctest=""$(dirname "$(pwd)")"/misc"
+if [ -d "$misctest" ]
+then
+   echo "../misc/ exists!"
+	 cp misc/* .
+else
+   echo "../misc/ does not exist! Making..."
+   mkdir "$misctest"
+fi
+
 # Build the dissertation.
 xelatex tesi
 bibtex tesi
 xelatex tesi
 xelatex tesi
+
+# Move temp files
+ls *.aux *.bbl *.blg *.toc *.lot *.lof *.log *.lol *.out | xargs -I {} mv {} misc/
