@@ -139,8 +139,6 @@ def main(options):
 	print("[+] Reading net file...")
 	net = sumolib.net.readNet(options.netfile)
 
-	print(options)
-
 	nodes = net.getNodes()
 	edges = net.getEdges()
 	print("[+] %d nodes and %d edges." % (len(nodes), len(edges)))
