@@ -3,12 +3,10 @@
 %!TeX spellcheck = it_IT
 %!TEX root = ../tesi.tex
 
-% TODO da rivedere un po'
-
 \chapter{Modello a ostacoli}\label{chap:modello-a-ostacoli}
 %
 \section{Il modello matematico}\label{sec:il-modello-matematico}
-Il modello utilizzato viene descritto per la prima volta in~\cite{5720204}, dove veniva presentato
+Il modello utilizzato viene descritto per la prima volta in~\cite{5720204}, dove viene presentato
 come un'estensione dei cosiddétti modelli di attenuazione del segnale.
 In generale, questi possono essere scritti nella forma dell'Equazione~\ref{eq:fading-models}, dove $P$ è la potenza del trasmettitore (e ricevitore),
 $G$ i guadagni delle antenne e $L$ il termine che indica le attenuazioni dovute alla trasmissione.
@@ -19,7 +17,7 @@ $G$ i guadagni delle antenne e $L$ il termine che indica le attenuazioni dovute 
 	L_{LogNorm} = 10 \lg \left( X_\sigma \right)	\qquad [dB]													\label{eq:lognorm-model}
 \end{gather}
 %
-Questi modelli possono essere scritti come componenti di $L$ e concatenati in modo da ottenere l'attenuazione totale risultante.
+Questi modelli possono essere espressi come componenti di $L$ e concatenati in modo da ottenere l'attenuazione totale risultante.
 Ad esempio, le equazioni~\ref{eq:tworayground-model} e~\ref{eq:lognorm-model} illustrano rispettivamente i modelli a doppio raggio e log-normale.
 
 Il modello in esame rappresenta la perdita di segnale dovuta a un ostacolo estendendo l'Equazione~\ref{eq:fading-models}
@@ -48,15 +46,30 @@ sostituendo i valori in~\ref{eq:osbtacle-model} si ottiene: $L_{s,o} = 9*6 + 0,4
 Si evince come, con questa quantità di attenuazione, sia difficile che la trasmissione da un veicolo abbia abbastanza potenza per essere ricevuta dal secondo veicolo.
 %
 \section{L'implementazione}\label{sec:implementazione}
-Nel dettaglio, gli ostacoli sono rappresentati da poligoni bidimensionali che ne definiscono i bordi (spigoli).
-Il modello \textit{Obstacle Shadowing} conta il numero di intersezioni con gli spigoli dell'ostacolo, calcola la distanza percorsa internamente a esso e, utilizzando
-il modello matematico visto in precedenza, restituisce l'attenuazione della trasmissione wireless fra i due veicoli.
+% passi:
+% - dati reali su edifici: dove?
+% - sopra+come?
+% - come rappresentarre gli ostacoli
+% - come gestirli in modo efficace
+% - come implementare il tutto in ns3
+% TODO: processo di elaorazione dati (osm + sumo)
+Ripredendo il modello ideato in~\cite{5720204} e descritto nella sezione precedente, in~\cite{Carpenter:2015:OMI:2756509.2756512} gli autori ne hanno sviluppato
+un'efficiente implementazione per il software di simulazioni ns-3, chiamato \textit{Obstacle Shadowing}.
+Un ostacolo è rappresento come un poligono bidimensionale, internamente riprodotto da una lista di vertici $(x,y)$; il poligono delimita
+i confine (i bordi) dell'ostacolo.
+Nel codice inserito in ns-3 sono state utilizzate le Computational Geometry Algorithms Library (CGAL), libreria scritta in \Cpp contente algoritmi di geometria computazionale.
+Gli ostacoli sono raggruppati in una struttura algebrica dedicata, chiamata partizione binaria dello spazio (\textit{Binary Search Partition}, BSP), utilizzata
+per motivi di ottimizzazione.
+% la ricerca dei potenziali ostacoli nella linea di visuale fra due nodi.
 
-Il tutto è implementato in ns-3 tramite tre classi: \textsf{Obstacle} contiente la rappresentazione geometrica dell'ostacolo utilizzando le Computational Geometry Algorithms Library (CGAL),
-come anche i parametri dell'attenuazione per-parete e per-muro.
-\textsf{Topology} legge i dati degli edifici da un file specifico generato dall'utility Polyconvert del software SUMO (Simulator for Urban Mobility)~\cite{sumoWebsite}
-a partire dalle informazioni ottenute da OpenStreetMap (OSM)~\cite{osmWebsite}.
-L'oggetto \textsf{Topology} così creato è poi utilizzato per determinare la perdita di segnale fra due punti (e.g. veicoli), utilizzando l'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween}.
+Nel dettaglio, quando bisogna calcolare l'attenuazione del segnale fra due nodi, si prende in considerazione un rettangolo fittizio che include i due nodi, lo si estende
+di un certo raggio, ad esempio $200$ metri; i potenziali ostacoli si trovano cercando il punto centrale dell'ostacolo all'interno del BSP.
+Ogni ostacolo il cui centro si trova all'interno della regione descritta in precedenza viene controllato per verificare se interseca la visuale
+(in questo caso \textit{obstructed-line-of-sight}, OLOS), fra i due nodi.
+Se questa verifica ha esito positivo (il segnale interseca effettivamente un ostacolo), viene cacolato il numero di intersezioni e la distanza interna percorsa e,
+successivamente, restituita la quantità di attenuazione secondo la Formula~\ref{eq:osbtacle-model}.
+Questo processo è riassunto nell'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween}.
+Infine, come ulteriore ottimizzazione, il valore calcolato viene salvato e riutilizzato nel caso i nodi non si siano spostati per più di $0,1$ metro.
 %
 \begin{italianalgorithm}[h]
 \caption{Algoritmo per determinare il numero di intersezioni con i bordi dell'ostacolo e la distanza interna percorsa fra due punti.}\label{algo:algoritmo-getobstucteddistancebetween}
@@ -85,6 +98,7 @@ L'oggetto \textsf{Topology} così creato è poi utilizzato per determinare la pe
 \end{italianalgorithm}
 %
 \section{Estensione a tre dimensioni}\label{sec:estensione-a-tre-dimensioni}
+% TODO rileggere
 Come detto in precedenza, gli oggetti sono rappresentati da poligoni bidimensionali e, conseguentemente,
 il modello descritto lavora in una proiezione bidimensionale dell'ambiente (tridimensionale) di ns-3,
 prendendo quindi in considerazione solo le prime due componenti \textit{x} e \textit{y} della posizione di ogni nodo.
