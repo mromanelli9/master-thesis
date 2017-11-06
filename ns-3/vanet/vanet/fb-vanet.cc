@@ -672,7 +672,7 @@ FBVanetExperiment::SetupScenario ()
 	m_alertGeneration = 9;	// 10 -1 (start time of the application)
 	m_TotalSimTime = 990000.0;
 	m_areaOfInterest = 1000;	// meters
-	m_vehiclesDistance = 50;	// meters
+	m_vehiclesDistance = 25;	// meters
 
 	if (m_scenario == 0)
 	{
@@ -680,16 +680,18 @@ FBVanetExperiment::SetupScenario ()
 		m_bldgFile = "Griglia.poly.xml";
 		m_traceFile = "Griglia.ns2mobility.xml";
 
-		m_nNodes = 209;
-		m_startingNode = 88;
+		m_nNodes = 96;
+		m_startingNode = 23;
+
+		m_areaOfInterest = 500;
 	} else if (m_scenario == 1)
 	{
 		// Padova (2x2 km)
 		m_bldgFile = "Padova.poly.xml";
 		m_traceFile = "Padova.ns2mobility.xml";
 
-		m_nNodes = 1203;
-		m_startingNode = 163;
+		m_nNodes = 2224;
+		m_startingNode = 331;
 	}
 	else if (m_scenario == 2)
 	{
@@ -697,8 +699,8 @@ FBVanetExperiment::SetupScenario ()
 		m_bldgFile = "LA.poly.xml";
 		m_traceFile = "LA.ns2mobility.xml";
 
-		m_nNodes = 930;
-		m_startingNode = 306;
+		m_nNodes = 1905;
+		m_startingNode = 365;
 	}
 	else
 		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
