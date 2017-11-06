@@ -8,32 +8,42 @@
 \chapter{Modello a ostacoli}\label{chap:modello-a-ostacoli}
 %
 \section{Il modello matematico}\label{sec:il-modello-matematico}
-Gli autori di~\cite{Carpenter:2015:OMI:2756509.2756512} riprendono il modello introdotto da Christoph Sommer et al.\ in~\cite{5720204},
-nel quale la perdita di segnale dovuta a ostacoli $L_{s,o}$ dipende dall'attenuazione causata dai bordi dell'ostacolo (\textit{per-wall attenuation})
-e quella derivante dalla superficie interna (\textit{per-meter attenuation}):
+Il modello utilizzato viene descritto per la prima volta in~\cite{5720204}, dove veniva presentato
+come un'estensione dei cosiddétti modelli di attenuazione del segnale.
+In generale, questi possono essere scritti nella forma dell'Equazione~\ref{eq:fading-models}, dove $P$ è la potenza del trasmettitore (e ricevitore),
+$G$ i guadagni delle antenne e $L$ il termine che indica le attenuazioni dovute alla trasmissione.
+%
+\begin{gather}
+	P_r[dBm] = P_t[dBm] + G_t[dB] + G_r[dB] - \sum L_x[dB] 														\label{eq:fading-models} \\
+	L_{TwoRayGround} = 10 \lg \left( \frac{d^4 L}{h^2_t h^2_t} \right)	\qquad [dB]		\label{eq:tworayground-model} \\
+	L_{LogNorm} = 10 \lg \left( X_\sigma \right)	\qquad [dB]													\label{eq:lognorm-model}
+\end{gather}
+%
+Questi modelli possono essere scritti come componenti di $L$ e concatenati in modo da ottenere l'attenuazione totale risultante.
+Ad esempio, le equazioni~\ref{eq:tworayground-model} e~\ref{eq:lognorm-model} illustrano rispettivamente i modelli a doppio raggio e log-normale.
+
+Il modello in esame rappresenta la perdita di segnale dovuta a un ostacolo estendendo l'Equazione~\ref{eq:fading-models}
+col termine $L_{obs}$, che unisce l'attenuazione causata dai bordi dell'ostacolo (attenuazione per-parete)
+e quella derivante dalla superficie interna (attenuazione per-metro):
+%
 \begin{gather}\label{eq:osbtacle-model}
 	L_{s,o} = \alpha n + \beta d_o
 \end{gather}
-Nella formula precedente, $n$ indica il numero di volte che il bordo dell'ostacolo viene intersecato dalla visuale diretta (LOS),
-mentre $d_o$ è la distanza, in metri, attraversata all'interno dell'ostacolo.
-Il parametro $\alpha$ rappresenta l'attenuazione per-parete espressa in decibels (dB per parete), mentre
-$\beta$ l'attenuazione per-metro, sempre in decibels per metro (dB/m).
+dove $n$ è il numero di volte che il bordo dell'ostacolo viene intersecato dalla visuale e $d_o$ è la distanza, in metri, attraversata all'interno dell'ostacolo.
+Il primo dei due parametri di calibrazione, $\alpha$, espresso in decibel per metro (dB/m), descrive l'attenuazione
+che la trasmissione subisce a causa delle pareti esterne dell'ostacoli.
+Il secondo, $\alpha$, espresso in decibel (dB per parete), serve come misura di approssimare della struttura interna dell'ostacolo.
+Tramite la regolazione di questo valore è possibile rappresentare diverse tipologie di ostacoli.
 
-I due fattori di calibrazione permettono di rappresentare più tipologie di edificio.
-I valori predefiniti di $\alpha = 9$ dB per parete e $\beta = 0,4$ dB/m sono buoni per la maggior parte delle applicazioni
-anche se, naturalmente, non per tutte.
-Riportando l'esempio in~\cite{5720204} di una casa in costruzione, il modello riesce a rappresentare le caratteristiche dell'attenuazione,
-tuttavia i parametri sono distanti da quelli sopra indicati: $\alpha = 2.4$ dBm and $\beta = 0.63$ dB/m.
+Prendendo il caso di edifici in un ambiente cittadino, i valori predefiniti per i due parametri sono $\alpha = 9$ dB per parete e $\beta = 0,4$ dB/m.
 %
-\begin{figure}[h]
+\begin{figure}[htbp]
 	\centering
-	\begin{center}
 		\includegraphics[width=.6\textwidth]{carpenter-1.png}
-	\end{center}
-	\label{fig:scenario-urbano-1}\caption{Esempio di scenario urbano.}
+\caption{Esempio di scenario urbano.\label{fig:scenario-urbano-1}}
 \end{figure}
 %
-Prendiamo l'esempio raffigurato in Figura~\ref{fig:scenario-urbano-1}, dove la linea fra i due veicoli interseca $n=6$ muri e una distanza interna di $d_o=32$m;
+Prendiamo l'esempio raffigurato in \figurename~\ref{fig:scenario-urbano-1}, dove la linea fra i due veicoli interseca $n=6$ muri e una distanza interna di $d_o=32$m;
 sostituendo i valori in~\ref{eq:osbtacle-model} si ottiene: $L_{s,o} = 9*6 + 0,4*32 = 66,8$dB.
 Si evince come, con questa quantità di attenuazione, sia difficile che la trasmissione da un veicolo abbia abbastanza potenza per essere ricevuta dal secondo veicolo.
 %
