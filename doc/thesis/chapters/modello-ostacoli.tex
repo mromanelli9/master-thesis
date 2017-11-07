@@ -46,13 +46,6 @@ sostituendo i valori in~\ref{eq:osbtacle-model} si ottiene: $L_{s,o} = 9*6 + 0,4
 Si evince come, con questa quantità di attenuazione, sia difficile che la trasmissione da un veicolo abbia abbastanza potenza per essere ricevuta dal secondo veicolo.
 %
 \section{L'implementazione}\label{sec:implementazione}
-% passi:
-% - dati reali su edifici: dove?
-% - sopra+come?
-% - come rappresentarre gli ostacoli
-% - come gestirli in modo efficace
-% - come implementare il tutto in ns3
-% TODO: processo di elaorazione dati (osm + sumo)
 Ripredendo il modello ideato in~\cite{5720204} e descritto nella sezione precedente, in~\cite{Carpenter:2015:OMI:2756509.2756512} gli autori ne hanno sviluppato
 un'efficiente implementazione per il software di simulazioni ns-3, chiamato \textit{Obstacle Shadowing}.
 Un ostacolo è rappresento come un poligono bidimensionale, internamente riprodotto da una lista di vertici $(x,y)$; il poligono delimita
@@ -107,7 +100,6 @@ utilizzando l'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween}.
 Il tutto è incluso in un nuovo modulo chiamato \textsf{obstacle} (ostacolo).
 %
 \section{Estensione a tre dimensioni}\label{sec:estensione-a-tre-dimensioni}
-% TODO rileggere
 Come detto in precedenza, gli oggetti sono rappresentati da poligoni bidimensionali e, conseguentemente,
 il modello descritto lavora in una proiezione bidimensionale dell'ambiente (tridimensionale) di ns-3,
 prendendo quindi in considerazione solo le prime due componenti \textit{x} e \textit{y} della posizione di ogni nodo.
