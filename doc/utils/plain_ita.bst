@@ -12,13 +12,12 @@
  %This file is an italian version of plain.bst
  %Use it by putting \bibliographystyle{plain_ita}
  %author: Vittorio De Martino, settembre 2002 (v.demart@dada.it)
- %modified by: Marco Romanelli, novembre 2017 (marco.romanelli.1@studenti.unipd.it)
 
  %Changes:        ["original"-->"italian"]
  %             "Daly, P., and Cox, D.R."-->"Daly P. e Cox D.R."
  %             "Technical Report"-->"Relazione Tecnica"
  %             "Ph.D. thesis"-->"Tesi di Dottorato di Ricerca"
- %             "Master thesis"-->"Tesi Magistrale"
+ %             "Master thesis"-->"Tesi di Master"
  %             "editor/editors"-->"Curatore/curatori o meglio (A cura di)"
 %%---------------------------------------------------------------------
 
@@ -204,19 +203,15 @@ FUNCTION {format.names}
     { namesleft #0 > }
     { s nameptr "{ff~}{vv~}{ll}{, jj}" format.name$ 't :=
       nameptr #1 >
-    { namesleft #1 >
-        { ", " * t * }
-        { numnames #2 >
-        { "," * }
-        'skip$
-          if$
-          t "others" =
-        { " e~altri" * }
-        { " e " * t * }
-          if$
-        }
-      if$
-    }
+  { namesleft #1 >
+      { ", " * t * }
+      { t "others" =
+          { " e~altri" * }
+          { " e " * t * }
+        if$
+      }
+    if$
+  }
     't
       if$
       nameptr #1 + 'nameptr :=
@@ -555,13 +550,6 @@ FUNCTION {format.incoll.inproc.crossref}
   " \cite{" * crossref * "}" *
 }
 
-FUNCTION {format.addendum}
-{ editor empty$
-    { "" }
-    {"(" addendum ")" *}
-      if$
-}
-
 FUNCTION {article}
 { output.bibitem
   format.authors "author" output.check
@@ -768,7 +756,6 @@ FUNCTION {mastersthesis}
   school "school" output.check
   address output
   format.date "year" output.check
-	format.addendum output
   new.block
   note output
   fin.entry
