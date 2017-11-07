@@ -56,7 +56,7 @@ Si evince come, con questa quantità di attenuazione, sia difficile che la trasm
 Ripredendo il modello ideato in~\cite{5720204} e descritto nella sezione precedente, in~\cite{Carpenter:2015:OMI:2756509.2756512} gli autori ne hanno sviluppato
 un'efficiente implementazione per il software di simulazioni ns-3, chiamato \textit{Obstacle Shadowing}.
 Un ostacolo è rappresento come un poligono bidimensionale, internamente riprodotto da una lista di vertici $(x,y)$; il poligono delimita
-i confine (i bordi) dell'ostacolo.
+il confine (i bordi) dell'ostacolo.
 Nel codice inserito in ns-3 sono state utilizzate le Computational Geometry Algorithms Library (CGAL), libreria scritta in \Cpp contente algoritmi di geometria computazionale.
 Gli ostacoli sono raggruppati in una struttura algebrica dedicata, chiamata partizione binaria dello spazio (\textit{Binary Search Partition}, BSP), utilizzata
 per motivi di ottimizzazione.
@@ -96,6 +96,15 @@ Infine, come ulteriore ottimizzazione, il valore calcolato viene salvato e riuti
 	\EndProcedure{}
 \end{algorithmic}
 \end{italianalgorithm}
+%
+Per quanto rigurda la struttura del codice in ns-3, il modello è implementato in tre classi:
+\textsf{Obstacle} contiente la rappresentazione geometrica dell'ostacolo come anche i parametri dell'attenuazione per-metro e per-muro.
+\textsf{Topology} legge il file contente le informazioni sugli ostacoli (vedere capitolo successivo) e per ognuno di questi
+lo crea e lo posiziona all'interno della struttura dati BSP.
+La terza, \textsf{ObstacleShadowingPropagationLossModel}, estende ns-3 aggiungendo il modello di propagazione a ostacoli
+e richiama \textsf{Topology} nel momento in cui si rende necessario calcolare l'attenuazione del segnale fra due nodi,
+utilizzando l'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween}.
+Il tutto è incluso in un nuovo modulo chiamato \textsf{obstacle} (ostacolo).
 %
 \section{Estensione a tre dimensioni}\label{sec:estensione-a-tre-dimensioni}
 % TODO rileggere
