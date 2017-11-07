@@ -12,6 +12,7 @@
  %This file is an italian version of plain.bst
  %Use it by putting \bibliographystyle{plain_ita}
  %author: Vittorio De Martino, settembre 2002 (v.demart@dada.it)
+ %modified by: Marco Romanelli, novembre 2017 (marco.romanelli.1@studenti.unipd.it)
 
  %Changes:        ["original"-->"italian"]
  %             "Daly, P., and Cox, D.R."-->"Daly P. e Cox D.R."
@@ -554,6 +555,13 @@ FUNCTION {format.incoll.inproc.crossref}
   " \cite{" * crossref * "}" *
 }
 
+FUNCTION {format.addendum}
+{ editor empty$
+    { "" }
+    {"(" addendum ")" *}
+      if$
+}
+
 FUNCTION {article}
 { output.bibitem
   format.authors "author" output.check
@@ -760,6 +768,7 @@ FUNCTION {mastersthesis}
   school "school" output.check
   address output
   format.date "year" output.check
+	format.addendum output
   new.block
   note output
   fin.entry
@@ -777,16 +786,6 @@ FUNCTION {misc}
   note output
   fin.entry
   empty.misc.check
-}
-
-FUNCTION {URL}
-{ output.bibitem
-  title howpublished new.block.checkb
-  format.title output
-  howpublished new.block.checka
-  howpublished "Visitato il " output
-  new.block
-  fin.entry
 }
 
 FUNCTION {phdthesis}

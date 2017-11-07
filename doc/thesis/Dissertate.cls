@@ -151,14 +151,14 @@
 \renewcommand{\setthesection}{\arabic{chapter}.A\arabic{section}}
 
 % References.
-\renewcommand\bibname{References}
+\renewcommand\bibname{Bibliografia}
 %\RequirePackage[super,comma,numbers]{natbib}
 \RequirePackage[comma,numbers]{natbib}
 \renewcommand{\bibnumfmt}[1]{[#1]}
 \RequirePackage[palatino]{quotchap}
 \renewcommand*{\chapterheadstartvskip}{\vspace*{-0.5\baselineskip}}
 \renewcommand*{\chapterheadendvskip}{\vspace{1.3\baselineskip}}
-\bibliographystyle{IEEEtran}
+\bibliographystyle{../utils/plain_ita.bst}
 
 % An environment for paragraph-style section.
 \providecommand\newthought[1]{%
