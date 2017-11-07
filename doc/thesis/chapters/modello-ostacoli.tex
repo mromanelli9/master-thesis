@@ -112,13 +112,12 @@ Come detto in precedenza, gli oggetti sono rappresentati da poligoni bidimension
 il modello descritto lavora in una proiezione bidimensionale dell'ambiente (tridimensionale) di ns-3,
 prendendo quindi in considerazione solo le prime due componenti \textit{x} e \textit{y} della posizione di ogni nodo.
 
-Uno dei principali motivi che portò gli ideatori del modello a questa scelta fu la mancanza di informazioni tridimensionali
-su OSM (piattaforma dalla quale aquisivano i dati), soprattutto su larga scala.
-Nonostante in parte sia vero anche attualmente (spacialmente per aree rurali), queste informazioni sono sicuramente
-più diffuse rispetto ad alcuni anni fa e lo saranno sempre di più.
-
+Uno dei principali motivi che portò gli ideatori del modello a questa scelta fu la mancanza di sufficienti informazioni tridimensionali
+sulla piattaforma dalla quale aquisivano i dati (OpenStreetMap, OSM).
+Grazie all'avanzamento del progresso tecnologico e a una crescente diffusione di Internet, questi dati
+sono, e saranno sempre più, disponibili per un numero crescente di aree.
 Dato, quindi, il supporto nativo alla terza dimensone di ns-3 (a differenza dei suoi precedessori) e la crescente diffusione
-di dati trimensionali sugli edifici in ambienti urbani e suburbani, è naturale pensare di estendere il modello affinché
+di dati trimensionali su edifici e ostacoli in generale sulle nostre città, è naturale pensare di estendere il modello affinché
 tenga conto di questa componente e pertanto dell'esatta posizione del nodo nell'ambiente della simulazione.
 %
 \subsection{Altezza degli edifici}\label{subsec:altezza-edifici}
@@ -153,8 +152,6 @@ Questa informazione può essere sfruttata per creare una forma tridimensionale s
 Nell'esempio indicato nel Codice~\ref{lst:esempio-dati-blocco-torre}, manca la misura dell'altezza ma è presente
 il numero di piani: è sufficiente moltiplicare questo numero, qui $8$, per l'altezza media un piano, per esempio $2,7$ metri,
 per ottenere una stima dell'altezza pari a $21,6$ metri.
-Questo calcolo è stato incluso in uno \textit{script}\footnote{\url{https://gitlab.com/mromanelli/tesi}} creato appositamente per integrare i dati sulle altezze nel file
-dei poligoni generati dall'utility Polyconvert.
 %
 \begin{lstlisting}[language=XML,style=mystyle,numbers=none,linewidth=\textwidth,label={lst:esempio-poly-blocco-torre},caption={Forma di un edificio estratta da OSM e convertita con Polyconvert con l'aggiunta dell'altezza.}]
 <poly id="62332429" type="amenity.university" color="237,199,199" fill="1" layer="-1.00" height="21.6" shape="79.68,73.38 119.66,61.39 108.52,24.49 88.84,30.39 68.53,36.48 79.68,73.38" />
@@ -166,7 +163,7 @@ Il resto dell'algoritmo \textsf{GetObstuctedDistanceBetween} (Algoritmo~\ref{alg
 rimane sostanzialmente lo stesso e, nello specifico, la ricerca dei potenziali ostacoli rimane invariata.
 Infatti gli ostacoli che si interpongono fra due punti nello spazio tridimensionale saranno gli stessi che sul piano bidimensionale
 (creato dalla perdita della terza componente \textit{z}) in quanto gli ostacoli che vengono considerati sono ``ancorati'' al terreno ($z=0$).
-Anche l'oggetto \textsf{Obstacle} rimane quasi del tutto invariato, fatta eccezione per il valore l'altezza.
+Anche l'oggetto \textsf{Obstacle} rimane quasi del tutto invariato, fatta eccezione per l'aggiunta del valore l'altezza.
 
 Le modifiche significative risiedono quasi totalmente nel calcolo delle intersezioni fra l'ostacolo e il raggio che collega i due nodi.
 In origine, l'intersezione veniva calcolata fra il segmento (raggio) che unisce i due punti e lo spigolo dell'ostacolo considerato in quel
@@ -183,7 +180,7 @@ una volta generato il piano va controllato che il punto sia un punto valido.
 
 L'ultimo passo, non necessario nel caso bidimensionale, consiste nel controllare che il raggio (fra i nodi)
 non intersechi la faccia superiore dell'oggetto (il tetto in un edificio); questo viene fatto esattamente come nei passi precedenti.
-Le modifiche sono riassunte nello pseudocodice riportato nell'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween-modificato}.
+Le modifiche sono riportate nell'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween-modificato}.
 %
 \begin{italianalgorithm}[!h]
 \caption{Modifica all'algoritmo per includere la terza dimensione.}\label{algo:algoritmo-getobstucteddistancebetween-modificato}
