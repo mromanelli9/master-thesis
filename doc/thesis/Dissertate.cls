@@ -61,6 +61,13 @@
     {\begin{spacing}{\dcompressedspacing}\oldenumerate}
     {\endoldenumerate\end{spacing}}
 
+% Images with compressed spacing
+\let\oldenumerate\figure
+\let\endoldenumerate\endfigure
+\renewenvironment{figure}
+    {\begin{spacing}{\dcompressedspacing}\oldenumerate}
+    {\endoldenumerate\end{spacing}}
+
 % Text layout.
 \RequirePackage[outer=1in, inner=1.55in, twoside, a4paper]{geometry}
 \usepackage{ragged2e}
