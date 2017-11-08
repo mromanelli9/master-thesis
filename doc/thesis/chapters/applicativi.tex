@@ -5,8 +5,49 @@
 
 \chapter{Applicativi}\label{chap:applicativi}
 \section{Network Simulator 3}\label{sec:ns-3}
+Network Simulator 3 (ns-3)~\cite{ns3Website} è un simulatore a eventi discreti utilizzato principalmente in ambito accademico e di ricerca,
+scritto in \Cpp{} e Python; è un software libero distribuito sotto licenza GNU GPLv2.
+Creato nel 2006 da un gruppo coordinato da Tom Henderson, George Riley, Sally Floyd e Sumit Roy con lo scopo
+di ovviare ad alcune grosse limitazioni della precedente versione (ns-2), come ad esempio la necessità di utilizzare
+un linguaggio di \textit{scripting} dedicato per modellare le simulazioni o una maggiore scalabilità~\cite{Henderson:2006:NPG:1190455.1190468}.
+Attualmente è l'unica versione della serie a essere sviluppata.
+È d'obbligo menzionare che, sebbene tutte le versione siano state scritte in \Cpp, ns-3 non è retrocompatibile i precedenti.
 %
-% TODO
+% \begin{figure}[htbp]
+% 	\centering
+% 		\includegraphics[width=.8\textwidth]{struttura-ns3.png}
+% \caption{Panoramica della struttura interna di ns-3.\label{fig:struttura-ns3}}
+% \end{figure}
+%
+\paragraph{Elementi chiave}
+In ns-3, il dispositivo di elaborazione di base (unità elementare) è chiamato \textit{nodo}
+e fornisce i metodi per gestire i dispositivi nelle simulazioni;
+Può essere paragonato a un computer a cui è possibile aggiungere funzionalità come applicazioni,
+stack protocollari e schede periferiche.
+Sui nodi sono eseguite delle attività per raggiungere uno scopo, le \textit{applicazioni};
+Per esempio, le applicazioni \textsf{UdpEchoClientApplication} e \textsf{UdpEchoServerApplication} compongono
+un'aplicazione client/server per gestire e scambiare pacchetti nella rete.
+Le comunicazioni fra i nodi avvengono tramite degli speciali \textit{canali};
+questi possono essere definiti dallo sviluppatore e permettono di modellare concetti semplici come un collegamento su cavo
+fino a quelli più complessi come uno \textit{switch Ethernet}.
+Su un nodo è possibile installare uno o più \textit{dispositivi di rete} che permettono la comunicazione con altri nodi attraverso i canali.
+Un nodo può essere connesso a più canali attraverso diversi dispositivi di rete.
+La simulazione di una grande rete obbliga lo sviluppatore a creare migliaia di nodi, dispositivi di rete e canali.
+Per facilitare questo tipo di operazioni molto comuni sono state inserite nel simulatore degli agenti, chiamati \textit{Helper}.
+%
+\paragraph{Struttura di una simulazione}
+Per creare una semplice simulazione è necessario:
+\begin{itemize}
+	\item impostare gli argomenti che saranno letti da riga di comando;
+	\item impostare il valore degli attributi delle classi;
+	\item creare i nodi;
+	\item configurare il livello fisico e MAC;
+	\item impostare il livello di rete, il protocollo di routing e gli indirizzi;
+	\item configurare e installare le applicazioni;
+	\item impostare la poszione iniziale dei nodi e l'eventuale mobilità;
+	\item pianificare eventuali eventi definiti dall'utente;
+	\item avviare la simulazione.
+\end{itemize}
 %
 \section{\SUMO}\label{sec:sumo}
 \SUMO~\cite{SUMO2012} è un simulatore per traffico veicolare su larga scala; è \textit{open source}, scritto in \Cpp
@@ -16,7 +57,7 @@ per pedoni, diverse tipologie di veicoli, eccetera.
 Proprio queste \textit{utility} sono state utilizzate per l'elaborazione delle informazioni sugli edifici (fornite poi
 al modello \textit{Obstacle Shadowing}) e il posizionamento dei veicoli.
 %
-\subsection{Realizzazione degli scenari}
+% \subsection{Realizzazione degli scenari}
 Per creare uno scenario derivato da un ambiente reale, come quelli che saranno utilizzati nelle simulazioni,
 e poterlo utilizzare in ns-3, sono necessarie alcune elaborazioni intermedie.
 
