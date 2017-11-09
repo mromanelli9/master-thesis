@@ -21,7 +21,7 @@ di un ambiente conosciuto;
 per questo motivo, la configurazione è la stessa presentata nel documento originale \cite{Barichello2017propagazione}, a cui sono stati aggiunti gli edifici.
 Lo scenario è una città fittizia con strade a griglia in stile Manhattan di lunghezza $4000$ metri e distanti l'una dall'altra $300$ metri.
 I veicoli sono disposti a $12$ metri di distanza per un totale di $8064$.
-Il veicolo dal quale ha inizio la fase di inoltro (generazione del primo messaggio di Alert) è posizionato
+Il veicolo dal quale ha inizio la fase di inoltro (generazione del primo messaggio di inoltro) è posizionato
 al centro della griglia, in modo da avere una propagazione teoricamente uniforme;
 per facilità verrà chiamato veicolo \textit{zero}.
 Seguendo l'idea originale, è stata definita anche un circonferenza di raggio pari a $1000\pm12$ metri, utilizzata per definire alcune metriche che verranno descritte in seguito;
@@ -120,8 +120,20 @@ mentre ora il limite ``quadratico'' dell'area è ideale (non tutte le strade fin
 \subsection{Padova}\label{sec:configurazione-griglia-risultati}
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=.49\textwidth]{osm_web-pd-2x2.png}
-		\hfill
-		\includegraphics[width=.49\textwidth]{osm_web-la-2x2.png}
-\caption{.\label{fig:risultati-padova-copertura-tot}}
+		\includegraphics[width=\textwidth]{grafici/pd_copertura_totale.png}
+		\includegraphics[width=\textwidth]{grafici/pd_copertura_circonferenza.png}
+\caption{Copertura dei veicoli totale e sulla circonferenza dei veicoli\label{fig:risultati-padova-copertura}}
+\end{figure}
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{grafici/pd_salti.png}
+\caption{Numero di salti necessario per raggiungere la circonferenza dei veicoli\label{fig:risultati-padova-salti}}
+\end{figure}
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{grafici/pd_messaggi_inviati.png}
+		\includegraphics[width=\textwidth]{grafici/pd_messaggi_ricevuti.png}
+\caption{Quantità di messaggi di inoltro durante la simulazione.\label{fig:risultati-padova-messaggi}}
 \end{figure}
