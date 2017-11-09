@@ -1,5 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 BASEDIR=$(dirname $0)
+MODE="$1"
+
 cd $BASEDIR
 cd ..
 
@@ -15,10 +17,14 @@ else
 fi
 
 # Build the dissertation.
-xelatex tesi
-bibtex tesi
-xelatex tesi
-xelatex tesi
+if [ "$MODE" == "all" ]; then
+	xelatex tesi
+	bibtex tesi
+	xelatex tesi
+	xelatex tesi
+else
+	xelatex tesi
+fi
 
 # Move temp files
 ls *.aux *.bbl *.blg *.toc *.lot *.lof *.log *.lol *.out | xargs -I {} mv {} misc/

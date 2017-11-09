@@ -33,7 +33,7 @@ che utilizzano una stima fissa del raggio tramissivo, rispettivamente di $300$ e
 Gli edifici sono stati creati apposititamente, in modo che ogni edificio fosse contenuto all'interno dello spazio creato dalle strade.
 Così facendo, risultano $169$ edifici di $295$x$295$ metri (i muri sono distanziati di $5$ metri dalla strada).
 %
-\begin{table}
+\begin{table}[htbp]
 	\centering
 	\begin{tabular}{| m{.4\linewidth} | p{.2\linewidth} |}
 		\toprule
@@ -58,3 +58,46 @@ Così facendo, risultano $169$ edifici di $295$x$295$ metri (i muri sono distanz
 % \end{figure}
 %
 \subsection{Risultati}\label{sec:configurazione-griglia-risultati}
+%
+% TODO
+%
+\section{Scenario urbano reale} % un titolo migliore no?
+Le configurazioni precedenti avevano il difetto di essere poco veritiere, sia dal punto di vista della topologia stradale
+che sulla geometria degli edifici.
+In questo gruppo di simulazioni, invece, si è voluto valutare Fast Broadcast all'interno di uno scenario quanto più reale possibile.
+Sono state scelte due città, Padova (IT) e Los Angeles (California, USA), definite due aree nella zona centrale di circa $5$ kilometri quadrati (Figura~\ref{fig:scenari-la-pd-osm})
+e, seguendo il procedimento descritto nella Sezione~\ref{sec:sumo}, si sono estratte le informazioni necessarie alla simulazione.
+I parametri risultanti sono elencati in Tabella~\ref{tab:parametri-simulazioni-pd-la}.
+
+La scelta è ricaduta su Los Angeles poiché ha una rete stradale a griglia in stile Manhattan, simile anche allo scenario precedente,
+mentre Padova (sede anche dell'Università dove si è svolto questo lavoro) ha una toplogià più irregolare, con strade più strette ed edifici a ridosso di queste,
+zone pedonali e ZTL.
+%
+\begin{table}[htbp]
+	\centering
+	  \begin{tabular}{| m{.35\linewidth} | p{.01\linewidth} | p{.04\linewidth} | p{.15\linewidth} | p{.15\linewidth} |}
+			\toprule
+			\multicolumn{3}{|m{.3\linewidth}|}{\multirow{2}{*}{}}														&		\multicolumn{2}{c|}{Scenario}						\\ \cline{4-5}
+			\multicolumn{3}{|m{.3\linewidth}|}{}																						&		Padova				&			Los Angeles					\\
+			\thickerline
+			\multicolumn{2}{|m{.25\linewidth}|}{\multirow{2}{*}{Latitudine}}				&		N	 	& 	$45,4171$				&			$33,9654$					\\ \cline{3-5}
+			\multicolumn{2}{|m{.25\linewidth}|}{}																		&		S	 	& 	$45,3981$				&			$33,9478$					\\ \hline
+			\multicolumn{2}{|l|}{\multirow{2}{*}{Longitudine}}											&		O	 	& 	$11,8654$				&			-$118,3260$				\\ \cline{3-5}
+			\multicolumn{2}{|l|}{}																									&		E	 	& 	$11,8923$				&			-$118,3055$				\\ \hline
+			\multicolumn{3}{|l|}{Area approssimativa (km$^2$)}															&		\multicolumn{2}{c|}{$5$}								\\ \hline
+			\multicolumn{3}{|l|}{Distanza fra veicoli (metri)}															&		\multicolumn{2}{c|}{$25$}								\\ \hline
+			\multicolumn{3}{|l|}{Numero di veicoli}																					&		$2224$					&					$1905$				\\ \hline
+			\multicolumn{3}{|l|}{Numero di edifici}																					&		$6322$					&					$8241$				\\ \hline
+			\multicolumn{3}{|l|}{Numero di simulazioni}																			&		\multicolumn{2}{c|}{$50$}								\\
+			\bottomrule
+	  \end{tabular}
+	\caption{Parametri per gli scenari urbani.\label{tab:parametri-simulazioni-pd-la}}
+\end{table}
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=.49\textwidth]{osm_web-pd-2x2.png}
+		\hfill
+		\includegraphics[width=.49\textwidth]{osm_web-la-2x2.png}
+\caption{Una vista delle aree selezionate per le simulazioni; a sinistra la città di Padova e a destra Los Angeles (fonte: OSM).\label{fig:scenari-la-pd-osm}}
+\end{figure}
