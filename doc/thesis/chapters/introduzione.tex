@@ -4,8 +4,57 @@
 %!TEX root = ../tesi.tex
 
 \chapter{Introduzione}\label{chap:introduction}
-\section{Contesto}\label{sec:contesto}
-% TODO
+% \section{Contesto}\label{sec:contesto}
+% scaletta:
+% - introdurre le vanet
+% - importanza della propagazione/protocolli broadcast
+% - importanza delle simulazioni
+% - importanza di simulazioni veritiere
+% - (~) modelli per rendere migliori le simulazioni
+% - importanza degli ostacoli
+% - modellazione di ambiente 3d
+% - struttura documenti tesi
+I progressi tecnologici dell'ultimo decennio nell'hardware, software e nelle telecomunicazioni hanno permesso
+la larga diffusione di unità computazionali all'interno degli autoveicoli.% , anche in quelli di fascia medio-bassa.
+Questo ha portato a un incremento dell'interesse della ricerca scientifica in questo campo e, in particolare,
+sullo studio delle reti veicolari o VANET (\textit{Vehicular Ad-hoc Networks}).
+
+Le VANET rappresentano una famiglia delle reti Ad-hoc mobili (\textit{Mobile Ad-hoc Network})
+nelle quali i movimenti sono strutturati, i veicoli sono consapevoli della propria posizione nello spazio (ad esempio tramite geolocalizzazione GSP)
+e sono equipaggiati con attrazzatura che permette le comunicazioni inter-veicolari (es.~antenne radio).
+Queste reti sono alla base di una vasta gamma di necessità, che spaziano dalla sicurezza stradale alle applicazioni multimediali,
+dalla distribuzione dei dati sul traffico allo sviluppo di una rete infrastrutturale urbana.
+
+Una caratteristicha comunue è la necessità di un sistema di propagazione che trasporti informazioni
+con il minor ritardo possibile; per esempio un pericolo inatteso sulla careggiata potrebbe causare l'impossibilità di proseguire
+lungo quel percorso, oppure una trasmissione di contenuti multimediali (giochi mutiplayer, video) fra due o più veicoli~\cite{1580935}~\cite{PantelW02}.
+Una delle soluzioni proposte si chiama Fast Broadcast: un protocollo per ridurre il tempo di propagazione
+di un messaggio da una sorgente a una destinazione tramite una stima del raggio trasmissivo effettivo e
+il conseguente utilizzo di questa per ridurre il numero di salti necessari al raggiungimento dell'obiettivo~\cite{Palazzi07howdo}.
+
+La valutazione di protocolli di questo tipo su scenari urbani con migliaia di agenti risulta
+problematica principalmente a causa dei costi proibitivi (oltre alle implicazioni sulla privacy)
+che comporterebbe una sperimentazione nel mondo reale.
+Spesso, quindi, i ricercatori ricadono sull'utilizzo di modelli simulati, eventualmente integrati con risultati ottenuti
+da esperimenti sul campo in ambienti ridotti.
+In particolare, l'accuratezza dei modelli di propagazione e di mobilità rappresenta la chiave per una buona valutazione delle prestazioni
+dei protocolli di rete veicolari~\cite{4020783}.
+All'interno di scenari urbani e suburbani, gli edifici ostruiscono la naturale propagazione di un segnale radio nello spazio
+e, di conseguenza, al fin di eseguire simulazioni più affidabili questa ostruzione non può essere ignorata.
+Una fra le diverse soluzioni proposte negli anni utilizza un semplice modello matematico
+per il calcolo dell'attenuazione del segnale per un singolo edificio, lo combina con informazioni reali
+sulla geometria degli edifici~\cite{Carpenter:2015:OMI:2756509.2756512}.
+% NB,nota: è da dire che è su ns-3? sennò dopo come lo giustifico?
+
+\paragraph{}
+Il presente lavoro è strutturato come segue.
+Nel capitolo successivo verrà presentato il protocollo Fast Broadcast e una proposta di estensione in due dimensioni.
+Il Capitolo~\ref{chap:modello-a-ostacoli} analizzerà il modello a ostacoli, sia dal punto di vista matematico che da quello analitico inerente alla simulazione;
+concluderà presentanto una possibile soluzione per rendere il modello tridimensionale.
+Il Capitolo~\ref{chap:applicativi} darà una veloce panoramica sui software utilizzati e il metodo utilizzato per la creazione degli scenari.
+Il Capitolo~\ref{chap:simulazioni} illusterà i diversi gruppi di simulazioni effettuati e i relativi risultati ottenuti.
+Infine, nel Capitolo~\ref{chap:conclusioni} saranno presentate le conclusioni, evidenziando anche alcuni possibili sviluppi di questo lavoro.
+%
 \section{Modelli di radiopropagazione}\label{sec:modelli-propagazione}
 Un modello di radiopropagazione (MRP) simula gli effetti dell'attenuazione del segnale radio (segnali elettromagnetici nello spazio libero o etere, in contrasto con la propagazione guidata)
 dovuta alla distanza, cammini multipli per effetto della riflessione, ombreggiatura causata da grandi ostacoli come edifici.
@@ -47,4 +96,4 @@ Gli autori di~\cite{Carpenter:2015:OMI:2756509.2756512} estraevano le informazio
 chiamata OpenStreetMap (OSM)~\cite{osmWebsite}; poi queste venivano elaborate da un software per la simuazione della mobilità di veicoli
 che generava un file contenente i dati sugli edifici e un altro per la mobilità dei veicoli;
 il modello di propagazione teneva conto della distanza interna percorsa del segnale e del numero di muri esterni che questo attraversava.
-% NB: ultima parte non bellissima
+%
