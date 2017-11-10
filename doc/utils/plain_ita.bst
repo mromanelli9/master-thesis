@@ -193,6 +193,13 @@ FUNCTION {emphasize}
   if$
 }
 
+FUNCTION {quote}
+{ duplicate$ empty$
+    { pop$ "" }
+    { "``" swap$ * "''" * }
+  if$
+}
+
 INTEGERS { nameptr namesleft numnames }
 
 FUNCTION {format.names}
@@ -248,7 +255,7 @@ FUNCTION {format.editorit}
 FUNCTION {format.title}
 { title empty$
     { "" }
-    { title "t" change.case$ }
+    { title "t" change.case$ quote}
   if$
 }
 
@@ -350,8 +357,8 @@ FUNCTION {format.edition}
 { edition empty$
     { "" }
     { output.state mid.sentence =
-    { edition "l" change.case$ " edizione" * }
-    { edition "t" change.case$ " edizione" * }
+    { edition "l" change.case$ "a edizione" * }			% this is a workaround, not the optimal solution
+    { edition "t" change.case$ "a edizione" * }
       if$
     }
   if$
