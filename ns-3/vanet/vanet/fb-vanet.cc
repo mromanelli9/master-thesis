@@ -691,7 +691,7 @@ FBVanetExperiment::SetupScenario ()
 		m_traceFile = "Padova.ns2mobility.xml";
 
 		m_nNodes = 2224;
-		m_startingNode = 331;
+		m_startingNode = 313;
 	}
 	else if (m_scenario == 2)
 	{
