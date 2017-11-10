@@ -193,13 +193,6 @@ FUNCTION {emphasize}
   if$
 }
 
-FUNCTION {quote}
-{ duplicate$ empty$
-    { pop$ "" }
-    { "``" swap$ * "''" * }
-  if$
-}
-
 INTEGERS { nameptr namesleft numnames }
 
 FUNCTION {format.names}
@@ -255,9 +248,16 @@ FUNCTION {format.editorit}
 FUNCTION {format.title}
 { title empty$
     { "" }
-    { title "t" change.case$ quote}
+    { title "t" change.case$}
   if$
 }
+
+%FUNCTION {format.title}
+%{ title empty$
+%    { "" }
+%    { title "t" change.case$ quote}
+%  if$
+%}
 
 FUNCTION {n.dashify}
 { 't :=

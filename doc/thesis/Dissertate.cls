@@ -165,7 +165,7 @@
 \RequirePackage[palatino]{quotchap}
 \renewcommand*{\chapterheadstartvskip}{\vspace*{-0.5\baselineskip}}
 \renewcommand*{\chapterheadendvskip}{\vspace{1.3\baselineskip}}
-\bibliographystyle{../utils/plain_ita.bst}
+\bibliographystyle{../utils/IEEEtran_ita.bst}
 
 % An environment for paragraph-style section.
 \providecommand\newthought[1]{%
