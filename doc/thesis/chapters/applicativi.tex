@@ -81,14 +81,14 @@ Il pacchetto SUMO include anche un'interfaccia grafica per visualizzare le simua
 %
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=\textwidth]{file-osm-dettaglio.png}
+		\fbox{\includegraphics[width=\textwidth]{file-osm-dettaglio.png}}
 \caption{Un estratto del fle dati sugli edifici dopo la conversione con Polyconvert.\label{fig:esempio-file-osm}}
 \end{figure}
 %
 %
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=\textwidth]{file-poly-dettaglio.png}
+		\fbox{\includegraphics[width=\textwidth]{file-poly-dettaglio.png}}
 \caption{Un estratto del fle dati sugli edifici dopo la conversione con Polyconvert.\label{fig:esempio-file-poly}}
 \end{figure}
 %
@@ -103,6 +103,9 @@ Il pacchetto SUMO include anche un'interfaccia grafica per visualizzare le simua
 % Generazione figura con: https://www.easel.ly/create?id=https://s3.amazonaws.com/easel.ly/all_easels/3240510/1510073603&key=pri
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=.9\textwidth]{generazione-file-sumo.jpg}
+	{
+		\setlength{\fboxsep}{0pt}	% override default setting
+		\fbox{\includegraphics[width=.9\textwidth]{generazione-file-sumo.jpg}}
+	}
 \caption{Procedimento per estrarre le informazioni da OSM e generare i file per la simulazione con ns-3.\label{fig:generazione-file-sumo}}
 \end{figure}
