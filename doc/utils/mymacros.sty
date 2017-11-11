@@ -32,6 +32,11 @@
 \algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
 
 % Italian language
+% \renewcommand{\listofalgorithms}{Elenco degli algoritmi}
+\makeatletter
+\renewcommand{\listalgorithmname}{Elenco degli algoritmi}
+\makeatother
+
 \newenvironment{italianalgorithm}[1][]
   {\begin{algorithm}[#1]
      \selectlanguage{italian}%
@@ -75,3 +80,10 @@
 %	BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 % EMPTY
+
+
+%----------------------------------------------------------------------------------------
+%	FIGURES
+%----------------------------------------------------------------------------------------
+\fboxsep=2pt	% padding thickness
+\fboxrule=0.4pt	% border thickness

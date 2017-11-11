@@ -267,11 +267,17 @@
 	\phantomsection
 	\cleardoublepage
 
-	% table listing - required if you have any tables
-	\addcontentsline{toc}{chapter}{Frammenti di codice}
-	\lstlistoflistings
+	% algorithms listing - required if you have any algorithms
+	\addcontentsline{toc}{chapter}{Elenco degli algoritmi}
+	\listofalgorithms
 	\phantomsection
 	\cleardoublepage
+
+	% % table listing - required if you have any tables
+	% \addcontentsline{toc}{chapter}{Frammenti di codice}
+	% \lstlistoflistings
+	% \phantomsection
+	% \cleardoublepage
 
 	\acronyms
 

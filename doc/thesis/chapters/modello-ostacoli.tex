@@ -118,37 +118,21 @@ OSM prevede la possibilità di definire l'altezza totale in metri e/o specificar
 presenti.
 Questa informazione può essere sfruttata per creare una forma tridimensionale semplificata dell'edificio.
 %
-\begin{lstlisting}[language=XML,style=mystyle,numbers=none,label={lst:esempio-dati-blocco-torre},caption={Esempio di informazioni di un edificio estratte da OSM.}]
-<way id="62332429" visible="true" version="13" changeset="44057933" timestamp="2016-11-30T11:53:34Z" user="Agno-phi" uid="731498" >
- <nd ref="778692594"/>
- <nd ref="778692588"/>
- <nd ref="778692589"/>
- <nd ref="1809913218"/>
- <nd ref="778692593"/>
- <nd ref="778692594"/>
- <tag k="addr:city" v="Padova"/>
- <tag k="addr:housenumber" v="63"/>
- <tag k="addr:postcode" v="35121"/>
- <tag k="addr:street" v="Via Trieste"/>
- <tag k="alt_name" v="Torre Archimede;Tullio Levi Civita"/>
- <tag k="amenity" v="university"/>
- <tag k="building" v="university"/>
- <tag k="building:levels" v="8"/>
- <tag k="building:levels:underground" v="2"/>
- <tag k="name" v="Dipartimento di Matematica 'Tullio Levi-Civita'/>
- <tag k="operator" v="Universita' degli Studi di Padova"/>
- <tag k="website" v="http://www.math.unipd.it/"/>
-</way>
-\end{lstlisting}
+\begin{figure}[htbp]
+	\centering
+		\fbox{\includegraphics[width=\textwidth]{file-pd-osm-unipd.png}}
+\caption{File dati estratto da OSM in cui compaiono informazioni sull'altezza di un edificio.\label{fig:esempio-pd-osm-edificio-altezza}}
+\end{figure}
 %
-Nell'esempio indicato nel Codice~\ref{lst:esempio-dati-blocco-torre}, manca la misura dell'altezza ma è presente
+Nell'esempio indicato nel \figurename~\ref{fig:esempio-pd-osm-edificio-altezza}, manca la misura dell'altezza ma è presente
 il numero di piani: è sufficiente moltiplicare questo numero, qui $8$, per l'altezza media un piano, per esempio $2,7$ metri,
 per ottenere una stima dell'altezza pari a $21,6$ metri.
 %
-\begin{lstlisting}[language=XML,style=mystyle,numbers=none,linewidth=\textwidth,label={lst:esempio-poly-blocco-torre},caption={Forma di un edificio estratta da OSM e convertita con Polyconvert con l'aggiunta dell'altezza.}]
-<poly id="62332429" type="amenity.university" color="237,199,199" fill="1" layer="-1.00" height="21.6" shape="79.68,73.38 119.66,61.39 108.52,24.49 88.84,30.39 68.53,36.48 79.68,73.38" />
-\end{lstlisting}
-%
+\begin{figure}[htbp]
+	\centering
+	\fbox{\includegraphics[width=\textwidth]{esempio-poly-blocco-torre.png}}
+\caption{Rappresentazione di un edificio in cui è presente un valore di l'altezza.\label{fig:esempio-pd-osm-edificio-altezza}}
+\end{figure}
 %
 \subsection{Modifica dell'algoritmo}\label{subsec:modifica-all-algoritmo}
 Il resto dell'algoritmo \textsf{GetObstuctedDistanceBetween} (Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween})
