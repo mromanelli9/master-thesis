@@ -19,7 +19,6 @@ $G$ i guadagni delle antenne e $L$ il termine che indica le attenuazioni dovute 
 %
 Questi modelli possono essere espressi come componenti di $L$ e concatenati in modo da ottenere l'attenuazione totale risultante.
 Ad esempio, le equazioni~\ref{eq:tworayground-model} e~\ref{eq:lognorm-model} illustrano rispettivamente i modelli a doppio raggio e log-normale.
-
 Il modello in esame rappresenta la perdita di segnale dovuta a un ostacolo estendendo l'Equazione~\ref{eq:fading-models}
 col termine $L_{s,o}$, che unisce l'attenuazione causata dai bordi dell'ostacolo (attenuazione per-parete)
 e quella derivante dalla superficie interna (attenuazione per-metro):
@@ -32,8 +31,11 @@ Il primo dei due parametri di calibrazione, $\alpha$, espresso in decibel per me
 che la trasmissione subisce a causa delle pareti esterne dell'ostacoli.
 Il secondo, $\alpha$, espresso in decibel (dB per parete), serve come misura di approssimare della struttura interna dell'ostacolo.
 Tramite la regolazione di questo valore è possibile rappresentare diverse tipologie di ostacoli.
-
 Prendendo il caso di edifici in un ambiente cittadino, i valori predefiniti per i due parametri sono $\alpha = 9$ dB per parete e $\beta = 0,4$ dB/m.
+
+Prendiamo l'esempio raffigurato in \figurename~\ref{fig:scenario-urbano-1}, dove la linea fra i due veicoli interseca $n=6$ muri e una distanza interna di $d_o=32$m;
+sostituendo i valori in~\ref{eq:osbtacle-model} si ottiene: $L_{s,o} = 9*6 + 0,4*32 = 66,8$dB.
+Si evince come, con questa quantità di attenuazione, sia difficile che la trasmissione da un veicolo abbia abbastanza potenza per essere ricevuta dal secondo veicolo.
 %
 \begin{figure}[htbp]
 	\centering
@@ -41,9 +43,6 @@ Prendendo il caso di edifici in un ambiente cittadino, i valori predefiniti per 
 \caption{Esempio di scenario urbano.\label{fig:scenario-urbano-1}}
 \end{figure}
 %
-Prendiamo l'esempio raffigurato in \figurename~\ref{fig:scenario-urbano-1}, dove la linea fra i due veicoli interseca $n=6$ muri e una distanza interna di $d_o=32$m;
-sostituendo i valori in~\ref{eq:osbtacle-model} si ottiene: $L_{s,o} = 9*6 + 0,4*32 = 66,8$dB.
-Si evince come, con questa quantità di attenuazione, sia difficile che la trasmissione da un veicolo abbia abbastanza potenza per essere ricevuta dal secondo veicolo.
 %
 \section{L'implementazione}\label{sec:implementazione}
 Ripredendo il modello ideato in~\cite{5720204} e descritto nella sezione precedente, in~\cite{Carpenter:2015:OMI:2756509.2756512} gli autori ne hanno sviluppato
