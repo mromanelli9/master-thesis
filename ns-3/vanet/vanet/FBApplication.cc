@@ -243,6 +243,7 @@ FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 	packet->AddHeader (fbHeader);
 
 	fbNode->Send (packet);
+	m_sent++;
 
 	fbNode->SetSent(true);
 	// StopNode (fbNode);
