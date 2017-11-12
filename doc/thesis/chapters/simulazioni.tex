@@ -39,21 +39,32 @@ Così facendo, risultano $169$ edifici di $295$x$295$ metri (i muri sono distanz
 %
 \begin{table}[htbp]
 	\centering
-	\begin{tabular}{| m{.4\linewidth} | p{.2\linewidth} |}
+	\begin{tabular}{| L{.4\linewidth} | r  l |}
 		\toprule
-		Parametro															&			Valore 							\\
+		Parametro															&			Valore 				&					\\
 		\thickerline
-		Lunghezza delle strade [metri] 				&			$4000$							\\
-		Distanza fra le strade [metri]				&			$300$								\\
-		Distanza fra i veicoloi [metri] 			&			$12$ 								\\
-		Raggio trasmissivo effettivo [metri]	&			$300$ - $500$				\\
-		Circonferenza [metri]									&			$1000\pm12$					\\
-		Posizione del veicolo zero						&			centrale						\\
-		Numero di simulazioni									&			$50$								\\
+		Lunghezza delle strade								&			$4000$				& m				\\
+		Distanza fra le strade								&			$300$					& m				\\
+		Distanza fra i veicoloi								&			$12$ 					& m				\\
+		Circonferenza													&			$1000\pm12$		& m				\\
+		Posizione del veicolo zero						&			centrale			&					\\
+		Numero di simulazioni									&			$50$					&					\\
+		\thickerline
+		Dimensioni pacchetto				&				$164$							&			byte		\\	\hline
+		Standard tramissione				&				$802.11$b					&							\\	\hline
+		Frequenza										&				$2.4$							&			GHz			\\	\hline
+		Banda del canale						&				$22$							&			MHz			\\	\hline
+		Velocità di tramissione			&				$11$							&			Mbps		\\	\hline
+		Potenza trasmissione				&				$4,6$-$13,4$			&			dBm			\\	\hline
+		Raggio tramissivo						&				$300$-$500$				&			m				\\	\hline
+		Codifica										&				DSSS\footnotemark	&							\\	\hline
+		Modello di propagazione			&				Two-Ray Ground		&							\\	\hline
+		Modello di ombreggiatura		&				A ostacoli				&							\\
 		\bottomrule
 	\end{tabular}
 	\caption{Configurazione dei parametri per le simulazioni.\label{tab:parametri-simulazioni-barichello}}
 \end{table}
+\footnotetext{\textit{Direct Sequence Spread Spectrum}}	% TODO controllare la posizone, che sia nella stessa pagina della tabella.
 %
 % \begin{figure}[htbp]
 % 	\centering
@@ -75,7 +86,7 @@ Sono state scelte due città, Padova (IT) e Los Angeles (California, USA) (Figur
 e, seguendo il procedimento descritto nella Sezione~\ref{sec:sumo}, si sono estratte le informazioni necessarie alla simulazione.
 Altre informazioni sulla configurazione sono elencati in Tabella~\ref{tab:parametri-simulazioni-pd-la}.
 
-La scelta è ricaduta su Los Angeles poiché ha una rete stradale a griglia in stile Manhattan, simile anche allo scenario precedente,
+La scelta è ricaduta su Los Angeles poiché la sua rete stradale è molto simile a una griglia in stile Manhattan, come anche nello scenario precedente,
 mentre Padova (sede anche dell'Università dove si è svolto questo lavoro) ha una toplogià più irregolare, con strade più strette ed edifici a ridosso di queste,
 zone pedonali e ZTL.
 %
@@ -99,7 +110,7 @@ zone pedonali e ZTL.
 			\multicolumn{3}{|l|}{Numero di simulazioni}																			&		\multicolumn{2}{c|}{$50$}								\\
 			\bottomrule
 	  \end{tabular}
-	\caption{Parametri per gli scenari urbani.\label{tab:parametri-simulazioni-pd-la}}
+	\caption{Parametri della topologia per gli scenari urbani.\label{tab:parametri-simulazioni-pd-la}}
 \end{table}
 %
 \begin{figure}[htbp]
