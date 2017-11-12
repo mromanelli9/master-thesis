@@ -121,6 +121,21 @@ Gli pseudo-codici~\ref{fig:algoritmo-invio-msg-alert} e~\ref{fig:algoritmo-inolt
 \end{italianalgorithm}
 %
 \section{Estensione a due dimensioni}\label{sec:fb-estensione-due-dimensioni}
+% non mi piace molto
+Nello studio originale del protocollo i veicoli erano distribuiti lungo una strada con un singolo senso di marcia.
+Ciò comportava che, presi due veicoli, fosse facile definire la provenienza, cioè chi dei due fosse davanti e chi dietro
+e di conseguenza a chi inoltrare il messaggi (immagine in alto in Figura~\ref{fig:v2v-1d-2d}).
+Se, invece, si considera uno scenario nel quale i veicoli circolano in una rete stradale a due o più sensi di marcia,
+quali sono i veicoli che si trovano davanti e quali invece dietro (immagine in basso in Figura~\ref{fig:v2v-1d-2d})?
+
+Una soluzione a questo problema è stata proposta in~\cite{Barichello2017propagazione}:
+qui la distinzione viene effettuata basandosi sulla posizione del veicolo che ha generato il messaggio.
+La fase di stima non richiede modifiche sostanziali: viene eliminato il concetto di direzione e conseguentemente si utilizza solo uno dei due campi CMBR e CMFR
+(creando così un CMR e un LMR).
+Nella fase di inoltro, la soluzione prevede di controllare la distanza del mittente e la distanza del destinatario rispetto all'origine del messaggio.
+La prima modifica necessaria è quindi la presenza nel messaggio di inoltro della posizione del veicolo che l'ha generato (oltre alla posizione del mezzo che lo intoltra).
+In fase di ricezione, si controlla che la distanza origine-mezzo sia maggiore o uguale a quella origine-mittente: in tal caso il veicolo è un candidato per inoltrare il messaggio;
+se così non avviene il messaggio viene scartato.
 %
 \begin{figure}[htbp]
 	\centering
@@ -130,13 +145,3 @@ Gli pseudo-codici~\ref{fig:algoritmo-invio-msg-alert} e~\ref{fig:algoritmo-inolt
 \caption{Esempio di propagazione di un messaggio in una e due dimensioni (fonti: TheDrive e Car2Car).\label{fig:v2v-1d-2d}}
 \end{figure}
 %
-Gli autori di~\cite{Palazzi07howdo} prevedevano veicoli lungo una singola strada con un senso di marcia.
-In~\cite{Barichello2017propagazione}, si propone una soluzione per estendere il protocollo su due dimensioni,
-quindi a più strade con entrambi i sensi di marcia.
-
-La fase di stima non richiede modifiche sostanziali: viene eliminato il concetto di direzione e conseguentemente si utilizza solo uno dei due campi CMBR e CMFR
-(creando così un CMR e un LMR).
-Nella fase di inoltro, la soluzione prevede di controllare la distanza del mittente e la distanza del destinatario rispetto all'origine del messaggio.
-La prima modifica necessaria è quindi la presenza nel messaggio di inoltro della posizione del veicolo che l'ha generato (oltre alla posizione del mezzo che lo intoltra).
-In fase di ricezione, si controlla che la distanza origine-mezzo sia maggiore o uguale a quella origine-mittente: in tal caso il veicolo è un candidato per inoltrare il messaggio;
-se così non avviene il messaggio viene scartato.
