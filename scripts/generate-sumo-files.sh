@@ -12,7 +12,7 @@ SUMO_CC="$(which sumo)"
 TRACE_EXPORTER="$(which sumo-traceExporter)"
 
 CUSTOM_SCRIPT_DIR="$HOME/GitLab/tesi/scripts/"
-RANDOM_POSITION="$CUSTOM_SCRIPT_DIR/sumo-randomPositions.py"
+RANDOM_POSITION="$CUSTOM_SCRIPT_DIR/fixedPositions.py"
 PRUNE_POLY="$CUSTOM_SCRIPT_DIR/prunePoly.py"
 
 # Check if software exitsts
