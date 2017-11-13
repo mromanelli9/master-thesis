@@ -1,6 +1,6 @@
 #!/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
 """
-@file    randomPositions.py
+@file    fixedPositions.py
 @author  Marco Romanelli [marco.romanelli.1@studenti.unipd.it]
 @date    2017-10-12
 """
