@@ -413,6 +413,7 @@ private:
 	std::string												m_traceFile;
 	std::string												m_bldgFile;
 	uint32_t													m_nDisabled;
+	uint32_t 													m_enableSensors;
 	double														m_TotalSimTime;
 };
 
@@ -441,6 +442,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_traceFile (""),
 		m_bldgFile (""),
 		m_nDisabled (0),
+		m_enableSensors (0),
 		m_TotalSimTime (30)
 {
 	srand (time (0));
@@ -692,18 +694,23 @@ FBVanetExperiment::ConfigureApplications ()
 	m_adhocNodes.Get (m_startingNode)->AddApplication (m_fbApplication);
 
 	// Configure dummy sensors
-	for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+	if (m_enableSensors != 0)
 	{
-		Ptr<Node> node = m_adhocNodes.Get (i);
+		for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+		{
+			Ptr<Node> node = m_adhocNodes.Get (i);
 
-		// Create the sensor
-		Ptr<DummySensor> sensor = CreateObject<DummySensor> ();
-		sensor->SetNode (node);
-		sensor->SetSocket(m_adhocSources.at (i));
-		sensor->SetReceived (false);
+			// Create the sensor
+			Ptr<DummySensor> sensor = CreateObject<DummySensor> ();
+			sensor->SetNode (node);
+			sensor->SetSocket(m_adhocSources.at (i));
+			sensor->SetReceived (false);
 
-		// Bind callback
-		m_adhocSinks.at (i)->SetRecvCallback (MakeCallback (&DummySensor::ReceivePacket, sensor));
+			m_dummySensors.push_back (sensor);
+
+			// Bind callback
+			m_adhocSinks.at (i)->SetRecvCallback (MakeCallback (&DummySensor::ReceivePacket, sensor));
+		}
 	}
 }
 
@@ -716,6 +723,7 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	CommandLine cmd;
 
 	// allow command line overrides
+	cmd.AddValue ("sensors", "Enable dummy sensors", m_enableSensors);
 	cmd.AddValue ("disabled", "Portion of vehicles to disable (no V2V capabilities), in percentage", m_nDisabled);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
 	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C500", m_staticProtocol);
