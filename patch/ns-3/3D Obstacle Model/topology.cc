@@ -136,9 +136,6 @@ CreateShape(std::string id, std::string vertices, std::string height)
 			obstacle.SetHeight (h);
 		}
 
-	// Fix "hidden last vertex" problem
-	vertices.append(" ");
-
   // tokenize each vertex
   size_t pos1 = 0;
   size_t pos2 = vertices.find(" ", pos1);
