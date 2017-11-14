@@ -388,8 +388,9 @@ private:
 
 	Ptr<FBApplication>								m_fbApplication;
 	uint32_t 													m_nNodes;
+	uint32_t 													m_nVehicles;
+	uint32_t 													m_nSensors;
 	NodeContainer											m_adhocNodes;
-	Ptr<ListPositionAllocator> 				m_adhocPositionAllocator;
 	NetDeviceContainer								m_adhocDevices;
 	Ipv4InterfaceContainer						m_adhocInterfaces;
 	std::vector <Ptr<Socket>>					m_adhocSources;
@@ -406,10 +407,10 @@ private:
 	uint32_t													m_alertGeneration;
 	uint32_t													m_areaOfInterest;
 	uint32_t													m_vehiclesDistance;
-	uint32_t													m_scenario;
 	uint32_t													m_loadBuildings;
 	std::string												m_traceFile;
 	std::string												m_bldgFile;
+	uint32_t													m_nDisabled;
 	double														m_TotalSimTime;
 };
 
@@ -419,7 +420,9 @@ private:
 */
 
 FBVanetExperiment::FBVanetExperiment ()
-	:	m_nNodes (0),	// random value, it will be set later
+	:	m_nNodes (0),
+		m_nVehicles (0),
+		m_nSensors (0),
 		m_packetSize ("64"),
 		m_rate ("2048bps"),
 		m_phyMode ("DsssRate11Mbps"),
@@ -432,10 +435,10 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_alertGeneration (20),
 		m_areaOfInterest (1000),
 		m_vehiclesDistance (250),
-		m_scenario (1),
 		m_loadBuildings (0),
 		m_traceFile (""),
 		m_bldgFile (""),
+		m_nDisabled (0),
 		m_TotalSimTime (30)
 {
 	srand (time (0));
@@ -513,14 +516,16 @@ FBVanetExperiment::ConfigureMobility ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current mobility mode.");
 
+	// Nodes positions
 	// Create Ns2MobilityHelper with the specified trace log file as parameter
 	Ns2MobilityHelper ns2 = Ns2MobilityHelper (m_traceFile);
-	NS_LOG_INFO ("Loading ns2 mobility file \"" << m_traceFile << "\".");
+	NS_LOG_INFO ("Loading vehicle (ns2) mobility file \"" << m_traceFile << "\".");
 
 	// Disable node movements
 	ns2.DisableNodeMovements ();
 
-	ns2.Install (); // configure movements for each node, while reading trace file
+	// configure movements for all nodes
+	ns2.Install (ns3::NodeList::Begin(), ns3::NodeList::End());
 
 	// Configure callback for logging
 	std::ofstream m_os;
@@ -631,10 +636,48 @@ FBVanetExperiment::ConfigureFBApplication ()
 	m_fbApplication->SetStartTime (Seconds (1));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
-	// Add nodes to the application
-	for (uint32_t i = 0; i < m_nNodes; i++)
+	// Extract randomly which vehicles must be disabled
+	// First manage extremities
+	std::vector<uint32_t> ids;
+
+	if (m_nDisabled == 0)
 	{
-		m_fbApplication->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
+		// Push all vehciles
+		for (uint32_t i = 0; i < m_nVehicles; i++)
+			ids.push_back (i);
+	}
+	else
+	{
+		uint32_t portion = std::floor(m_nVehicles / 100.0 * m_nDisabled);
+		uint32_t candidate = 0;
+		bool found = false;
+
+		for (uint32_t i = 0; i < portion - 1; i++)
+		{
+			found = true;
+			while (found) {
+				candidate = (rand() % m_nVehicles) + 1;
+
+				if (candidate == m_startingNode)
+					continue;
+
+				if (std::find(ids.begin(), ids.end(), candidate) == ids.end()) {
+					found = false;
+				}
+			}
+
+			ids.push_back (candidate);
+		}
+
+		// Starting node must be in the candidates
+		ids.push_back (m_startingNode);
+	}
+
+	// Add candidates to the application
+	for (uint32_t i = 0; i < ids.size(); i++)
+	{
+		uint32_t id = ids.at (i);
+		m_fbApplication->AddNode (m_adhocNodes.Get (id), m_adhocSources.at (id), m_adhocSinks.at (id));
 	}
 
 	// Add the application to a node
@@ -650,60 +693,39 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	CommandLine cmd;
 
 	// allow command line overrides
-	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
+	cmd.AddValue ("disabled", "Portion of vehicles to disable (no V2V capabilities), in percentage", m_nDisabled);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
 	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C500", m_staticProtocol);
 	cmd.AddValue ("flooding", "Enable flooding", m_flooding);
 	cmd.AddValue ("alertGeneration", "Time at which the first Alert Message should be generated.", m_alertGeneration);
 	cmd.AddValue ("area", "Radius of the area of interest", m_areaOfInterest);
-	cmd.AddValue ("scenario", "1=Padova, 2=Los Angeles", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
 	cmd.AddValue ("totalTime", "Simulation end time", m_TotalSimTime);
 
 	cmd.Parse (argc, argv);
+
+	if (m_nDisabled < 0 || m_nDisabled > 99)
+		NS_LOG_ERROR("Percentage of disable vehciles must be greather than 0 and less than 100.");
 }
 
 void
 FBVanetExperiment::SetupScenario ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
+	NS_LOG_INFO ("Configure scenario.");
 
 	m_alertGeneration = 9;	// 10 -1 (start time of the application)
 	m_TotalSimTime = 990000.0;
-	m_areaOfInterest = 1000;	// meters
+	m_areaOfInterest = 400;	// meters, radius
 	m_vehiclesDistance = 25;	// meters
 
-	if (m_scenario == 0)
-	{
-		// DEBUG, TODO: delete this scenario
-		m_bldgFile = "Griglia.poly.xml";
-		m_traceFile = "Griglia.ns2mobility.xml";
+	m_bldgFile = "LA-1x1.poly.3d.xml";
+	m_traceFile = "LA-1x1.ns2mobility.xml";
 
-		m_nNodes = 96;
-		m_startingNode = 23;
-
-		m_areaOfInterest = 500;
-	} else if (m_scenario == 1)
-	{
-		// Padova (2x2 km)
-		m_bldgFile = "Padova.poly.xml";
-		m_traceFile = "Padova.ns2mobility.xml";
-
-		m_nNodes = 2224;
-		m_startingNode = 313;
-	}
-	else if (m_scenario == 2)
-	{
-		// L.A.  (2x2 km)
-		m_bldgFile = "LA.poly.xml";
-		m_traceFile = "LA.ns2mobility.xml";
-
-		m_nNodes = 1905;
-		m_startingNode = 365;
-	}
-	else
-		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
+	m_nVehicles = 726;
+	m_nSensors = 339;
+	m_nNodes = m_nVehicles + m_nSensors;
+	m_startingNode = 225;		// shoud be 0 <= m_startingNode < m_nVehicles
 
 	if (m_loadBuildings != 0)
 	{
@@ -731,7 +753,6 @@ FBVanetExperiment::ProcessOutputs ()
 	m_fbApplication->PrintStats (dataStream);
 
 	g_csvData.AddValue((int) RngSeedManager::GetRun ());
-	g_csvData.AddValue((int) m_scenario);
 	g_csvData.AddValue((int) m_actualRange);
 	g_csvData.AddValue((int) m_staticProtocol);
 	g_csvData.AddValue((int) m_loadBuildings);
@@ -813,9 +834,9 @@ int main (int argc, char *argv[])
 	uint32_t maxRun = RngSeedManager::GetRun ();
 
 	// Manage data storage
-	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet");	// cluster
-	g_csvData.EnableAlternativeFilename ("fb-vanet");
-	g_csvData.WriteHeader ("\"id\",\"Scenario\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Alert received mean time\",\"Mean hops\",\"Mean slots\",\"Messages sent\",\"Messages received\"");
+	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet-3d");	// cluster
+	g_csvData.EnableAlternativeFilename ("fb-vanet-3d");
+	g_csvData.WriteHeader ("\"id\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Alert received mean time\",\"Mean hops\",\"Mean slots\",\"Messages sent\",\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
 	{
