@@ -32,8 +32,6 @@
 
  namespace ns3 {
 
- uint32_t FBNode::g_idCounter = 0;
-
  NS_LOG_COMPONENT_DEFINE ("FBNode");
 
  NS_OBJECT_ENSURE_REGISTERED (FBNode);
@@ -49,7 +47,7 @@
 	}
 
 	FBNode::FBNode()
-	  : m_id (g_idCounter++),
+	  : m_id (0),
 			m_CMFR (0),
 			m_LMFR (0),
 			m_CMBR (0),
@@ -159,6 +157,13 @@
 	{
 		NS_LOG_FUNCTION (this);
 		return m_timestamp;
+	}
+
+	void
+	FBNode::SetId (uint32_t value)
+	{
+	  NS_LOG_FUNCTION (this << value);
+	  m_id = value;
 	}
 
 	void

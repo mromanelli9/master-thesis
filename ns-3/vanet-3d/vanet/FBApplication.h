@@ -191,6 +191,7 @@ private:
 private:
 	uint32_t																m_nNodes;	// number of nodes
 	std::vector<Ptr<FBNode>>								m_nodes;	// nodes that run this application
+	std::map<uint32_t, uint32_t> 						m_id2id;	// map node id with index in m_nodes
 	uint32_t																m_startingNode; // index of the node that will generate the Alert Message
 	bool																		m_staticProtocol;	// true if static protocol is used
 	uint32_t													 			m_broadcastPhaseStart;	// broadcast phase start time (seconds)

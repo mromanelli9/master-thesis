@@ -116,6 +116,7 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 
 	Ptr<FBNode> fbNode = CreateObject<FBNode> ();
 	fbNode->SetNode (node);
+	fbNode->SetId (node->GetId ());
 	fbNode->SetSocket (source);
 	sink->SetRecvCallback (MakeCallback (&FBApplication::ReceivePacket, this));
 	fbNode->SetCMFR (m_estimatedRange);
@@ -131,6 +132,7 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 
 	// misc stuff
 	m_nodes.push_back (fbNode);
+	m_id2id[fbNode->GetId ()] = m_nodes.size() - 1;
 	m_nNodes++;
 }
 
@@ -467,9 +469,10 @@ FBApplication::GetFBNode (Ptr<Node> node)
 {
 	NS_LOG_FUNCTION (this);
 
-	uint32_t id = node->GetId ();
+	// the key,val is always there?
+	uint32_t idin = m_id2id[node->GetId ()];
 
-	return m_nodes.at (id);
+	return m_nodes.at (idin);
 }
 
 void

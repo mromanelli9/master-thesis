@@ -624,35 +624,19 @@ FBVanetExperiment::ConfigureApplications ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure FB application.");
 
-	// Delete pre-existing application
-	if (m_fbApplication)
-		m_fbApplication = 0;
-
-	// Create the application and schedule start and end time
-	m_fbApplication = CreateObject<FBApplication> ();
-	m_fbApplication->Install (m_staticProtocol,
-														m_alertGeneration,
-														m_actualRange,
-														m_areaOfInterest,
-														m_vehiclesDistance,
-														(m_flooding==1) ? true : false,
-														32, 1024);
-	m_fbApplication->SetStartTime (Seconds (1));
-	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
-
 	// Extract randomly which vehicles must be disabled
 	// First manage extremities
 	std::vector<uint32_t> ids;
 
 	if (m_nDisabled == 0)
 	{
-		// Push all vehciles
+		// Push all vehicles
 		for (uint32_t i = 0; i < m_nVehicles; i++)
 			ids.push_back (i);
 	}
 	else
 	{
-		uint32_t portion = std::floor(m_nVehicles / 100.0 * m_nDisabled);
+		uint32_t portion = m_nVehicles - std::floor(m_nVehicles / 100.0 * m_nDisabled);
 		uint32_t candidate = 0;
 		bool found = false;
 
@@ -673,21 +657,38 @@ FBVanetExperiment::ConfigureApplications ()
 			ids.push_back (candidate);
 		}
 
-		// Starting node must be in the candidates
+		// starting node must be always in
 		ids.push_back (m_startingNode);
 	}
 
-	// Add candidates to the application
+
+	// Delete pre-existing application
+	if (m_fbApplication)
+		m_fbApplication = 0;
+
+	// Create the application and schedule start and end time
+	m_fbApplication = CreateObject<FBApplication> ();
+	m_fbApplication->Install (m_staticProtocol,
+														m_alertGeneration,
+														m_actualRange,
+														m_areaOfInterest,
+														m_vehiclesDistance,
+														(m_flooding==1) ? true : false,
+														32, 1024);
+	m_fbApplication->SetStartTime (Seconds (1));
+	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
+
+	// Add vehciles to the application except whose who are in ids
 	for (uint32_t i = 0; i < ids.size(); i++)
 	{
-		uint32_t id = ids.at (i);
+		uint32_t legit = ids.at (i);
 
 		// id should be an id of a vehicles
 		// I'll do a check
-		if (id < 0 or id >= m_nVehicles)
+		if (legit < 0 or legit >= m_nVehicles)
 			NS_LOG_ERROR("Error: you're trying to install the FB app onto a sensor.");
 
-		m_fbApplication->AddNode (m_adhocNodes.Get (id), m_adhocSources.at (id), m_adhocSinks.at (id));
+		m_fbApplication->AddNode (m_adhocNodes.Get (legit), m_adhocSources.at (legit), m_adhocSinks.at (legit));
 	}
 
 	// Add the application to a node

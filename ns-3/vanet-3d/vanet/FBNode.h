@@ -109,6 +109,12 @@ public:
 	Time GetTimestamp (void) const;
 
 	/**
+	 * \brief set the node id
+	 * \param value id
+	 */
+	void SetId (uint32_t value);
+
+	/**
 	 * \brief set the node
 	 * \param node ns-3 node
 	 */
@@ -193,7 +199,6 @@ public:
 	void SetTimestamp (Time value);
 
 	uint32_t							m_id;	// node id
-	static uint32_t				g_idCounter;	// global id counter
 	Ptr<Node>							m_node;	// ns-3 node
 	Ptr<Socket> 					m_socket; // ns-3 socket
 	uint32_t 	  					m_CMFR;	// Current Maximum Front Range
