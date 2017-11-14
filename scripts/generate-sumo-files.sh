@@ -12,7 +12,7 @@ SUMO_CC="$(which sumo)"
 TRACE_EXPORTER="$(which sumo-traceExporter)"
 
 CUSTOM_SCRIPT_DIR="$HOME/GitLab/tesi/scripts/"
-RANDOM_POSITION="$CUSTOM_SCRIPT_DIR/fixedPositions.py"
+POSITIONER="$CUSTOM_SCRIPT_DIR/fixedPositions.py"
 PRUNE_POLY="$CUSTOM_SCRIPT_DIR/prunePoly.py"
 
 # Check if software exitsts
@@ -81,7 +81,7 @@ $POLYCONVERT_CC --osm-files="$OSM_FILE" --net-file="$NET_FILE" --shapefile.add-p
 $PRUNE_POLY --poly-file="$BUILDINGS_FILE" --output-file="$BUILDINGS_FILE_2"
 
 # Generate routes
-$RANDOM_POSITION -n "$NET_FILE" -d 25 -o "$ROUTES_FILE"
+$POSITIONER -n "$NET_FILE" -d 25 -o "$ROUTES_FILE"
 
 # Run sumo
 $SUMO_CC -c "$SUMO_CFG_FILE"
