@@ -40,6 +40,7 @@
 #include "ns3/wave-mac-helper.h"
 
 #include "FBApplication.h"
+#include "DummySensor.h"
 
 using namespace ns3;
 
@@ -336,7 +337,7 @@ protected:
 	 * \brief Configure the FB application
 	 * \return none
 	 */
-	void ConfigureFBApplication ();
+	void ConfigureApplications ();
 
 	/**
 	 * \brief Run the simulation
@@ -395,6 +396,7 @@ private:
 	Ipv4InterfaceContainer						m_adhocInterfaces;
 	std::vector <Ptr<Socket>>					m_adhocSources;
 	std::vector <Ptr<Socket>>					m_adhocSinks;
+	std::vector <Ptr<DummySensor>>		m_dummySensors;
 	std::string												m_packetSize;
 	std::string												m_rate;
 	std::string												m_phyMode;
@@ -469,7 +471,7 @@ FBVanetExperiment::Simulate ()
 	SetupAdhocDevices ();
 	ConfigureConnections ();
 
-	ConfigureFBApplication ();
+	ConfigureApplications ();
 
 	// Run simulation and print some results
 	RunSimulation ();
@@ -615,7 +617,7 @@ FBVanetExperiment::ConfigureTracingAndLogging ()
 }
 
 void
-FBVanetExperiment::ConfigureFBApplication ()
+FBVanetExperiment::ConfigureApplications ()
 {
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure FB application.");
@@ -688,6 +690,21 @@ FBVanetExperiment::ConfigureFBApplication ()
 
 	// Add the application to a node
 	m_adhocNodes.Get (m_startingNode)->AddApplication (m_fbApplication);
+
+	// Configure dummy sensors
+	for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+	{
+		Ptr<Node> node = m_adhocNodes.Get (i);
+
+		// Create the sensor
+		Ptr<DummySensor> sensor = CreateObject<DummySensor> ();
+		sensor->SetNode (node);
+		sensor->SetSocket(m_adhocSources.at (i));
+		sensor->SetReceived (false);
+
+		// Bind callback
+		m_adhocSinks.at (i)->SetRecvCallback (MakeCallback (&DummySensor::ReceivePacket, sensor));
+	}
 }
 
 void
