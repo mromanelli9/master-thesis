@@ -47,6 +47,8 @@ def get_options(args=None):
 						 help="Defines the name of the ns2 file to generate")
 	optParser.add_option("-z", "--height", dest="tlsHeight", type="float",
 						 default="6", help="define the height at witch place the sensors")
+ 	optParser.add_option("-i", "--firstID", dest="firstID", type="int",
+ 						 default="0", help="override first ID")
 						 # read https://mutcd.fhwa.dot.gov/pdfs/2009r1r2/part4.pdf
 	(options, args) = optParser.parse_args(args=args)
 	if  not options.netfile or not options.ns2mobility:
@@ -55,11 +57,11 @@ def get_options(args=None):
 
 	return options
 
-def convert2ns2mobility(positions):
+def convert2ns2mobility(positions, firstID):
 	res = []
 	for i, pos in enumerate(positions):
 		x, y, z = pos
-		res.append(pos2ns2format(i, x, y, z))
+		res.append(pos2ns2format(i + firstID, x, y, z))
 
 	return res
 
@@ -90,7 +92,7 @@ def main(options):
 	print("[+] I created %d sensors." % len(positions))
 	print("[+] Writing trips file.")
 
-	data = convert2ns2mobility(positions)
+	data = convert2ns2mobility(positions, options.firstID)
 
 	with open(options.ns2mobility, 'w') as file:
 		for el in data:
