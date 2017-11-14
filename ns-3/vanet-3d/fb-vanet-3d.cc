@@ -677,6 +677,12 @@ FBVanetExperiment::ConfigureFBApplication ()
 	for (uint32_t i = 0; i < ids.size(); i++)
 	{
 		uint32_t id = ids.at (i);
+
+		// id should be an id of a vehicles
+		// I'll do a check
+		if (id < 0 or id >= m_nVehicles)
+			NS_LOG_ERROR("Error: you're trying to install the FB app onto a sensor.");
+
 		m_fbApplication->AddNode (m_adhocNodes.Get (id), m_adhocSources.at (id), m_adhocSinks.at (id));
 	}
 
@@ -756,6 +762,7 @@ FBVanetExperiment::ProcessOutputs ()
 	g_csvData.AddValue((int) m_actualRange);
 	g_csvData.AddValue((int) m_staticProtocol);
 	g_csvData.AddValue((int) m_loadBuildings);
+	g_csvData.AddValue((int) m_nDisabled);
 	g_csvData.AddValue((int) m_nNodes);
 	g_csvData.AddMultipleValues(dataStream);
 	g_csvData.CloseRow ();
@@ -836,7 +843,7 @@ int main (int argc, char *argv[])
 	// Manage data storage
 	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet-3d");	// cluster
 	g_csvData.EnableAlternativeFilename ("fb-vanet-3d");
-	g_csvData.WriteHeader ("\"id\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Alert received mean time\",\"Mean hops\",\"Mean slots\",\"Messages sent\",\"Messages received\"");
+	g_csvData.WriteHeader ("\"id\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Nodes disabled\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Alert received mean time\",\"Mean hops\",\"Mean slots\",\"Messages sent\",\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
 	{
