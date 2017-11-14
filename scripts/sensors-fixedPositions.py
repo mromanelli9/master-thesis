@@ -46,9 +46,10 @@ def get_options(args=None):
 	optParser.add_option("-o", "--ns2mobility-output", dest="ns2mobility",
 						 help="Defines the name of the ns2 file to generate")
 	optParser.add_option("-z", "--height", dest="tlsHeight", type="float",
-						 default="3", help="define the height at witch place the sensors")
+						 default="6", help="define the height at witch place the sensors")
+						 # read https://mutcd.fhwa.dot.gov/pdfs/2009r1r2/part4.pdf
 	(options, args) = optParser.parse_args(args=args)
-	if not options.netfile:
+	if  not options.netfile or not options.ns2mobility:
 		optParser.print_help()
 		sys.exit(1)
 
@@ -68,6 +69,9 @@ def pos2ns2format(id, x, y, z):
 	return base
 
 def main(options):
+	if (options.tlsHeight != 3):
+		print("[+] Override TLS height: %d." % options.tlsHeight)
+
 	print("[+] Reading net file...")
 	net = sumolib.net.readNet(options.netfile)
 
