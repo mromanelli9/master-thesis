@@ -414,6 +414,7 @@ private:
 	std::string												m_traceFile;
 	std::string												m_bldgFile;
 	uint32_t													m_nDisabled;
+	uint32_t													m_enableSensors;
 	double														m_TotalSimTime;
 };
 
@@ -443,6 +444,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_traceFile (""),
 		m_bldgFile (""),
 		m_nDisabled (0),
+		m_enableSensors (0),
 		m_TotalSimTime (30)
 {
 	srand (time (0));
@@ -694,33 +696,35 @@ FBVanetExperiment::ConfigureApplications ()
 	// Add the application to a node
 	m_adhocNodes.Get (m_startingNode)->AddApplication (m_fbApplication);
 
-
-	if (m_scenario == 2)
+	if (m_enableSensors != 0)
 	{
-		// sensor use FB app
-		for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+		if (m_scenario == 2)
 		{
-			m_fbApplication->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
+			// sensor use FB app
+			for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+			{
+				m_fbApplication->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
+			}
 		}
-	}
-	else
-	{
-		// sensor as dummy forwarder
-
-		for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+		else
 		{
-			Ptr<Node> node = m_adhocNodes.Get (i);
+			// sensor as dummy forwarder
 
-			// Create the sensor
-			Ptr<DummySensor> sensor = CreateObject<DummySensor> ();
-			sensor->SetNode (node);
-			sensor->SetSocket(m_adhocSources.at (i));
-			sensor->SetReceived (false);
+			for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+			{
+				Ptr<Node> node = m_adhocNodes.Get (i);
 
-			m_dummySensors.push_back (sensor);
+				// Create the sensor
+				Ptr<DummySensor> sensor = CreateObject<DummySensor> ();
+				sensor->SetNode (node);
+				sensor->SetSocket(m_adhocSources.at (i));
+				sensor->SetReceived (false);
 
-			// Bind callback
-			m_adhocSinks.at (i)->SetRecvCallback (MakeCallback (&DummySensor::ReceivePacket, sensor));
+				m_dummySensors.push_back (sensor);
+
+				// Bind callback
+				m_adhocSinks.at (i)->SetRecvCallback (MakeCallback (&DummySensor::ReceivePacket, sensor));
+			}
 		}
 	}
 }
@@ -734,6 +738,7 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	CommandLine cmd;
 
 	// allow command line overrides
+	cmd.AddValue ("sensors", "Enable or disable sensors", m_enableSensors);
 	cmd.AddValue ("scenario", "1=Config1, 2=Config2", m_scenario);
 	cmd.AddValue ("disabled", "Portion of vehicles to disable (no V2V capabilities), in percentage", m_nDisabled);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
@@ -807,6 +812,7 @@ FBVanetExperiment::ProcessOutputs ()
 	g_csvData.AddValue((int) m_actualRange);
 	g_csvData.AddValue((int) m_staticProtocol);
 	g_csvData.AddValue((int) m_loadBuildings);
+	g_csvData.AddValue((int) m_enableSensors);
 	g_csvData.AddValue((int) m_nDisabled);
 	g_csvData.AddValue((int) m_nNodes);
 	g_csvData.AddMultipleValues(dataStream);
@@ -888,7 +894,7 @@ int main (int argc, char *argv[])
 	// Manage data storage
 	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet-3d");	// cluster
 	g_csvData.EnableAlternativeFilename ("fb-vanet-3d");
-	g_csvData.WriteHeader ("\"id\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Nodes disabled\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Alert received mean time\",\"Mean hops\",\"Mean slots\",\"Messages sent\",\"Messages received\"");
+	g_csvData.WriteHeader ("\"id\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Sensors\",\"Nodes disabled\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Alert received mean time\",\"Mean hops\",\"Mean slots\",\"Messages sent\",\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
 	{
