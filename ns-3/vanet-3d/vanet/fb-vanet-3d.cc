@@ -642,6 +642,8 @@ FBVanetExperiment::ConfigureApplications ()
 		uint32_t candidate = 0;
 		bool found = false;
 
+		NS_LOG_INFO ("Selected " << portion << " vehicles (with V2V comm enabled).");
+
 		for (uint32_t i = 0; i < portion - 1; i++)
 		{
 			found = true;
