@@ -22,9 +22,9 @@ def get_options(args=None):
 	optParser.add_option("-i", "--osm-file", dest="osmfile",
 						 help="define the osm file (mandatory)")
 	optParser.add_option("-p", "--poly-file", dest="polyfile",
-						 default="trips.trips.xml", help="define the input poly filename")
+						 default="poly.xml", help="define the input poly filename")
 	optParser.add_option("-o", "--output-file", dest="outputfile",
-						 default="trips.trips.xml", help="define the output poly filename")
+						 default="3Dpoly.xml", help="define the output poly filename")
  	optParser.add_option("-f", "--floor", dest="floorH", type="float",
  						 default="2.7", help="Default height for a single house level")
 	optParser.add_option("-r", "--roof", dest="roofH", type="float",
@@ -115,13 +115,21 @@ def insertElementBeforeLast(s, k, v):
 
 	return s[0:pos2] + " {k}=\"{v}\"".format(k=k, v=v) + s[pos2:len(s)]
 
+def mean(heights):
+	total = 0
+	for h in heights.values():
+		total += h
+
+	return total / (len(heights) * 1.0)
 
 def main(options):
 	print("[+] Running...")
 
 	hs = retrieveHeights(options.osmfile, (options.floorH, options.roofH))
 
-	print("[+] I found %d infos about heights." % len(hs))
+	meanh = mean(hs)
+
+	print("[+] I found %d infos about heights (mean h: %.2f)." % (len(hs), meanh))
 
 	polys = enhancedPoly(options.polyfile, options.outputfile, hs)
 
