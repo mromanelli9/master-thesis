@@ -1,0 +1,59 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+%!TeX spellcheck = it_IT
+%!TEX root = ../tesi.tex
+
+\chapter{Tabelle dei risultati}\label{chap:risultati-in-tabella}
+%----------------------------------------------------------------------------------------
+% GRUPPO SIMULAZIONI : GRIGLIA
+%----------------------------------------------------------------------------------------
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura totale} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,46$\%					&			$92,66$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,14$\%					& 		$94,27$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$92,61$\%					&			$92,66$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,59$\%					& 		$94,25$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$96,54$\%					&			$94,86$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,26$\%					& 		$93,75$\%					\\
+		\bottomrule
+		\multicolumn{4}{c}{} 	\\
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura sulla circonferenza} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,00$\%					&			$93,00$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,28$\%					& 		$96,78$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$97,22$\%					&			$91,65$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,22$\%					& 		$96,33$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$97,17$\%					&			$96,17$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,33$\%					& 		$97,06$\%					\\
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario a griglia: copertura di veicoli in totale e sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura}}
+\end{table}
+%
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Numero di salti} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$10,240$\%				&			$11,247$\%				\\ \cline{2-4}
+																			&	$500$m															&			$5,581$\%					& 		$6,309$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$10,201$\%				&			$11,150$\%				\\ \cline{2-4}
+																			&	$500$m															&			$6,013$\%					& 		$6,360$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$11,797$\%				&			$13,154$\%				\\ \cline{2-4}
+																			&	$500$m															&			$5,632$\%					& 		$6,270$\%					\\
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario a griglia: numero di salti per inoltrare il messaggio fino al bordo della griglia.\label{tab:risulati-simulazioni-griglia-salti}}
+\end{table}
+%
