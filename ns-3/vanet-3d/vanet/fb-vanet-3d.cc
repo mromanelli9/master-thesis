@@ -772,7 +772,11 @@ FBVanetExperiment::SetupScenario ()
 
 	if (m_scenario == 1)
 	{		// Setup #1
+		m_traceFile = "LA-1x1.conf1.ns2mobility.xml";
 
+		m_nVehicles = 642;
+		m_nSensors = 87;
+		m_startingNode = 92;		// shoud be 0 <= m_startingNode < m_nVehicles
 	}
 	else
 	{		// Setup #2
