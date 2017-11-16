@@ -21,6 +21,7 @@
 #ifndef FBNODE_H
 #define FBNODE_H
 
+#include "ns3/core-module.h"
 #include "ns3/node.h"
 #include "ns3/object.h"
 #include "ns3/vector.h"
@@ -103,6 +104,17 @@ public:
 	bool GetSent (void) const;
 
 	/**
+	 * \returns the number of microseconds in the timestamp
+	 */
+	Time GetTimestamp (void) const;
+
+	/**
+	 * \brief set the node id
+	 * \param value id
+	 */
+	void SetId (uint32_t value);
+
+	/**
 	 * \brief set the node
 	 * \param node ns-3 node
 	 */
@@ -180,20 +192,26 @@ public:
 	 */
 	void Send (Ptr<Packet> packet);
 
-	uint32_t					m_id;	// node id
-	static uint32_t		g_idCounter;	// global id counter
-	Ptr<Node>					m_node;	// ns-3 node
-	Ptr<Socket> 			m_socket; // ns-3 socket
-	uint32_t 	  			m_CMFR;	// Current Maximum Front Range
-	uint32_t 	  			m_LMFR;	// Last Maximum Front Range
-	uint32_t 	  			m_CMBR;	// Current Maximum Back Range
-	uint32_t 	  			m_LMBR; // Last Maximum Back Range
-	Vector 						m_position;	// node current position
-	uint32_t					m_num;
-	int32_t						m_phase;
-	uint32_t					m_slot;
-	bool 							m_received;
-	bool 							m_sent;
+	/**
+	 * \brief set the timestamp field
+	 * \param value number of microseconds
+	 */
+	void SetTimestamp (Time value);
+
+	uint32_t							m_id;	// node id
+	Ptr<Node>							m_node;	// ns-3 node
+	Ptr<Socket> 					m_socket; // ns-3 socket
+	uint32_t 	  					m_CMFR;	// Current Maximum Front Range
+	uint32_t 	  					m_LMFR;	// Last Maximum Front Range
+	uint32_t 	  					m_CMBR;	// Current Maximum Back Range
+	uint32_t 	  					m_LMBR; // Last Maximum Back Range
+	Vector 								m_position;	// node current position
+	uint32_t							m_num;	// legacy with barichello's code
+	int32_t								m_phase;	// legacy with barichello's code
+	uint32_t							m_slot;	// legacy with barichello's code
+	bool 									m_received;	// legacy with barichello's code
+	bool 									m_sent;	// legacy with barichello's code
+	Time									m_timestamp;	// used for statistics
 };
 
 } // namespace ns3

@@ -20,6 +20,7 @@
 
  #include "FBNode.h"
 
+ #include "ns3/core-module.h"
  #include "ns3/log.h"
  #include "ns3/uinteger.h"
  #include "ns3/object-vector.h"
@@ -30,8 +31,6 @@
 
 
  namespace ns3 {
-
- uint32_t FBNode::g_idCounter = 0;
 
  NS_LOG_COMPONENT_DEFINE ("FBNode");
 
@@ -48,12 +47,18 @@
 	}
 
 	FBNode::FBNode()
-	  : m_id (g_idCounter++),
+	  : m_id (0),
 			m_CMFR (0),
 			m_LMFR (0),
 			m_CMBR (0),
 			m_LMBR (0),
-			m_position (Vector (0, 0, 0))
+			m_position (Vector (0, 0, 0)),
+			m_num (0),
+			m_phase (0),
+			m_slot (0),
+			m_received (false),
+			m_sent (false),
+			m_timestamp (0)
 	{
 	  NS_LOG_FUNCTION (this);
 	}
@@ -145,6 +150,20 @@
 	{
 		NS_LOG_FUNCTION (this);
 		return m_sent;
+	}
+
+	Time
+	FBNode::GetTimestamp (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_timestamp;
+	}
+
+	void
+	FBNode::SetId (uint32_t value)
+	{
+	  NS_LOG_FUNCTION (this << value);
+	  m_id = value;
 	}
 
 	void
@@ -245,5 +264,12 @@
 		NS_LOG_FUNCTION (this << packet);
 
 		m_socket->Send (packet);
+	}
+
+	void
+	FBNode::SetTimestamp (Time value)
+	{
+		NS_LOG_FUNCTION (this << value);
+		m_timestamp = value;
 	}
 } // namespace ns3

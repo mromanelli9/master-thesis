@@ -116,6 +116,7 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 
 	Ptr<FBNode> fbNode = CreateObject<FBNode> ();
 	fbNode->SetNode (node);
+	fbNode->SetId (node->GetId ());
 	fbNode->SetSocket (source);
 	sink->SetRecvCallback (MakeCallback (&FBApplication::ReceivePacket, this));
 	fbNode->SetCMFR (m_estimatedRange);
@@ -131,6 +132,7 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 
 	// misc stuff
 	m_nodes.push_back (fbNode);
+	m_id2id[fbNode->GetId ()] = m_nodes.size() - 1;
 	m_nNodes++;
 }
 
@@ -243,10 +245,11 @@ FBApplication::GenerateAlertMessage (Ptr<FBNode> fbNode)
 	packet->AddHeader (fbHeader);
 
 	fbNode->Send (packet);
+	fbNode->SetSent(true);
 	m_sent++;
 
-	fbNode->SetSent(true);
-	// StopNode (fbNode);
+	// Store current time
+	fbNode->SetTimestamp (Simulator::Now ());
 }
 
 void
@@ -306,12 +309,17 @@ FBApplication::ReceivePacket (Ptr<Socket> socket)
 			// otherwise do nothing
 			if (distanceCurrentToStarter > distanceSenderToStarter && !fbNode->GetReceived ())
 			{
+				// Store when the current has received the first packet
+				fbNode->SetTimestamp (Simulator::Now ());
+
 				uint32_t sl = fbHeader.GetSlot ();
 				fbNode->SetSlot (fbNode->GetSlot() + sl);
-				// StopNode (fbNode);
 				fbNode->SetReceived (true);
+
 				if (fbNode->GetNum( ) == 0)
+				{
 					fbNode->SetNum (phase);
+				}
 
 				// check if the message is coming fron the front
 				if (phase > fbNode->GetPhase ())
@@ -461,9 +469,10 @@ FBApplication::GetFBNode (Ptr<Node> node)
 {
 	NS_LOG_FUNCTION (this);
 
-	uint32_t id = node->GetId ();
+	// the key,val is always there?
+	uint32_t idin = m_id2id[node->GetId ()];
 
-	return m_nodes.at (id);
+	return m_nodes.at (idin);
 }
 
 void
@@ -477,11 +486,9 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 	double radiusMin = m_aoi - m_aoi_error;
 	double radiusMax = m_aoi + m_aoi_error;
 
-	std::stringstream nums;
-	std::stringstream slots;
-
-	nums << "\"";
-	slots << "\"";
+	long double time_sum = 0;
+	long double nums_sum = 0;
+	long double slots_sum = 0;
 
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
@@ -514,20 +521,20 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 			{
 				circ++;
 
-				// Update the count of nums and slots
-				nums << current->GetNum() << ",";
-				slots << current->GetSlot() << ",";
+				// Update mean time, nums and slots
+				nums_sum += current->GetNum();
+				slots_sum += current->GetSlot();
+				time_sum += current->GetTimestamp().GetMilliSeconds ();
 			}
 		}
 	}
-	nums << "\"";
-	slots << "\"";
 
 	dataStream << circCont << ","
 			<< cover << ","
 			<< circ << ","
-			<< nums.str () << ","
-			<< slots.str () << ","
+			<< (time_sum / (double) circ) << ","
+			<< (nums_sum / (double) circ) << ","
+			<< (slots_sum / (double) circ) << ","
 			<< m_sent << ","
 			<< m_received;
 }
