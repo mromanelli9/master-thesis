@@ -20,12 +20,12 @@ Questo ha portato a un incremento dell'interesse della ricerca scientifica in qu
 sullo studio delle reti veicolari o VANET (\textit{Vehicular Ad-hoc Networks}).
 
 Le VANET rappresentano una famiglia delle reti Ad-hoc mobili (\textit{Mobile Ad-hoc Network})
-nelle quali i movimenti sono strutturati, i veicoli sono consapevoli della propria posizione nello spazio (ad esempio tramite geolocalizzazione GPS)
-e sono equipaggiati con attrazzatura che permette le comunicazioni inter-veicolari (es.~antenne radio).
+nelle quali i movimenti sono strutturati, i veicoli possono essere consapevoli della propria posizione nello spazio (ad esempio tramite geolocalizzazione GPS)
+e sono equipaggiati con attrezzatura che permette le comunicazioni inter-veicolari (es.~antenne radio).
 Queste reti sono alla base di una vasta gamma di necessità, che spaziano dalla sicurezza stradale alle applicazioni multimediali,
 dalla distribuzione dei dati sul traffico allo sviluppo di una rete infrastrutturale urbana.
 
-Una caratteristicha comunue è la necessità di un sistema di propagazione che trasporti informazioni
+Una caratteristica comune è la necessità di un sistema di propagazione che trasporti informazioni
 con il minor ritardo possibile; per esempio un pericolo inatteso sulla careggiata potrebbe causare l'impossibilità di proseguire
 lungo quel percorso, oppure una trasmissione di contenuti multimediali (giochi mutiplayer, video) fra due o più veicoli~\cite{1580935}~\cite{PantelW02}.
 Una delle soluzioni proposte si chiama Fast Broadcast: un protocollo per ridurre il tempo di propagazione
@@ -40,17 +40,18 @@ da esperimenti sul campo in ambienti ridotti.
 In particolare, l'accuratezza dei modelli di propagazione e di mobilità rappresenta la chiave per una buona valutazione delle prestazioni
 dei protocolli di rete veicolari~\cite{4020783}.
 All'interno di scenari urbani e suburbani, gli edifici ostruiscono la naturale propagazione di un segnale radio nello spazio
-e, di conseguenza, al fin di eseguire simulazioni più affidabili questa ostruzione non può essere ignorata.
+e, di conseguenza, al fine di eseguire simulazioni più affidabili questa ostruzione non può essere ignorata.
 Una fra le diverse soluzioni proposte negli anni utilizza un semplice modello matematico
-per il calcolo dell'attenuazione del segnale per un singolo edificio, lo combina con informazioni reali
-sulla geometria degli edifici~\cite{Carpenter:2015:OMI:2756509.2756512}.
+per il calcolo dell'attenuazione del segnale per un singolo edificio,
+in funzione il numero di intersezioni con le pareti esterne e la distanza interna percorsa,
+e lo combina con informazioni reali sulla geometria degli edifici~\cite{Carpenter:2015:OMI:2756509.2756512}.
 % NB,nota: è da dire che è su ns-3? sennò dopo come lo giustifico?
 
 \paragraph{}
 Il presente lavoro è strutturato come segue.
 Nel capitolo successivo (Capitolo~\ref{chap:protocollo-fast-broadcast}) verrà presentato il protocollo Fast Broadcast e una proposta di estensione in due dimensioni.
 Il Capitolo~\ref{chap:modello-a-ostacoli} analizzerà il modello a ostacoli, sia dal punto di vista matematico che da quello analitico inerente alla simulazione;
-concluderà presentanto una possibile soluzione per rendere il modello tridimensionale.
+concluderà presentando una possibile soluzione per rendere il modello tridimensionale.
 Il Capitolo~\ref{chap:applicativi} darà una veloce panoramica sui software utilizzati e il metodo utilizzato per la creazione degli scenari.
 Il Capitolo~\ref{chap:simulazioni} illusterà i diversi gruppi di simulazioni effettuati e i relativi risultati ottenuti.
 Infine, nel Capitolo~\ref{chap:conclusioni} saranno presentate le conclusioni, evidenziando anche alcuni possibili sviluppi di questo lavoro.
@@ -66,7 +67,7 @@ Il più semplice di questi si chiama modello a disco unitario (\textit{unit-disk
 di distanza, mentre non possono altrimenti~\cite{6554832}.
 Un modello molto utilizzato nelle simuazioni di VANET è il modello a doppio raggio (\textit{Two-ray ground-reflection model}),
 nel quale il segnale in fase di ricezione è composto da una componente in linea diretta e una seconda derivante dalla riflessione causata dal terreno~\cite{DBLP:books/daglib/0091821}.
-In~\cite{Schmitz:2006:ERW:1164717.1164730} e in~\cite{Souley2005RealisticUS}, modelli più sviluppati prendono in considerazione anche le properità riflettenti delle superfici e degli ostacoli.
+In~\cite{Schmitz:2006:ERW:1164717.1164730} e in~\cite{Souley2005RealisticUS}, modelli più sviluppati prendono in considerazione anche le proprietà riflettenti delle superfici e degli ostacoli.
 
 Tuttavia, un approcio diretto di questo tipo difficilmente scala al numero di nodi necessario in un classico scenario VANET e per questo motivo
 spesso questi modelli si affidano a una fase di pre-elaborazione che può richiedere tempi elevati~\cite{Stepanov:2008:IMR:1293378.1293656}.

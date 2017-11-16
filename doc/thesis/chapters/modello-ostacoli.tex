@@ -54,7 +54,7 @@ Gli ostacoli sono raggruppati in una struttura algebrica dedicata, chiamata part
 per motivi di ottimizzazione.
 % la ricerca dei potenziali ostacoli nella linea di visuale fra due nodi.
 
-Nel dettaglio, quando bisogna calcolare l'attenuazione del segnale fra due nodi, si prende in considerazione un rettangolo fittizio che include i due nodi, lo si estende
+Nel dettaglio, quando bisogna calcolare l'attenuazione del segnale fra due nodi si prende in considerazione un rettangolo fittizio che include i due nodi e lo si estende
 di un certo raggio, ad esempio $200$ metri; i potenziali ostacoli si trovano cercando il punto centrale dell'ostacolo all'interno del BSP.
 Ogni ostacolo il cui centro si trova all'interno della regione descritta in precedenza viene controllato per verificare se interseca la visuale
 (in questo caso \textit{obstructed-line-of-sight}, OLOS), fra i due nodi.
@@ -130,7 +130,7 @@ per ottenere una stima dell'altezza pari a $21,6$ metri.
 \begin{figure}[htbp]
 	\centering
 	\fbox{\includegraphics[width=\textwidth]{esempio-poly-blocco-torre.png}}
-\caption{Rappresentazione di un edificio in cui è presente un valore di l'altezza.\label{fig:esempio-pd-osm-edificio-altezza}}
+\caption{Rappresentazione di un edificio in cui è presente un valore di l'altezza.\label{fig:esempio-pd-poly-edificio-altezza}}
 \end{figure}
 %
 \subsection{Modifica dell'algoritmo}\label{subsec:modifica-all-algoritmo}
