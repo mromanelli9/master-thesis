@@ -6,9 +6,8 @@
 \chapter{Simulazioni}\label{chap:simulazioni}
 % INTRO: cosa c'è in questa sezione?
 Dopo aver illustrato il protocollo in esame e il modello di propagazione utilizzato, si passa ora alla fase di valutazione.
-Il capitolo procederà, quindi, nel dettaglio delle diverse simulazioni effettuate analizzando i relativi risultati.
-% Ogni capitolo presenterà un gruppo di simulazioni, che differiscono dagli altri per scenario applicativo e configurazione.
-% NB: non è bellissimo
+Il capitolo procederà, quindi, nel dettaglio dei diversi scenari affrontati illustrando
+le motivazioni che hanno portato alla loro realizzazione, definendone i parametri e motivando i risulati ottenuti.
 %
 \section{Configurazione a griglia}\label{sec:configurazione-griglia}
 % \subsection{Panoramica}
@@ -16,55 +15,60 @@ Il capitolo procederà, quindi, nel dettaglio delle diverse simulazioni effettua
 %  - struttura simulazioni
 %  - grafici
 %  - risulati
-Il primo gruppo di simulazioni ha lo scopo di analizzare il comportamento del protocollo Fast Broadcast con e senza edifici all'interno
-di un ambiente conosciuto;
-per questo motivo, la configurazione è la stessa presentata nel documento originale \cite{Barichello2017propagazione}, a cui sono stati aggiunti gli edifici.
-Lo scenario è una città fittizia con strade a griglia in stile Manhattan di lunghezza $4000$ metri e distanti l'una dall'altra $300$ metri.
+Il primo gruppo di simulazioni ha lo scopo di analizzare l'impatto degli edifici sul comportamento del protocollo
+Fast Broadcast all'interno di uno scenario conosciuto, ossia quello presentato nella tesi originale~\cite{Barichello2017propagazione}
+a cui sono stati aggiunti degli edifici creati apposititamente.
+La configurazione dello scenario, dei nodi e della rete è la stessa ed è riassunta in Tabella~\ref{tab:parametri-simulazioni-barichello}.
+L'ambiente è una città fittizia con strade a griglia in stile Manhattan di lunghezza $4000$ metri e distanti l'una dall'altra $300$ metri.
 I veicoli sono disposti a $12$ metri di distanza per un totale di $8064$.
-Il veicolo dal quale ha inizio la fase di inoltro (generazione del primo messaggio di inoltro) è posizionato
-al centro della griglia, in modo da avere una propagazione teoricamente uniforme;
-per facilità verrà chiamato veicolo \textit{zero}.
+Il veicolo che da inizio alla fase di inoltro (generazione del primo messaggio di inoltro),
+che per facilità verrà chiamato veicolo \textit{zero}, è posizionato al centro della griglia.
 Seguendo l'idea originale, è stata definita anche un circonferenza di raggio pari a $1000\pm12$ metri, utilizzata per definire alcune metriche che verranno descritte in seguito;
 la circonferenza ha centro in corrispondenza del veicolo zero.
-Il raggio trasmissivo effettivo assume due valori possibili: $300$ metri o $500$ metri;
-il tutto è riassunto in Tabella~\ref{tab:parametri-simulazioni-barichello}.
-
-Per valutare il protocollo sono stati presi in esame diversi parametri: la copertura totale e la copertura sulla circonferenza,
-il numero di salti necessari per raggiungere il bordo della griglia, il numero totale di messaggi di inoltro ricevuti e inviati.
-In modo da aver un metro di paragone per il protocollo Fast Broadcast, quest'ultimo è stato comparato con altri due metodi, chiamati \statica e \staticb,
-che utilizzano una stima fissa del raggio tramissivo, rispettivamente di $300$ e $500$ metri.
-
-Gli edifici sono stati creati apposititamente, in modo che ogni edificio fosse contenuto all'interno dello spazio creato dalle strade.
-Così facendo, risultano $169$ edifici di $295$x$295$ metri (i muri sono distanziati di $5$ metri dalla strada).
+Il raggio trasmissivo effettivo (fisico) assume due valori possibili: $300$ o $500$ metri;
 %
-\begin{table}[htbp]
+\begin{table}[!h]
 	\centering
 	\begin{tabular}{| L{.4\linewidth} | r  l |}
 		\toprule
-		Parametro															&			Valore 				&					\\
+		Parametro															&			Valore 							&					\\
 		\thickerline
-		Lunghezza delle strade								&			$4000$				& m				\\
-		Distanza fra le strade								&			$300$					& m				\\
-		Distanza fra i veicoloi								&			$12$ 					& m				\\
-		Circonferenza													&			$1000\pm12$		& m				\\
-		Posizione del veicolo zero						&			centrale			&					\\
-		Numero di simulazioni									&			$50$					&					\\
+		Lunghezza delle strade								&			$4000$							& m				\\
+		Distanza fra le strade								&			$300$								& m				\\
+		Distanza fra i veicoloi								&			$12$ 								& m				\\
+		Circonferenza													&			$1000\pm12$					& m				\\
+		Posizione del veicolo zero						&			centrale						&					\\
 		\thickerline
-		Dimensioni pacchetto				&				$164$							&			byte		\\	\hline
-		Standard tramissione				&				$802.11$b					&							\\	\hline
-		Frequenza										&				$2.4$							&			GHz			\\	\hline
-		Banda del canale						&				$22$							&			MHz			\\	\hline
-		Velocità di tramissione			&				$11$							&			Mbps		\\	\hline
-		Potenza trasmissione				&				$4,6$-$13,4$			&			dBm			\\	\hline
-		Raggio tramissivo						&				$300$-$500$				&			m				\\	\hline
-		Codifica										&				DSSS\footnotemark	&							\\	\hline
-		Modello di propagazione			&				Two-Ray Ground		&							\\	\hline
-		Modello di ombreggiatura		&				A ostacoli				&							\\
+		Dimensioni pacchetto									&				$164$							&			byte		\\	\hline
+		Standard tramissione									&				$802.11$b					&							\\	\hline
+		Frequenza															&				$2.4$							&			GHz			\\	\hline
+		Banda del canale											&				$22$							&			MHz			\\	\hline
+		Velocità di tramissione								&				$11$							&			Mbps		\\	\hline
+		Potenza trasmissione									&				$7,5$							&			dBm			\\	\hline
+		Raggio trasmissivo										&				$300$-$500$				&			m				\\	\hline
+		Codifica															&				DSSS\footnotemark	&							\\	\hline
+		Modello di propagazione								&				\textsf{ns3::RangePropagation}	&							\\	\hline
+		Modello di ombreggiatura							&				A ostacoli				&							\\	\hline
+		\thickerline
+		Simulazioni	per configurazione				&			$50$								&					\\
 		\bottomrule
 	\end{tabular}
 	\caption{Configurazione dei parametri per le simulazioni.\label{tab:parametri-simulazioni-barichello}}
 \end{table}
 \footnotetext{\textit{Direct Sequence Spread Spectrum}}	% TODO controllare la posizone, che sia nella stessa pagina della tabella.
+%
+Per valutare il protocollo sono stati presi in esame diversi parametri: la copertura totale e la copertura sulla circonferenza,
+il numero di salti necessari per raggiungere il bordo della griglia, il numero totale di messaggi di inoltro ricevuti e inviati.
+In modo da aver un metro di paragone per il protocollo Fast Broadcast, quest'ultimo è stato comparato con altri due metodi, chiamati \statica e \staticb,
+che utilizzano una stima fissa del raggio tramissivo rispettivamente di $300$ e $500$ metri.
+Il raggio trasmissivo viene variato agendo sul modello di propagazione \textsf{ns3::RangePropagation},
+nel quale una trasmissione viene ricevuta se è a una distanza minore o uguale della portata impostata.
+Gli edifici, non presenti nello scenario originale, sono stati creati manualmente, in modo che ogni edificio fosse contenuto all'interno dello spazio creato dalle strade.
+Così facendo, risultano $169$ edifici di $295$x$295$ metri (i muri sono distanziati di $5$ metri dalla strada).
+
+Le simulazioni sono state eseguite sfruttando l'attrezzatura in dotazione al servizio di \textit{High Performance Computing} dell'università di Padova,
+% mettere anche il tempo?
+eseguendono un numero pari a $50$ simulazioni per ogni configurazione.
 %
 % \begin{figure}[htbp]
 % 	\centering
@@ -76,7 +80,37 @@ Così facendo, risultano $169$ edifici di $295$x$295$ metri (i muri sono distanz
 %
 \subsection{Risultati}\label{sec:configurazione-griglia-risultati}
 %
-% TODO
+Come si può vedere dalla Tabella~\ref{tab:risulati-simulazioni-griglia-copertura}
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura totale} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,46$\%					&			$92,66$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,14$\%					& 		$94,27$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$92,61$\%					&			$92,66$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,59$\%					& 		$94,25$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$96,54$\%					&			$94,86$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,26$\%					& 		$93,75$\%					\\
+		\bottomrule
+		\multicolumn{4}{c}{} 	\\
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura sulla circonferenza} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,00$\%					&			$93,00$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,28$\%					& 		$96,78$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$97,22$\%					&			$91,65$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,22$\%					& 		$96,33$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$97,17$\%					&			$96,17$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,33$\%					& 		$97,06$\%					\\
+		\bottomrule
+	\end{tabular}
+	\caption{Copertura di veicoli in totale e sulla circonferenza con scenario a griglia.\label{tab:risulati-simulazioni-griglia-copertura}}
+\end{table}
 %
 \section{Scenario urbano reale} % un titolo migliore no?
 Le configurazioni precedenti avevano il difetto di essere poco veritiere, sia dal punto di vista della topologia stradale
