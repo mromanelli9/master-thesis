@@ -774,17 +774,17 @@ FBVanetExperiment::SetupScenario ()
 	{		// Setup #1
 		m_traceFile = "LA-1x1.conf1.ns2mobility.xml";
 
-		m_nVehicles = 642;
-		m_nSensors = 87;
-		m_startingNode = 92;		// shoud be 0 <= m_startingNode < m_nVehicles
+		m_nVehicles = 630;
+		m_nSensors = 120;
+		m_startingNode = 292;		// shoud be 0 <= m_startingNode < m_nVehicles
 	}
 	else
 	{		// Setup #2
 		m_traceFile = "LA-1x1.conf2.ns2mobility.xml";
 
-		m_nVehicles = 642;
+		m_nVehicles = 630;
 		m_nSensors = 90;
-		m_startingNode = 92;		// shoud be 0 <= m_startingNode < m_nVehicles
+		m_startingNode = 292;		// shoud be 0 <= m_startingNode < m_nVehicles
 	}
 
 	m_nNodes = m_nVehicles + m_nSensors;
