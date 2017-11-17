@@ -40,7 +40,6 @@
 #include "ns3/wave-mac-helper.h"
 
 #include "FBApplication.h"
-#include "DummySensor.h"
 
 using namespace ns3;
 
@@ -386,6 +385,11 @@ private:
 	static void
 	CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility);
 
+	/**
+	 * \brief Implements a dummy forwarding mechanism
+	 * \return none
+	 */
+	void DummyForwarding (Ptr<Socket> socket);
 
 	Ptr<FBApplication>								m_fbApplication;
 	uint32_t 													m_nNodes;
@@ -397,7 +401,6 @@ private:
 	Ipv4InterfaceContainer						m_adhocInterfaces;
 	std::vector <Ptr<Socket>>					m_adhocSources;
 	std::vector <Ptr<Socket>>					m_adhocSinks;
-	std::vector <Ptr<DummySensor>>		m_dummySensors;
 	std::string												m_packetSize;
 	std::string												m_rate;
 	std::string												m_phyMode;
@@ -417,6 +420,7 @@ private:
 	uint32_t													m_nDisabled;
 	uint32_t													m_enableSensors;
 	double														m_TotalSimTime;
+	std::map<uint32_t, uint32_t> 			m_sensorsMemory;
 };
 
 /* -----------------------------------------------------------------------------
@@ -721,20 +725,11 @@ FBVanetExperiment::ConfigureApplications ()
 		{
 			// sensor as dummy forwarder
 
-			for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+			for (uint32_t id = m_nVehicles; id < m_nNodes; id++)
 			{
-				Ptr<Node> node = m_adhocNodes.Get (i);
+				m_sensorsMemory[id] = 0;	// never see a packet
 
-				// Create the sensor
-				Ptr<DummySensor> sensor = CreateObject<DummySensor> ();
-				sensor->SetNode (node);
-				sensor->SetSocket(m_adhocSources.at (i));
-				sensor->SetReceived (false);
-
-				m_dummySensors.push_back (sensor);
-
-				// Bind callback
-				m_adhocSinks.at (i)->SetRecvCallback (MakeCallback (&DummySensor::ReceivePacket, sensor));
+				m_adhocSinks.at (id)->SetRecvCallback (MakeCallback (&FBVanetExperiment::DummyForwarding, this));
 			}
 		}
 	}
@@ -893,6 +888,33 @@ FBVanetExperiment::SetupPacketSend (Ipv4Address addr, Ptr<Node> node)
 	m_adhocSources.push_back (sender);
 
 	return sender;
+}
+
+void
+FBVanetExperiment::DummyForwarding (Ptr<Socket> socket)
+{
+	NS_LOG_FUNCTION (this << socket);
+
+	// Get the node who received this message and the corresponding FBNode
+	Ptr<Node> node = socket->GetNode ();
+	uint32_t id = node->GetId ();
+
+	Ptr<Packet> packet;
+	Address senderAddress;
+
+	while ((packet = socket->RecvFrom (senderAddress)))
+	{
+		NS_LOG_DEBUG ("Packet received by dummy forwarding on node " << id << ".");
+
+		// If I never saw this packet
+		if (m_sensorsMemory[id] == 0)
+		{
+			m_sensorsMemory[id] = 1;	// mark as seen
+			m_adhocSources.at (id)->Send(packet);
+
+			NS_LOG_DEBUG ("Packet forwarded by dummy forwarding on node " << node->GetId () << ".");
+		}
+	}
 }
 
 
