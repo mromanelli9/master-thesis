@@ -109,6 +109,11 @@ public:
 	Time GetTimestamp (void) const;
 
 	/**
+	 * \returns true if the node is set as vehicle
+	 */
+	bool AmIaVehicle (void) const;
+
+	/**
 	 * \brief set the node id
 	 * \param value id
 	 */
@@ -198,6 +203,12 @@ public:
 	 */
 	void SetTimestamp (Time value);
 
+	/**
+	 * \brief set the node as a vehicle
+	 * \param value true if the node has to be set as a vehicles
+	 */
+	void SetMeAsVehicle (bool value);
+
 	uint32_t							m_id;	// node id
 	Ptr<Node>							m_node;	// ns-3 node
 	Ptr<Socket> 					m_socket; // ns-3 socket
@@ -212,6 +223,7 @@ public:
 	bool 									m_received;	// legacy with barichello's code
 	bool 									m_sent;	// legacy with barichello's code
 	Time									m_timestamp;	// used for statistics
+	bool									m_amIaVehicle;	// used for statistics
 };
 
 } // namespace ns3

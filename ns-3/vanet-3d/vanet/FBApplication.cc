@@ -110,7 +110,7 @@ FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_
 }
 
 void
-FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
+FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink, bool onstats)
 {
 	NS_LOG_FUNCTION (this << node);
 
@@ -129,6 +129,7 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 	fbNode->SetSlot (0);
 	fbNode->SetReceived (false);
 	fbNode->SetSent (false);
+	fbNode->SetMeAsVehicle (onstats);
 
 	// misc stuff
 	m_nodes.push_back (fbNode);
@@ -469,7 +470,12 @@ FBApplication::GetFBNode (Ptr<Node> node)
 {
 	NS_LOG_FUNCTION (this);
 
-	// the key,val is always there?
+	if (m_id2id.count(node->GetId ()) == 0)
+	{
+		// We got a problem: key not found
+		NS_LOG_ERROR ("Error: key for node " << node->GetId () << " not found in fb application.");
+	}
+
 	uint32_t idin = m_id2id[node->GetId ()];
 
 	return m_nodes.at (idin);
@@ -497,6 +503,10 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 			continue;
 
 		Ptr<FBNode> current = m_nodes.at (i);
+
+		// If this isn't a vehciles, skip
+		if (!current->AmIaVehicle ())
+			continue;
 
 		// Update the total cover value
 		if (current->GetReceived ())

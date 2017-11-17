@@ -390,6 +390,7 @@ private:
 	Ptr<FBApplication>								m_fbApplication;
 	uint32_t 													m_nNodes;
 	uint32_t 													m_nVehicles;
+	uint32_t 													m_nVehiclesEnabled;
 	uint32_t 													m_nSensors;
 	NodeContainer											m_adhocNodes;
 	NetDeviceContainer								m_adhocDevices;
@@ -426,6 +427,7 @@ private:
 FBVanetExperiment::FBVanetExperiment ()
 	:	m_nNodes (0),
 		m_nVehicles (0),
+		m_nVehiclesEnabled (0),
 		m_nSensors (0),
 		m_packetSize ("64"),
 		m_rate ("2048bps"),
@@ -665,6 +667,7 @@ FBVanetExperiment::ConfigureApplications ()
 		ids.push_back (m_startingNode);
 	}
 
+	m_nVehiclesEnabled = ids.size ();
 
 	// Delete pre-existing application
 	if (m_fbApplication)
@@ -683,7 +686,7 @@ FBVanetExperiment::ConfigureApplications ()
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
 	// Add vehciles to the application except whose who are in ids
-	for (uint32_t i = 0; i < ids.size(); i++)
+	for (uint32_t i = 0; i < m_nVehiclesEnabled; i++)
 	{
 		uint32_t legit = ids.at (i);
 
@@ -692,7 +695,10 @@ FBVanetExperiment::ConfigureApplications ()
 		if (legit < 0 or legit >= m_nVehicles)
 			NS_LOG_ERROR("Error: you're trying to install the FB app onto a sensor.");
 
-		m_fbApplication->AddNode (m_adhocNodes.Get (legit), m_adhocSources.at (legit), m_adhocSinks.at (legit));
+		m_fbApplication->AddNode (m_adhocNodes.Get (legit),
+														m_adhocSources.at (legit),
+														m_adhocSinks.at (legit),
+														true);
 	}
 
 	// Add the application to a node
@@ -705,7 +711,10 @@ FBVanetExperiment::ConfigureApplications ()
 			// sensor use FB app
 			for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
 			{
-				m_fbApplication->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
+				m_fbApplication->AddNode (m_adhocNodes.Get (i),
+																	m_adhocSources.at (i),
+																	m_adhocSinks.at (i),
+																	false);
 			}
 		}
 		else
@@ -821,6 +830,7 @@ FBVanetExperiment::ProcessOutputs ()
 	g_csvData.AddValue((int) m_enableSensors);
 	g_csvData.AddValue((int) m_nDisabled);
 	g_csvData.AddValue((int) m_nNodes);
+	g_csvData.AddValue((int) m_nVehiclesEnabled);
 	g_csvData.AddMultipleValues(dataStream);
 	g_csvData.CloseRow ();
 }
@@ -900,7 +910,22 @@ int main (int argc, char *argv[])
 	// Manage data storage
 	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet-3d");	// cluster
 	g_csvData.EnableAlternativeFilename ("fb-vanet-3d");
-	g_csvData.WriteHeader ("\"id\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Sensors\",\"Nodes disabled\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Alert received mean time\",\"Mean hops\",\"Mean slots\",\"Messages sent\",\"Messages received\"");
+	g_csvData.WriteHeader ("\"id\",\
+												\"Actual Range\",\
+												\"Protocol\",\
+												\"Buildings\",\
+												\"Sensors\",\
+												\"Nodes disabled\",\
+												\"Total nodes\",\
+												\"Vehicles enabled\",\
+												\"Vehicles on circ\",\
+												\"Total vehicles coverage\",\
+												\"Vehicles coverage on circ\",\
+												\"Alert received mean time\",\
+												\"Mean hops\",\
+												\"Mean slots\",\
+												\"Messages sent\",\
+												\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
 	{
