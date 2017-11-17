@@ -911,21 +911,21 @@ int main (int argc, char *argv[])
 	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet-3d");	// cluster
 	g_csvData.EnableAlternativeFilename ("fb-vanet-3d");
 	g_csvData.WriteHeader ("\"id\",\
-												\"Actual Range\",\
-												\"Protocol\",\
-												\"Buildings\",\
-												\"Sensors\",\
-												\"Nodes disabled\",\
-												\"Total nodes\",\
-												\"Vehicles enabled\",\
-												\"Vehicles on circ\",\
-												\"Total vehicles coverage\",\
-												\"Vehicles coverage on circ\",\
-												\"Alert received mean time\",\
-												\"Mean hops\",\
-												\"Mean slots\",\
-												\"Messages sent\",\
-												\"Messages received\"");
+\"Actual Range\",\
+\"Protocol\",\
+\"Buildings\",\
+\"Sensors\",\
+\"Nodes disabled\",\
+\"Total nodes\",\
+\"Vehicles enabled\",\
+\"Vehicles on circ\",\
+\"Total vehicles coverage\",\
+\"Vehicles coverage on circ\",\
+\"Alert received mean time\",\
+\"Mean hops\",\
+\"Mean slots\",\
+\"Messages sent\",\
+\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
 	{
