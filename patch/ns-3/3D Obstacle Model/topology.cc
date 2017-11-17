@@ -26,6 +26,9 @@
 
 using namespace ns3;
 
+#define noop	// null-operation
+
+
 NS_LOG_COMPONENT_DEFINE ("topology");
 
 Topology::Topology () :
@@ -132,7 +135,7 @@ CreateShape(std::string id, std::string vertices, std::string height)
 	// If height is defined, set it
 	if (!height.empty())
 		{
-			double h = atof(height.c_str ());
+			double h = std::abs(atof(height.c_str ()));
 			obstacle.SetHeight (h);
 		}
 
@@ -491,18 +494,19 @@ Topology::GetObstructedLossBetween(const Point_3 &p1, const Point_3 &p2, double 
             {
               // obtstacle is within range
 
-							// Check if the points are over the top of the building
-							double minz = std::min(p1z, p2z);
-							if ((obstacle.GetHeight () > 0) && (minz >= obstacle.GetHeight ()))
-							{
-								// If so, skip the current obstacle
-								current++;
-							}
-
               double obstructedDistanceBetween = 0.0;
               int intersections = 0;
 
-              GetObstructedDistance(p1, p2, obstacle, obstructedDistanceBetween, intersections);
+							// if both points are over the top of the building, no loss
+							double minz = std::min(p1z, p2z);
+							if ((obstacle.GetHeight () > 0) && (minz >= obstacle.GetHeight ()))
+								{
+									noop;	// pass, do nothing
+								}
+							else
+								{
+									GetObstructedDistance(p1, p2, obstacle, obstructedDistanceBetween, intersections);
+								}
               // From C. Sommer et. al.:
               // A Computationally Inexpensive Empirical Model of IEEE 802.11p
               // Radio Shadowing in Urban Environments, 2011.
