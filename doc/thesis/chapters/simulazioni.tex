@@ -9,7 +9,7 @@ Dopo aver illustrato il protocollo in esame e il modello di propagazione utilizz
 Il capitolo procederà, quindi, nel dettaglio dei diversi scenari affrontati illustrando
 le motivazioni che hanno portato alla loro realizzazione, definendone i parametri e motivando i risulati ottenuti.
 %
-\section{Configurazione a griglia}\label{sec:configurazione-griglia}
+\section{Scenario a griglia}\label{sec:configurazione-griglia}
 % \subsection{Panoramica}
 % Simulazioni codice barichello:
 %  - struttura simulazioni
@@ -79,21 +79,44 @@ eseguendono un numero pari a $50$ simulazioni per ogni configurazione.
 % \end{figure}
 %
 \subsection{Risultati}\label{sec:configurazione-griglia-risultati}
-I grafici in \figurename~\ref{fig:risultati-griglia-copertura} mostrano il cambiamento della copertura dei veicoli in totale e sulla circonferenza,
-dove si hanno rispettivamente $8064$ e $36$ veicoli, quando si vanno a considerare gli edifici.
-Nelle simulazioni rappresentato a sinistra
-Si può notare un generale calo della copertura causato dalla perdita di segnale per effetto dell'ombreggiatura,
-anche se non significativo; la differenza è leggermente maggiore considerando solo i veicoli sulla circonferenza.
-Analizzando invece il numero dei salti (\figurename~\ref{fig:risultati-griglia-salti}) necessari a raggiungere il perimetro della griglia
-si nota un aumento generale di questo valore, leggermente maggiore con raggio trasmissivo $300$ metri.
-Questo comporta che, mediamente, ci vogliono $1,104$ salti in più per raggiungere il perimetro se il raggio
-trasmissivo è di $300$m, mentre ce ne vogliono $0,571$ se è di $500$m.
-Il grafico in \figurename~\ref{fig:risultati-griglia-messaggi}) mostra un aumento del numero di messaggi
-di inoltro inviati, in media, del $17,9$\% nel caso del raggio trasmissivo di $300$m
-e del $163,9$\% nel secondo caso.
-Combinando questi risultati con i precenti, si denota che, nel caso degli edifici,
-un alto numero di pacchetti venga perso a causa della troppa attenuazione del segnale;
-infatti per coprire (circa) la stessa percentuale di veicoli è necessario un numero molto maggiore di inoltri.
+% I grafici in \figurename~\ref{fig:risultati-griglia-copertura} mostrano il cambiamento della copertura dei veicoli in totale e sulla circonferenza,
+% dove si hanno rispettivamente $8064$ e $36$ veicoli, quando si vanno a considerare gli edifici.
+% Nelle simulazioni rappresentato a sinistra
+% Si può notare un generale calo della copertura causato dalla perdita di segnale per effetto dell'ombreggiatura,
+% anche se non significativo; la differenza è leggermente maggiore considerando solo i veicoli sulla circonferenza.
+% Analizzando invece il numero dei salti (\figurename~\ref{fig:risultati-griglia-salti}) necessari a raggiungere il perimetro della griglia
+% si nota un aumento generale di questo valore, leggermente maggiore con raggio trasmissivo $300$ metri.
+% Questo comporta che, mediamente, ci vogliono $1,104$ salti in più per raggiungere il perimetro se il raggio
+% trasmissivo è di $300$m, mentre ce ne vogliono $0,571$ se è di $500$m.
+% Il grafico in \figurename~\ref{fig:risultati-griglia-messaggi}) mostra un aumento del numero di messaggi
+% di inoltro inviati, in media, del $17,9$\% nel caso del raggio trasmissivo di $300$m
+% e del $163,9$\% nel secondo caso.
+% Combinando questi risultati con i precenti, si denota che, nel caso degli edifici,
+% un alto numero di pacchetti venga perso a causa della troppa attenuazione del segnale;
+% infatti per coprire (circa) la stessa percentuale di veicoli è necessario un numero molto maggiore di inoltri.
+I grafici dalla \figurename~\ref{fig:risultati-griglia-copertura} alla~\ref{fig:risultati-griglia-messaggi}
+mostrano i risultati di questo gruppo di simulazioni.
+Come si può notare, la presenza degli ostacoli influisce molto poco sui quasi tutti i parametri presi in esame.
+La differenza sulla copertura totale è, in generale, inferiore o vicina all'$1\%$, tuttavia utilizando i protocolli FB e \statica{} si vede
+un leggero calo nel caso di raggio tramissivo pari a $300$m e un leggero incremento con $500$m, mentre
+è l'opposto con \staticb{}; la differenza è comunque minima per ipotizzare una causa di questo comportamento. % ?
+I veicoli sulla circonferenza (di raggio $1000$m) ottengono una copertura legggermente migliore
+(in media dello $0,5\%$), tranne nel caso di \staticb{} con raggio trasmissivo $500$m.
+Questo leggero aumento della copertura potrebbe essere dovuto a quello che gli autori del modello a ostacoli (~\cite{Carpenter:2015:OMI:2756509.2756512})
+chiamano ``L'effetto cena con amici'' (\textit{The Dinner Party effect}): la presenza di ostacoli come edifici
+può aumentare, localmente, la probabilità di tramissioni con successo, in quanto aumenterebbe il riuso delle spazio.
+Tale fenomeno può anche essere visto nel grafico in \figurename~\ref{fig:risultati-griglia-messaggi}
+dove nel caso di raggio trasmissivo pari a $500$m è presente un aumento, in media, del $5,6$\%
+nel numero di messaggi di intoltro ricevuti, mentre quelli inviati sono più simili al caso senza edifici.
+Anche il numero di salti necessari a raggiungere il perimetro della griglia rimane vicino
+e aumenta mediamente solo del $0,34\%$.
+Da tutto ciò si deduce che la presenza di edifici causa un aumento locale del traffico di messaggi
+ma il meccanimo di contesa e inoltro permette di mantenere limitata la propagazione di questi in avanti. % sicuro?
+Ciascun edificio ricopre un intero isolato (spazio interno racchiuso fra le strade) e si trova, per una differenza di pochi metri,
+a ridosso delle strade;
+la grandezza di questi edifici probabilmente blocca qualsiasi trasmissione fra due veicoli che si trovano
+agli estremi dell'isolato e, di conseguenza, limita la propagazione del messaggio all'interno del blocco  che viene ``forzato''
+a proseguire lungo la strada.
 %
 \begin{figure}[htbp]
 	\centering
