@@ -196,6 +196,54 @@ Questo perché nella configurazione a griglia lungo il perimetro esterno erano s
 mentre ora il limite ``quadratico'' dell'area è ideale (non tutte le strade finisco esattamente sul bordo della mappa).
 %
 \subsection{Los Angeles}\label{subsec:risultati-la}
+A differenza del caso precente, quando si va a considerare l'effetto dell'ombreggiatura in questo scenario
+si notano dei maggiori cambiamenti.
+In primo luogo, come si può vedere dalla \figurename~\ref{fig:risultati-la-copertura},
+si nota una diminuzione della copertura dei veicoli, più marcata con raggio trasmissivo $300$m.
+Nelle simulazioni, infatti, le due diverse distanze massime raggiungibili dal segnale,
+$300$ e $500$ metri senza ostruzioni sono state implementate tramite una diversa potenza in fase di trasmissione.
+Un sengale più potente è, naturalmente, in grado di ``superare'' un edificio rispetto a un sengale con meno potenza.
+Inoltre, avendo una portata maggiore potrebbe raggiungere altri elementi in ricezione e coprire quindi ulteriori veicoli e/o aree.
+
+Da notare è il cambio di tendenza nel caso del protocollo \statica{}:
+in presenza di edifici si ha una copertura maggiore con raggio trasmissivo di $500$m.
+Il motivo potrebbe essere che l'effetto dell'ombreggiatura influisce maggiormente rispetto
+allo non stimare correttamente il mezzo fisico.
+
+Per quanto riguarda il numero medio di salti necessari a raggiungere i veicoli sulla circonferenza,
+\figurename~\ref{fig:risultati-la-salti},
+% TODO: contorllare che sia così anceh avendo nuovi dati
+si ha un incremento del $36,5\%$ nel caso di raggio trasmissivo $300$m mentre solo del $5\%$ nella controparte.
+Inoltre si può osservare come il protocollo FB abbia prestazioni migiori delle alternative statiche,
+di circa il $10\%$ con $300$m e del $23\%$ con $500$m. % ha senso confrontarli così?
+
+Considerando il numero di messaggi di inoltro che vengono scambiati rete (\figurename~\ref{fig:risultati-la-messaggi}),
+rimane anomalo il caso \statica{}-$500$m, dove si ha un valore inferiore rispetto agli altri protocolli,
+anche se rimane coerente nel considerare l'effetto ombreggiatura (rispetto allo scenario senza).
+Mediamente, i messaggi inviati nel caso $300$m subiscono un incremento del $194,5\%$ e del $179,4\%$
+con $500$m.
+Un andamento inverso caratterizza, invece, il numero totale di messaggi ricevuti:
+se si considera un raggio trasmissivo di $500$m si ha un aumento del $43\%$ in presenza di edifici,
+mentre nella controparte a $300$m un calo del $32,2\%$.
+Ciò significa che, nel primo caso, gli ostacoli considerati causano la perdita di una grossa quantità di messaggi
+mentre così non avviene nel secondo.
+La causa di questo fenomeno potrebbe trovarsi nella topologia stradale presente in questo specifico scenario.
+Gli isolati più piccoli hanno una dimensioni di circa $50$x$175$ metri mentre quelli più grandi
+(visibili nella mappa in basso a destra) sono lunghi circa $400$ metri.
+Il raggio trasmissivo minore non riesce a superarli mentre è così per quello maggiore che raggiunge
+di conseguenza anche i veicoli posizionati sugli e nelle vicinanze degli incroci.
+Considerando gli isolati più piccoli, con $300$m si copre (al massimo) due incroci mentre se ne coprono
+fino a tre se si hanno $500$m.
+Inoltre, potrebbe essere che il segnale generato nel caso di raggio trasmissivo minore
+non sia sufficiente a penetrare gli edifici presenti all'interno di un isolato (in larghezza),
+mentre è abbastanza forte quello con raggio trasmissivo maggiore.
+% i grafici su potenza-sengale-isolati-la lo confermeranno?
+
+Anche in questo scenario, il protocollo FB si comporta secondo le aspettative,
+garantendo una copertura migliore % TODO da confermare dopo con i nuovi dati
+rispetto ai protocolli con stima fissa,
+un numero di salti inferiore e quindi una consegna del messaggio più veloce
+e in generale un numero inferiore di messaggi inoltrati.
 %
 \begin{figure}[htbp]
 	\centering
