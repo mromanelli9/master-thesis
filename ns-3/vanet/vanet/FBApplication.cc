@@ -110,7 +110,7 @@ FBApplication::Install (uint32_t protocol, uint32_t broadcastPhaseStart, uint32_
 }
 
 void
-FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
+FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink, bool onstats)
 {
 	NS_LOG_FUNCTION (this << node);
 
@@ -129,6 +129,7 @@ FBApplication::AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink)
 	fbNode->SetSlot (0);
 	fbNode->SetReceived (false);
 	fbNode->SetSent (false);
+	fbNode->SetMeAsVehicle (onstats);
 
 	// misc stuff
 	m_nodes.push_back (fbNode);
@@ -469,7 +470,12 @@ FBApplication::GetFBNode (Ptr<Node> node)
 {
 	NS_LOG_FUNCTION (this);
 
-	// the key,val is always there?
+	if (m_id2id.count(node->GetId ()) == 0)
+	{
+		// We got a problem: key not found
+		NS_LOG_ERROR ("Error: key for node " << node->GetId () << " not found in fb application.");
+	}
+
 	uint32_t idin = m_id2id[node->GetId ()];
 
 	return m_nodes.at (idin);
@@ -498,6 +504,10 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 
 		Ptr<FBNode> current = m_nodes.at (i);
 
+		// If this isn't a vehciles, skip
+		if (!current->AmIaVehicle ())
+			continue;
+
 		// Update the total cover value
 		if (current->GetReceived ())
 			cover++;
@@ -524,15 +534,17 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 				// Update mean time, nums and slots
 				nums_sum += current->GetNum();
 				slots_sum += current->GetSlot();
-				time_sum += current->GetTimestamp().GetMilliSeconds ();
+				time_sum += current->GetTimestamp().GetMicroSeconds ();
 			}
 		}
 	}
 
+	Time timeref = m_nodes.at (m_startingNode)->GetTimestamp();
+
 	dataStream << circCont << ","
 			<< cover << ","
 			<< circ << ","
-			<< (time_sum / (double) circ) << ","
+			<< timeref.GetMicroSeconds () - (time_sum / (double) circ) -  << ","
 			<< (nums_sum / (double) circ) << ","
 			<< (slots_sum / (double) circ) << ","
 			<< m_sent << ","
