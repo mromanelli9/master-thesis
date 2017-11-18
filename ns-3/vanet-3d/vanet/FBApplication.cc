@@ -534,15 +534,17 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 				// Update mean time, nums and slots
 				nums_sum += current->GetNum();
 				slots_sum += current->GetSlot();
-				time_sum += current->GetTimestamp().GetMilliSeconds ();
+				time_sum += current->GetTimestamp().GetMicroSeconds ();
 			}
 		}
 	}
 
+	Time timeref = m_nodes.at (m_startingNode)->GetTimestamp();
+
 	dataStream << circCont << ","
 			<< cover << ","
 			<< circ << ","
-			<< (time_sum / (double) circ) << ","
+			<< timeref.GetMicroSeconds () - (time_sum / (double) circ) -  << ","
 			<< (nums_sum / (double) circ) << ","
 			<< (slots_sum / (double) circ) << ","
 			<< m_sent << ","
