@@ -254,7 +254,7 @@ e in generale un numero inferiore di messaggi inoltrati.
 \begin{figure}[htbp]
 	\centering
 		\includegraphics[width=\linewidth]{grafici/la/copertura_totale.png}
-		% \includegraphics[width=\linewidth]{grafici/la/copertura_circonferenza.png} % TODO da mettere!!!!
+		\includegraphics[width=\linewidth]{grafici/la/copertura_circonferenza.png}
 \caption{Scenario L.A.: copertura dei veicoli in totale e sulla circonferenza.\label{fig:risultati-la-copertura}}
 \end{figure}
 %
@@ -274,6 +274,8 @@ e in generale un numero inferiore di messaggi inoltrati.
 %
 %
 \subsection{Padova}\label{subsec:risultati-pd}
+% TODO: rivedere tutti qiesti risultati
+
 
 % \begin{figure}[htbp]
 % 	\centering
@@ -294,3 +296,46 @@ e in generale un numero inferiore di messaggi inoltrati.
 % 		\includegraphics[width=\textwidth]{grafici/pd_messaggi_ricevuti.png}
 % \caption{Quantità di messaggi di inoltro durante la simulazione.\label{fig:risultati-padova-messaggi}}
 % \end{figure}
+%
+\section{Scenario con sensori}
+Inizialmente si era detto che spesso le reti VANET sono caratterizzate da nodi con capacità di comunicazione
+intra-veicolare e che, grazie ai progressi tecnologici, sempre più veicoli possiedono queste caratteristiche.
+Tuttavia bisogna prendere atto che, almeno per il momento, non siamo nelle condizioni
+di poter affermare che ogni ogni veicolo è grado di comunicare.
+Per questo motivo, si può pensare di rilassare tale assunzione e permettere che alcuni veicoli
+siano esclusi dal traffico; la loro presenza all'interno dello scenario rimane, ma non partecipano allo scambio
+di messaggi e alla propagazione del messaggio.
+
+Viene aggiunta una seconda assunzione: sparpagliati lungo la città sono posizionati dei sensori a basso costo
+che contribuiscono alla propagazione dei messaggi tramite il semplice Algortimo~\ref{fig:algoritmo-inoltro-dummy}
+che inoltra (in broadcast) un messaggio solo la prima volta.
+%
+\begin{italianalgorithm}[h]
+\begin{algorithmic}[1]
+	\If{(RilevatoMsg() $\wedge$ visto() = NO)}
+		\State{visto $\gets$ SI}
+		\State{inviaInBroadcast(msg)}
+		\EndIf{}
+\end{algorithmic}
+\caption{Semplice algoritmo di inoltro.}\label{fig:algoritmo-inoltro-dummy}
+\end{italianalgorithm}
+%
+Nel mondo reale questi sensori potrebbero essere dedicati come aiuto propagazione,
+cioè installati al solo scopo di aiutare la diffusione dei messaggi,
+oppure essere presenti per altri motivi ma con la capacità di ricevere/inoltrare messaggi
+in caso di bisogno; ad esempio sensori per l'analisi delle polveri sottili,
+oppure per il monitoraggio del traffico stradale.
+Si assume, inoltre, che questi sensori siano posizionati a una certa altezza prefissata;
+potrebbe essere che, in fase di installazione, si sia scelto di utilizzare delle infrastrutture
+pre-esistenti, come per esempio delle lanterne semaforiche, sulle quali montare i sensori in modo da ridurre i costi.
+Prendendo come spunto l'esempio indicato, si è visto che nel classico semaforo a tre tempi
+la parte contenente i segnali luminosi dev'essere posizionata
+fra i $15$ e i $26,5$ piedi (rispettivamente $4,5$ e ho $8$ metri) nel caso di strutture al di sopra della
+careggiata~\cite{MUTCD}.
+
+Nel dettaglio, lo scenario attuale prevede la disposizione di $630$ veicoli distanti
+$25$ metri (come nello scenario precedente) l'uno dall'altro
+e di $120$ sensori posizionati agli incroci a un'altezza di $6$ metri.
+
+
+%
