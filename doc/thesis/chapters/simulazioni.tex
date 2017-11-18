@@ -336,6 +336,55 @@ careggiata~\cite{MUTCD}.
 Nel dettaglio, lo scenario attuale prevede la disposizione di $630$ veicoli distanti
 $25$ metri (come nello scenario precedente) l'uno dall'altro
 e di $120$ sensori posizionati agli incroci a un'altezza di $6$ metri.
+Il raggio tramissivo è fissato a $300$ metri, i veicoli implementato il protocollo Fast broadcast
+mentre i sensori il semplice inoltro visto in precedenza.
+
+Nelle varie simulazioni si andrà a variare la percentuale di veicoli ``disabilitati'',
+ovvero senza capacità di comunicazione, prendendo un campione casuale della popolazione.
+La configurazione sopra descritta è riassunta in Tabella~\ref{tab:parametri-simulazioni-sensori},
+mentre alcune informazioni sulle altezze degli ostacoli\footnotemark{} (fra cui gli edifici) si possono vedere in Tabella~\ref{tab:simulazioni-sensori-altezze-edfici}.
+\footnotetext{Altezze predefinite per un piano e un sottotetto rispettivamente di $2,7$ e $2,1$ metri.}
+%
+\begin{table}[htbp]
+	\centering
+	  \begin{tabular}{| L{.4\linewidth} | C{.01\linewidth} | C{.04\linewidth} | C{.2\linewidth} |}
+			\toprule
+			\multicolumn{3}{|m{.3\linewidth}|}{}																						&		Scenario											\\
+			\thickerline
+			\multicolumn{2}{|m{.25\linewidth}|}{\multirow{2}{*}{Latitudine}}				&		N	 	& 	$33,9611$											\\ \cline{3-4}
+			\multicolumn{2}{|m{.25\linewidth}|}{}																		&		S	 	& 	$33,9509$											\\ \cline{2-4}
+			\multicolumn{2}{|l|}{\multirow{2}{*}{Longitudine}}											&		O	 	& 	$-118,3214$										\\ \cline{3-4}
+			\multicolumn{2}{|l|}{}																									&		E	 	& 	$-118,3098$										\\ \hline
+			\multicolumn{3}{|l|}{Area approssimativa [km$^2$]}															&		$1,2$													\\ \hline
+			\multicolumn{3}{|l|}{Distanza fra veicoli [metri]}															&		$25$													\\ \hline
+			\multicolumn{3}{|l|}{Numero di veicoli}																					&		$630$													\\ \hline
+			\multicolumn{3}{|l|}{Posizione sensori}																					&		incroci												\\ \hline
+			\multicolumn{3}{|l|}{Altezza dei sensori [metri]}																&		$6$														\\ \hline
+			\multicolumn{3}{|l|}{Numero di sensori}																					&		$120$												\\
+			\thickerline
+			\multicolumn{3}{|l|}{Simulazioni	per configurazione}														&		$30$													\\
+			\bottomrule
+	  \end{tabular}
+	\caption{Parametri della topologia per lo scenario con sensori.\label{tab:parametri-simulazioni-sensori}}
+\end{table}
+%
+\begin{table}[htbp]
+	\centering
+	  \begin{tabular}{| L{.4\linewidth} | C{.2\linewidth} |}
+			\toprule
+																	&		Valore 								\\
+			\thickerline
+			Ostacoli totali							&		$2791$							\\ \hline
+			Ostacoli con altezza				&		$2714$ ($97,24\%$)		\\ \hline
+			Altezza massima	[m]					&		$21,9$								\\ \hline
+			Altezza media	[m]						&		$4,8$									\\ \hline
+			Altezza minima [m]					&		$1,4$									\\
+			\bottomrule
+	  \end{tabular}
+	\caption{Statistiche sull'altezza degli ostacoli.\label{tab:simulazioni-sensori-altezze-edfici}}
+\end{table}
+%
+\subsection{Risultati}\label{sec:configurazione-sensori-risultati}
 
 
 %
