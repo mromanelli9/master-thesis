@@ -94,7 +94,8 @@ eseguendono un numero pari a $50$ simulazioni per ogni configurazione.
 % Combinando questi risultati con i precenti, si denota che, nel caso degli edifici,
 % un alto numero di pacchetti venga perso a causa della troppa attenuazione del segnale;
 % infatti per coprire (circa) la stessa percentuale di veicoli è necessario un numero molto maggiore di inoltri.
-I grafici dalla \figurename~\ref{fig:risultati-griglia-copertura} alla~\ref{fig:risultati-griglia-messaggi}
+I grafici dalla \figurename~\ref{fig:risultati-griglia-copertura} alla~\ref{fig:risultati-griglia-messaggi}\footnotemark
+\footnotetext{Tutti i grafici mostrati utilizzano come misura di errore l'errore standard con intervallo di confidenza del $95\%$.}
 mostrano i risultati di questo gruppo di simulazioni.
 Come si può notare, la presenza degli ostacoli influisce molto poco sui quasi tutti i parametri presi in esame.
 La differenza sulla copertura totale è, in generale, inferiore o vicina all'$1\%$, tuttavia utilizando i protocolli FB e \statica{} si vede
@@ -202,35 +203,38 @@ diversi parametri essenziali, come la potenza della trasmissione, la frequenza d
 inoltre l'assunzione che il segnale si propaghi uniformemente fino a una certa distanza prefissata non è reale.
 %
 \subsection{Los Angeles}\label{subsec:risultati-la}
-A differenza del caso precente, quando si va a considerare l'effetto dell'ombreggiatura in questo scenario
+A differenza del precente, quando si va a considerare l'effetto dell'ombreggiatura in questo scenario
 si notano dei maggiori cambiamenti.
 In primo luogo, come si può vedere dalla \figurename~\ref{fig:risultati-la-copertura},
-si nota una diminuzione della copertura dei veicoli, più marcata con raggio trasmissivo $300$m.
+si nota una diminuzione della copertura dei veicoli che è più marcata con raggio trasmissivo $300$m.
 Nelle simulazioni, infatti, le due diverse distanze massime raggiungibili dal segnale,
-$300$ e $500$ metri senza ostruzioni sono state implementate tramite una diversa potenza in fase di trasmissione.
-Un sengale più potente è, naturalmente, in grado di ``superare'' un edificio rispetto a un sengale con meno potenza.
-Inoltre, avendo una portata maggiore potrebbe raggiungere altri elementi in ricezione e coprire quindi ulteriori veicoli e/o aree.
+$300$ e $500$ metri senza ostruzioni, sono state implementate tramite una diversa potenza in fase di trasmissione.
+Un sengale più potente ha, naturalmente,
+più probabilità di ``superare'' un ostacolo rispetto a un segnale con meno potenza.
+Inoltre, avendo una portata maggiore potrebbe raggiungere altri elementi in ricezione,
+permettere degli inoltri e coprire quindi ulteriori veicoli.
 
 Da notare è il cambio di tendenza nel caso del protocollo \statica{}:
 in presenza di edifici si ha una copertura maggiore con raggio trasmissivo di $500$m.
 Il motivo potrebbe essere che l'effetto dell'ombreggiatura influisce maggiormente rispetto
 allo non stimare correttamente il mezzo fisico.
+Questo fenomeno rimarrà costante anche nello sceario successivo.
 
 Per quanto riguarda il numero medio di salti necessari a raggiungere i veicoli sulla circonferenza,
-\figurename~\ref{fig:risultati-la-salti},
+in \figurename~\ref{fig:risultati-la-salti},
 % TODO: contorllare che sia così anceh avendo nuovi dati
-si ha un incremento del $36,5\%$ nel caso di raggio trasmissivo $300$m mentre solo del $5\%$ nella controparte.
-Inoltre si può osservare come il protocollo FB abbia prestazioni migiori delle alternative statiche,
+si ha un incremento del $36,5\%$ nel caso di raggio trasmissivo $300$m mentre solo del $5\%$ nella controparte a $500$.
+Inoltre si può osservare come il protocollo FB abbia prestazioni migliori delle alternative statiche
 di circa il $10\%$ con $300$m e del $23\%$ con $500$m. % ha senso confrontarli così?
 
-Considerando il numero di messaggi di inoltro che vengono scambiati rete (\figurename~\ref{fig:risultati-la-messaggi}),
+Considerando il numero di messaggi di inoltro che vengono scambiati nella rete (\figurename~\ref{fig:risultati-la-messaggi}),
 rimane anomalo il caso \statica{}-$500$m, dove si ha un valore inferiore rispetto agli altri protocolli,
 anche se rimane coerente nel considerare l'effetto ombreggiatura (rispetto allo scenario senza).
 Mediamente, i messaggi inviati nel caso $300$m subiscono un incremento del $194,5\%$ e del $179,4\%$
 con $500$m.
-Un andamento inverso caratterizza, invece, il numero totale di messaggi ricevuti:
+Un andamento inverso caratterizza il numero totale di messaggi di inoltro ricevuti:
 se si considera un raggio trasmissivo di $500$m si ha un aumento del $43\%$ in presenza di edifici,
-mentre nella controparte a $300$m un calo del $32,2\%$.
+mentre un calo del $32,2\%$ con $300$m.
 Ciò significa che, nel primo caso, gli ostacoli considerati causano la perdita di una grossa quantità di messaggi
 mentre così non avviene nel secondo.
 La causa di questo fenomeno potrebbe trovarsi nella topologia stradale presente in questo specifico scenario.
@@ -238,7 +242,7 @@ Gli isolati più piccoli hanno una dimensioni di circa $50$x$175$ metri mentre q
 (visibili nella mappa in basso a destra) sono lunghi circa $400$ metri.
 Il raggio trasmissivo minore non riesce a superarli mentre è così per quello maggiore che raggiunge
 di conseguenza anche i veicoli posizionati sugli e nelle vicinanze degli incroci.
-Considerando gli isolati più piccoli, con $300$m si copre (al massimo) due incroci mentre se ne coprono
+Considerando gli isolati più piccoli con $300$m si coprono (al massimo) due incroci mentre se ne coprono
 fino a tre se si hanno $500$m.
 Inoltre, potrebbe essere che il segnale generato nel caso di raggio trasmissivo minore
 non sia sufficiente a penetrare gli edifici presenti all'interno di un isolato (in larghezza),
@@ -280,13 +284,13 @@ anche nel centro cittadino padovano si subisce una brusca riduzione della copert
 quando si va a considerare l'effetto ombreggiatura casuato dagli edifici (\figurename~\ref{fig:risultati-padova-copertura}).
 Più precisamente, in questo caso il calo è maggiore e pari al $49,5\%$ nel caso $300$m,
 a differenza del precente che si attestava al $30,5\%$;
-utilizzando il raggio trasmissivo pari a $500$m, la differenza di copertura totale si attesta
+utilizzando il raggio trasmissivo pari a $500$m la differenza di copertura totale si attesta
 intorno al $9\%$ per entrambi gli scenari.
 Una sostanziale differenza di nota anche nella copertura dei veicoli che si trovano sulla circonferenza,
 dove si registra un calo che arriva fino al $77,3\%$ con \statica{}-$300$m;
-lungo questo raggio si trovano $50$ veicoli ma, mediamente, nel caso $300$m se ne copre solo il $24,5\%$.
+lungo questo raggio si trovano $50$ veicoli ma nel caso $300$m se ne copre mediamente solo il $24,5\%$.
 Se ne deduce che alcune caratteristiche intrinseche della città veneta
-impattano maggiormente un raggio trasmissivo che uno maggiore rispetto
+impattano maggiormente un raggio trasmissivo minore che uno maggiore rispetto
 alle equivalenti della città californiana. % è giusto scriver così?
 Questo potrebbe essere dovuto alla geometria e topologia degli edifici della città
 veneta, a ridosso della careggiata, più stipati e con meno spazio libero,
@@ -298,15 +302,15 @@ i risultati sono coerenti con le aspettative e con lo scenario Los Angeles;
 il protocollo Fast Broadcast si comporta leggermente peggio in Padova che in L.A.
 ma rimane il migliore nell'adattarsi al cambiamento di raggio trasmissivo reale.
 
-Rimane l'anomalia nel caso \statica{}-$500$m del numero di messaggi di inoltro in \figurename~\ref{fig:risultati-pd-messaggi},
+Rimane l'anomalia nel caso \statica{}-$500$m del numero di messaggi di inoltro in \figurename~\ref{fig:risultati-padova-messaggi},
 dove si ha un valore inferiore rispetto al protocollo statitico con stima corretta.
 Come nello scenario precedente, la causa potrebbe essere la maggior influenza dell'ombreggiatura rispetto
 all'effettuare una stima corretta del mezzo fisico.
 Considerando l'effetto degli edifici si ha un aumento dei messaggi inviati del $234\%$ nel caso $300$m e del $197\%$ nell'altro,
-un incremento maggiore rispetto allo scenario precente, probabilmente per le stesse cause
+un incremento maggiore rispetto allo scenario precente probabilmente per le stesse cause
 descritte in precedenza osservando gli effetti sulla copertura dei veicoli.
 Nel numero di messaggi di inoltro ricevuti si ha un calo nel caso $300$m,
-pari al $44,9\%$, e un aumento con il raggio trasmissivo maggiore, ossia del $46,9\%$,
+pari al $44,9\%$, e un aumento con il raggio trasmissivo maggiore, del $46,9\%$,
 come nelle simulazioni con la città californiana.
 %
 \begin{figure}[htbp]
@@ -328,6 +332,7 @@ come nelle simulazioni con la città californiana.
 		\includegraphics[width=\textwidth]{grafici/pd/messaggi_ricevuti.png}
 \caption{Scenario Padova: numero di messaggi di inoltro inviati e ricevuti.\label{fig:risultati-padova-messaggi}}
 \end{figure}
+%
 %
 \section{Scenario urbano con sensori}
 Inizialmente si era detto che spesso le reti VANET sono caratterizzate da nodi con capacità di comunicazione
