@@ -183,9 +183,9 @@ In questo modo si ha il primo scenario che si discosta meno dal precendete, ment
 %
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=.49\textwidth]{osm_web-pd-2x2.png}
+		\includegraphics[width=.491\textwidth]{osm_web-pd-2x2.png}
 		\hfill
-		\includegraphics[width=.49\textwidth]{osm_web-la-2x2.png}
+		\includegraphics[width=.489\textwidth]{osm_web-la-2x2.png}
 \caption{Una vista delle aree selezionate per le simulazioni; a sinistra la città di Padova e a destra Los Angeles (fonte: OSM).
 Il cerchio rosso evidenzia la posizione del nodo di partenza mentre i tre rimanenti rappresentano il perimetro della circonferenza
 e i due intervalli di confidenza.\label{fig:scenari-la-pd-osm}}
@@ -275,29 +275,61 @@ e in generale un numero inferiore di messaggi inoltrati.
 %
 \subsection{Padova}\label{subsec:risultati-pd}
 % TODO: rivedere tutti qiesti risultati
+Similmente ai risultati ottenuti nelle simulazioni precendenti,
+anche nel centro cittadino padovano si subisce una brusca riduzione della copertura totale
+quando si va a considerare l'effetto ombreggiatura casuato dagli edifici (\figurename~\ref{fig:risultati-padova-copertura}).
+Più precisamente, in questo caso il calo è maggiore e pari al $49,5\%$ nel caso $300$m,
+a differenza del precente che si attestava al $30,5\%$;
+utilizzando il raggio trasmissivo pari a $500$m, la differenza di copertura totale si attesta
+intorno al $9\%$ per entrambi gli scenari.
+Una sostanziale differenza di nota anche nella copertura dei veicoli che si trovano sulla circonferenza,
+dove si registra un calo che arriva fino al $77,3\%$ con \statica{}-$300$m;
+lungo questo raggio si trovano $50$ veicoli ma, mediamente, nel caso $300$m se ne copre solo il $24,5\%$.
+Se ne deduce che alcune caratteristiche intrinseche della città veneta
+impattano maggiormente un raggio trasmissivo che uno maggiore rispetto
+alle equivalenti della città californiana. % è giusto scriver così?
+Questo potrebbe essere dovuto alla geometria e topologia degli edifici della città
+veneta, a ridosso della careggiata, più stipati e con meno spazio libero,
+oppure dalla diverse struttura stradale, che vede strade più strette,
+rettilinei di lunghezza inferiore e cambi di direzione repentini.
 
+Per quanto riguarda il numero di salti (per raggiungere la circonferenza) in \figurename~\ref{fig:risultati-padova-salti},
+i risultati sono coerenti con le aspettative e con lo scenario Los Angeles;
+il protocollo Fast Broadcast si comporta leggermente peggio in Padova che in L.A.
+ma rimane il migliore nell'adattarsi al cambiamento di raggio trasmissivo reale.
 
-% \begin{figure}[htbp]
-% 	\centering
-% 		\includegraphics[width=\textwidth]{grafici/pd_copertura_totale.png}
-% 		\includegraphics[width=\textwidth]{grafici/pd_copertura_circonferenza.png}
-% \caption{Copertura dei veicoli totale e sulla circonferenza dei veicoli\label{fig:risultati-padova-copertura}}
-% \end{figure}
-% %
-% \begin{figure}[htbp]
-% 	\centering
-% 		\includegraphics[width=\textwidth]{grafici/pd_salti.png}
-% \caption{Numero di salti necessario per raggiungere la circonferenza dei veicoli\label{fig:risultati-padova-salti}}
-% \end{figure}
-% %
-% \begin{figure}[htbp]
-% 	\centering
-% 		\includegraphics[width=\textwidth]{grafici/pd_messaggi_inviati.png}
-% 		\includegraphics[width=\textwidth]{grafici/pd_messaggi_ricevuti.png}
-% \caption{Quantità di messaggi di inoltro durante la simulazione.\label{fig:risultati-padova-messaggi}}
-% \end{figure}
+Rimane l'anomalia nel caso \statica{}-$500$m del numero di messaggi di inoltro in \figurename~\ref{fig:risultati-pd-messaggi},
+dove si ha un valore inferiore rispetto al protocollo statitico con stima corretta.
+Come nello scenario precedente, la causa potrebbe essere la maggior influenza dell'ombreggiatura rispetto
+all'effettuare una stima corretta del mezzo fisico.
+Considerando l'effetto degli edifici si ha un aumento dei messaggi inviati del $234\%$ nel caso $300$m e del $197\%$ nell'altro,
+un incremento maggiore rispetto allo scenario precente, probabilmente per le stesse cause
+descritte in precedenza osservando gli effetti sulla copertura dei veicoli.
+Nel numero di messaggi di inoltro ricevuti si ha un calo nel caso $300$m,
+pari al $44,9\%$, e un aumento con il raggio trasmissivo maggiore, ossia del $46,9\%$,
+come nelle simulazioni con la città californiana.
 %
-\section{Scenario con sensori}
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{grafici/pd/copertura_totale.png}
+		\includegraphics[width=\textwidth]{grafici/pd/copertura_circonferenza.png}
+\caption{Scenario Padova: copertura dei veicoli in totale e sulla circonferenza.\label{fig:risultati-padova-copertura}}
+\end{figure}
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{grafici/pd/salti.png}
+\caption{Scenario Padova: numero di salti.\label{fig:risultati-padova-salti}}
+\end{figure}
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{grafici/pd/messaggi_inviati.png}
+		\includegraphics[width=\textwidth]{grafici/pd/messaggi_ricevuti.png}
+\caption{Scenario Padova: numero di messaggi di inoltro inviati e ricevuti.\label{fig:risultati-padova-messaggi}}
+\end{figure}
+%
+\section{Scenario urbano con sensori}
 Inizialmente si era detto che spesso le reti VANET sono caratterizzate da nodi con capacità di comunicazione
 intra-veicolare e che, grazie ai progressi tecnologici, sempre più veicoli possiedono queste caratteristiche.
 Tuttavia bisogna prendere atto che, almeno per il momento, non siamo nelle condizioni
