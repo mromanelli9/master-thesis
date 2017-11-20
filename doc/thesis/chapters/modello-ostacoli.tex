@@ -5,8 +5,8 @@
 
 \chapter{Modello a ostacoli}\label{chap:modello-a-ostacoli}
 %
-\section{Il modello matematico}\label{sec:il-modello-matematico}
-Il modello utilizzato viene descritto per la prima volta in~\cite{5720204}, dove viene presentato
+\section{Il modello matematico}\label{sec:il-modello-matematico}{\vspace*{-.3\baselineskip}} % fix: dunno why so a large space
+Il modello a ostacoli utilizzato viene descritto per la prima volta in~\cite{5720204}, dove viene presentato
 come un'estensione dei cosiddétti modelli di attenuazione del segnale.
 In generale, questi possono essere scritti nella forma dell'Equazione~\ref{eq:fading-models}, dove $P$ è la potenza del trasmettitore (e ricevitore),
 $G$ i guadagni delle antenne e $L$ il termine che indica le attenuazioni dovute alla trasmissione.
@@ -28,14 +28,16 @@ e quella derivante dalla superficie interna (attenuazione per-metro):
 \end{gather}
 dove $n$ è il numero di volte che il bordo dell'ostacolo viene intersecato dalla visuale e $d_o$ è la distanza, in metri, attraversata all'interno dell'ostacolo.
 Il primo dei due parametri di calibrazione, $\alpha$, espresso in decibel per metro (dB/m), descrive l'attenuazione
-che la trasmissione subisce a causa delle pareti esterne dell'ostacoli.
-Il secondo, $\alpha$, espresso in decibel (dB per parete), serve come misura di approssimare della struttura interna dell'ostacolo.
+che la trasmissione subisce a causa delle pareti esterne dell'ostacolo.
+Il secondo, $\beta$, espresso in decibel (dB per parete), serve come misura di approssimazione della struttura interna dell'ostacolo.
 Tramite la regolazione di questo valore è possibile rappresentare diverse tipologie di ostacoli.
 Prendendo il caso di edifici in un ambiente cittadino, i valori predefiniti per i due parametri sono $\alpha = 9$ dB per parete e $\beta = 0,4$ dB/m.
-
-Prendiamo l'esempio raffigurato in \figurename~\ref{fig:scenario-urbano-1}, dove la linea fra i due veicoli interseca $n=6$ muri e una distanza interna di $d_o=32$m;
-sostituendo i valori in~\ref{eq:osbtacle-model} si ottiene: $L_{s,o} = 9*6 + 0,4*32 = 66,8$dB.
-Si evince come, con questa quantità di attenuazione, sia difficile che la trasmissione da un veicolo abbia abbastanza potenza per essere ricevuta dal secondo veicolo.
+Nell'esempio raffigurato in \figurename~\ref{fig:scenario-urbano-1} la visuale fra i due veicoli interseca $n=6$ muri e una distanza interna di $d_o=32$m
+e se si sostiuiscono i valori in~\ref{eq:osbtacle-model} si ottiene: $L_{s,o} = 9*6 + 0,4*32 = 66,8$dB.
+Solo considerando questa attenuazione la potenza del segnale si riduce di molto, considerando che,
+a titolo esemplificativo, nello standard $802.11$b a $11$ Mb/s il limite per la ricezione è di $-89$ dBm;
+si evince come, in questo caso, sia difficile che la trasmissione da un veicolo
+possa essere ricevuta con successo da un secondo veicolo.
 %
 \begin{figure}[htbp]
 	\centering
@@ -46,29 +48,31 @@ Si evince come, con questa quantità di attenuazione, sia difficile che la trasm
 %
 \section{L'implementazione}\label{sec:implementazione}
 Ripredendo il modello ideato in~\cite{5720204} e descritto nella sezione precedente, in~\cite{Carpenter:2015:OMI:2756509.2756512} gli autori ne hanno sviluppato
-un'efficiente implementazione per il software di simulazioni ns-3, chiamato \textit{Obstacle Shadowing}.
-Un ostacolo è rappresento come un poligono bidimensionale, internamente riprodotto da una lista di vertici $(x,y)$; il poligono delimita
+un'efficiente implementazione per il software di simulazioni ns-3, chiamata semplicemente \textit{Obstacle Shadowing} (ombreggiatura da ostacoli).
+Un ostacolo è rappresentato come un poligono bidimensionale, internamente riprodotto da una lista di vertici $(x,y)$, dove questo delimita
 il confine (i bordi) dell'ostacolo.
-Nel codice inserito in ns-3 sono state utilizzate le Computational Geometry Algorithms Library (CGAL), libreria scritta in \Cpp contente algoritmi di geometria computazionale.
+Nella sua implementazione, distrubita come modulo aggiuntivo per il simulatore ns-3,
+sono state utilizzate le Computational Geometry Algorithms Library (CGAL), libreria scritta in \Cpp contente algoritmi di geometria computazionale.
 Gli ostacoli sono raggruppati in una struttura algebrica dedicata, chiamata partizione binaria dello spazio (\textit{Binary Search Partition}, BSP), utilizzata
 per motivi di ottimizzazione.
-% la ricerca dei potenziali ostacoli nella linea di visuale fra due nodi.
 
-Nel dettaglio, quando bisogna calcolare l'attenuazione del segnale fra due nodi si prende in considerazione un rettangolo fittizio che include i due nodi e lo si estende
-di un certo raggio, ad esempio $200$ metri; i potenziali ostacoli si trovano cercando il punto centrale dell'ostacolo all'interno del BSP.
-Ogni ostacolo il cui centro si trova all'interno della regione descritta in precedenza viene controllato per verificare se interseca la visuale
+Nel dettaglio, quando bisogna calcolare l'attenuazione del segnale fra due elementi, nodi in ns-3, si prende in considerazione un riquadro di delimitazione
+che include i due e lo si estende
+di un certo raggio, ad esempio $200$ metri; i potenziali ostacoli si trovano
+selezionando quelli il cui punto centrale risiede all'interno del riquadro, utilizzando il BSP per la ricerca.
+Ogni ostacolo selezionado viene controllato per verificare se interseca la visuale
 (in questo caso \textit{obstructed-line-of-sight}, OLOS), fra i due nodi.
-Se questa verifica ha esito positivo (il segnale interseca effettivamente un ostacolo), viene cacolato il numero di intersezioni e la distanza interna percorsa e,
-successivamente, restituita la quantità di attenuazione secondo la Formula~\ref{eq:osbtacle-model}.
-Questo processo è riassunto nell'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween}.
-Infine, come ulteriore ottimizzazione, il valore calcolato viene salvato e riutilizzato nel caso i nodi non si siano spostati per più di $0,1$ metro.
+Se questa verifica ha esito positivo viene cacolato il numero di intersezioni, la distanza interna percorsa e,
+successivamente, restituita la quantità di attenuazione secondo la Formula~\ref{eq:osbtacle-model};
+questo processo è riassunto nell'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween}.
+Infine, come ulteriore ottimizzazione, il valore calcolato viene salvato e riutilizzato nel caso i nodi non si siano spostati per più di $0,1$ metri.
 %
 \begin{italianalgorithm}[h]
 \caption{Algoritmo per determinare il numero di intersezioni con i bordi dell'ostacolo e la distanza interna percorsa fra due punti.}\label{algo:algoritmo-getobstucteddistancebetween}
 \begin{algorithmic}[1]
 	\Procedure{GetObstuctedDistanceBetween}{$p_1, p_2, B$}
 	\BState{}\emph{Input}: $p_1, p_2$: posizione dei due veicoli; $B$: partizione binaria dello spazio (BSP) di ostacoli.
-	\BState{}\emph{Output}: Distanza interna percorsa, $m_o$, e il numero di intersezioni con i bordi, $n$.
+	\BState{}\emph{Output}: Distanza interna percorsa $m_o$ e il numero di intersezioni con i bordi $n$.
 	\State{$m_o \gets 0;\; n \gets 0$}
 	\TextState{Inizializza la portata massima $r$: distanza dal punto $p_1$ o $p_2$ al centro di un ostacolo, utilizzata per filtrare il sottoinsieme di ostacoli sufficientemente vicini.}
 	\TextState{Crea un riquadro di delimitazione $b$ per $p_1$ e $p_2$ ed estendila di $r$ in tutte le direzioni.}
@@ -105,17 +109,19 @@ prendendo quindi in considerazione solo le prime due componenti \textit{x} e \te
 
 Uno dei principali motivi che portò gli ideatori del modello a questa scelta fu la mancanza di sufficienti informazioni tridimensionali
 sulla piattaforma dalla quale aquisivano i dati (OpenStreetMap, OSM).
-Grazie all'avanzamento del progresso tecnologico e a una crescente diffusione di Internet, questi dati
-sono, e saranno sempre più, disponibili per un numero crescente di aree.
-Dato, quindi, il supporto nativo alla terza dimensone di ns-3 (a differenza dei suoi precedessori) e la crescente diffusione
-di dati trimensionali su edifici e ostacoli in generale sulle nostre città, è naturale pensare di estendere il modello affinché
-tenga conto di questa componente e pertanto dell'esatta posizione del nodo nell'ambiente della simulazione.
+Grazie a una crescente diffusione di Internet sia a livello tecnologico che nella vita quotidiana delle persone,
+informazioni di questo tipo sono e saranno sempre più disponibili.
+Dato, quindi, il supporto nativo alla terza dimensone di ns-3 (a differenza dei suoi predecessori)
+è naturale pensare di estendere il modello affinché
+tenga conto di questa componente e pertanto dell'esatta posizione del nodo nell'ambiente tridimensionale.
 %
-\subsection{Altezza degli edifici}\label{subsec:altezza-edifici}
-Sebbene le forma degli edifici si possa descrivere esclusivamente in due dimensioni (punti bidimensionali che ne delineano il perimetro al suolo),
+\subsection{Altezza degli ostacoli}\label{subsec:altezza-edifici}
+Sebbene le forma degli ostacoli si possa descrivere esclusivamente in due dimensioni (punti bidimensionali che ne delineano il perimetro al suolo),
 OSM prevede la possibilità di definire l'altezza totale in metri e/o specificare il numero di piani (sopra e sotto il livello del suolo)
-presenti.
-Questa informazione può essere sfruttata per creare una forma tridimensionale semplificata dell'edificio.
+nel caso di edifici.
+Queste informazioni possono essere sfruttate per creare una forma tridimensionale semplificata dell'ostacolo,
+sia che sia presente il vero valore dell'altezza sia che ci siano solo indicati il numero di piani,
+anche se in questo caso si tratterebbe solo di una stima e non della dimensione esatta.
 %
 \begin{figure}[htbp]
 	\centering
@@ -133,28 +139,42 @@ per ottenere una stima dell'altezza pari a $21,6$ metri.
 \caption{Rappresentazione di un edificio in cui è presente un valore di l'altezza.\label{fig:esempio-pd-poly-edificio-altezza}}
 \end{figure}
 %
-\subsection{Modifica dell'algoritmo}\label{subsec:modifica-all-algoritmo}
+A questo punto è necessario decidere la rappresentazione interna dell'ostacolo tridimensionale
+e ci sono (almeno) due strade possibili: combinare la forma bidimensionale dell'ostacolo
+e l'altezza per creare un poligono tridimensionale (con punti $x,y,z$) oppure
+scegliere di tenere le due informazioni separate e gestirle di conseguenza.
+Va però fatto notare che si conosce solo forma che questo ha al suolo,
+in quanto i punti sono bidimensionali, di conseguenza la forma tridimensionale
+sarebbe una proiezione in altezza della stessa.
+Mantere separate la forma e l'altezza permette, quindi, di ridurre i costi legati
+alla costruzione e alla memorizzazione dell'eventuale poliedro,
+senza perdita di informazioni.
+%
+\subsection{Modifica all'algoritmo}\label{subsec:modifica-all-algoritmo}
 Il resto dell'algoritmo \textsf{GetObstuctedDistanceBetween} (Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween})
 rimane sostanzialmente lo stesso e, nello specifico, la ricerca dei potenziali ostacoli rimane invariata.
 Infatti gli ostacoli che si interpongono fra due punti nello spazio tridimensionale saranno gli stessi che sul piano bidimensionale
-(creato dalla perdita della terza componente \textit{z}) in quanto gli ostacoli che vengono considerati sono ``ancorati'' al terreno ($z=0$).
-Anche l'oggetto \textsf{Obstacle} rimane quasi del tutto invariato, fatta eccezione per l'aggiunta del valore l'altezza.
+(creato dalla perdita della terza componente \textit{z})
+grazie alla forma semplificata dell'oggetto per i motivi esposti precedentemente.
+All'oggetto \textsf{Obstacle} è sufficiente aggiungere un campo con il valore dell'altezza.
 
-Le modifiche significative risiedono quasi totalmente nel calcolo delle intersezioni fra l'ostacolo e il raggio che collega i due nodi.
+Le modifiche significative si trovano nel calcolo del numero di intersezioni $n$,
+visto che per la distanza $m_o$ basta aggiungere la componente $z$ del punto di intersezione
+e il procedimento è lo stesso che nel caso bidimensionale.
 In origine, l'intersezione veniva calcolata fra il segmento (raggio) che unisce i due punti e lo spigolo dell'ostacolo considerato in quel
 momento, procedura poi iterata per ogni spigolo dell'ostacolo (riga~\ref{algo:line:getobstucteddistancebetween-interesezione}).
-È possibile, tuttavia, considerare il piano perpendicolare al suolo passante per lo spigolo e trovare l'intersezione fra questo
-e il raggio passante per i due punti; il punto risultante (se esiste) sarà allora tridimensionale.
-A questo punto si rende necessario però controllare che il punto trovato sia ``valido'', ossia compreso fra il segmento inferiore
-(quello considerato al momento), il segmento superiore parallelo a questo di altezza pari a quella dell'ostacolo e i due segmenti
-perpendicolari che congiungono le estemità di questi due segmenti.
+Ora bisogna trovare l'intersezione fra il raggio (segmento) e la parete dello spigolo corrente.
+Una soluzione soluzione consiste nel generare un piano in corrispondenza della parete,
+calcolare l'intersezione fra questo e il segmento e verificare, nel caso ci sia,
+che il punto trovato appartenga alla parete dell'oggetto e che non sia esterno.
+Per generare il piano a partire dal segmento dello spigolo basta prendere i due vertici dello spigolo
+e un terzo vertice generato da uno dei due (a piacere) a cui si imposta la componente $z$ diversa da $0$.
 Per chiarire il concetto, si pensi a un semplice edificio: definita la forma alla base (al suolo) i muri sono perpendicolari
-al terreno e, a una certa altezza, si trova il tetto.
-Il punto d'intersezione che interessa si trova sulla faccia del muro (in questa semplificazione i muri non hanno spessore);
-una volta generato il piano va controllato che il punto sia un punto valido.
-
-L'ultimo passo, non necessario nel caso bidimensionale, consiste nel controllare che il raggio (fra i nodi)
-non intersechi la faccia superiore dell'oggetto (il tetto in un edificio); questo viene fatto esattamente come nei passi precedenti.
+al terreno e, a una certa altezza, si trova il tetto con la stessa forma della base;
+il punto d'intersezione che interessa si trova sulla faccia del muro corrente.
+L'ultimo passo, non necessario nel caso bidimensionale, consiste nel controllare se il raggio (fra i nodi)
+interseca la faccia superiore dell'oggetto (il tetto in un edificio), seguendo un procedimento simile
+ai casi delle pareti.
 Le modifiche sono riportate nell'Algoritmo~\ref{algo:algoritmo-getobstucteddistancebetween-modificato}.
 %
 \begin{italianalgorithm}[!h]
@@ -166,15 +186,15 @@ Le modifiche sono riportate nell'Algoritmo~\ref{algo:algoritmo-getobstucteddista
 	\ForEach{ostacolo $o \in O$}
 		\If{(distanza($p_1$, o.centro) $< r$) $\vee$ (distanza($p_2$, o.centro) $< r$)}
 			\ForEach{spigolo $e \in o$}
-				\TextState{Crea un piano $pl$ passante per $e$ e perpendicalare al suolo}
-				\If{$pl$ interseca un raggio da $p_1$ a $p_2$ e il punto è valido}
+				\TextState{Crea un piano $pl$ passante per $e$ e perpendicolare al suolo}
+				\If{$pl$ interseca un raggio da $p_1$ a $p_2$ e il punto è interno alla parete}
 					\State{$n \gets n+1$}
 					\TextState{Salva la distanza minima e massima da $\{ p_1, p_2\}$ al punto d'intersezione.}
 				\EndIf{}
 				\TextState{$m_o \gets m_o+$ differenza fra i valori min e max calcolati al passo precedente.}
 			\EndFor{}
 			\TextState{Crea un piano $pls$ a partire dalla faccia superiore dell'oggetto}
-			\If{$pls$ interseca un raggio da $p_1$ a $p_2$ e il punto è valido}
+			\If{$pls$ interseca un raggio da $p_1$ a $p_2$ e il punto è interno}
 				\State{$n \gets n+1$}
 				\TextState{Aggiorna la distanza minima e massima di conseguenza.}
 			\EndIf{}
