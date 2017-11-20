@@ -249,8 +249,8 @@
 	\maketitle
 	\frontispiece
 	\dedicationpage
-	% page
-	\sommario
+	% \abstractpage
+	\abstract
 	\tableofcontents
 	\phantomsection
 	\clearpage
@@ -387,7 +387,7 @@
 	\vspace*{\fill} \newpage
 }
 
-\newcommand{\sommario}{
+\newcommand{\abstract}{
 	\phantomsection
 	\chapter*{Riassunto}
 	\input{frontmatter/preface}
@@ -400,7 +400,7 @@
 	\input{frontmatter/abbr.tex}
 }
 
-\newcommand{page}{
+\newcommand{\abstractpage}{
 	\phantomsection
 	\setcounter{page}{5}
 	\addcontentsline{toc}{chapter}{Abstract}
