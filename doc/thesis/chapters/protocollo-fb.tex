@@ -4,14 +4,16 @@
 %!TEX root = ../tesi.tex
 
 \chapter{Protocollo Fast Broadcast}\label{chap:protocollo-fast-broadcast}
-La tecnica del Fast Broadcast~\cite{Palazzi07howdo} si compone di due fasi. La prima, chiamata ``Fase di stima'', permette a ogni veicolo di avere una stima aggiornata
-del proprio raggio trasmissivo.
+La tecnica del Fast Broadcast~\cite{Palazzi07howdo} è nata con lo scopo di propagare un messaggio
+fra veicoli utilizzando meno salti possibile; questo è reso possibile tramite una stima dinamica del raggio trasmissivo reale.
+Il protcollo si compone di due fasi: la prima, chiamata ``Fase di stima'', permette a ogni veicolo di avere una stima aggiornata
+del proprio raggio trasmissivo da utilizzare nella seconda fase.
 La seconda, invece, è detta ``Fase di inoltro'' e viene attivata nel momento in cui si rende necessario inviare un messaggio
 al resto dei veicoli presenti nell'area di interesse.
 %
 \section{Fase di stima}\label{sec:fb-fase-di-stima}
-Durante questa fase, ogni veicolo effettua una stima del suo raggio trasmissivo, sia di fronte che alle sue spalle, attraverso l'uso di messaggi \textit{Hello}.
-Per ottenere una stima sempre aggiornata, il tempo è suddiviso in turni e le informazioni raccolte durante un certo turno
+Durante questa fase ogni veicolo effettua una stima del suo raggio trasmissivo, sia di fronte che alle sue spalle, attraverso l'invio di messaggi \textit{Hello}.
+Per ottenere una stima sempre aggiornata il tempo è suddiviso in turni e le informazioni raccolte durante un certo turno
 rimangono attive per tutto il turno successivo, per poi essere scartate.
 Una breve durata dei turni permette di cogliere meglio variazioni del raggio trasmissivo mantendendo tuttavia un elevato scambio di messaggi;
 gli autori suggeriscono un tempo pari a un secondo.
@@ -19,16 +21,16 @@ gli autori suggeriscono un tempo pari a un secondo.
 Le informazioni sulla stima sono rappresentate dai campi \textit{Current-turn Maximum Front Range} (CMFR) e \textit{Current-turn Maximum Back Range} (CMBR).
 Il primo esprime la stima della massima distanza in avanti dalla quale un altro veicolo nell'area di interesse può ricevere messaggi che provengono dal veicolo considerato.
 Il secondo, invece, stima la massima distanza all'indietro.
-Questi valori sono costantemente aggiornati con i valori ricevuti nei messaggi Hello fino alla fine del turno;
+Questi valori sono costantemente aggiornati con i valori ricevuti nei messaggi Hello fino alla fine del turno,
 dopodiché vengono salvati nei campi \textit{Latest-turn Maximum Front Range} (LMFR) e \textit{Latest-turn Maximum Back Range} (LMBR) rispettivamente.
 Questo permette di combinare una stima calcolata nel tempo (con diversi messaggi Hello) con le ultime informazioni sul mezzo trasmissivo.
 
 Nel dettaglio, la procedura di invio di un messaggio Hello prevede inizialmente che il veicolo aspetti un tempo d'attesa casuale e,
-dopo aver verificato l'assenza di altre trasmissioni in corso e/o collisioni, proceda poi all'invio del messaggio contenente
+dopo aver verificato l'assenza di altre trasmissioni in corso e/o collisioni, proceda all'invio del messaggio contenente
 la stima del raggio trasmissivo in avanti.
-Vengono poi aggiunte altre informazioni utili al protocollo, come ad esempio la posizione aggiornata del veicolo.
+Al messaggio vengono aggiunte altre informazioni utili al protocollo, come ad esempio la posizione aggiornata del veicolo.
 
-Si fa notare che, in ogni turno, non più di un messaggio Hello viene inviato fra veicoli all'interno dell'area delimitata dal raggio trasmissivo.
+Si fa notare che per ogni turno non più di un messaggio Hello viene inviato fra veicoli all'interno dell'area delimitata dal raggio trasmissivo.
 In questo modo il numero totale di messaggi Hello generati rimane limitato nell'ordine di \BigO{1}.
 
 In fase di ricezione, un veicolo determina la distanza fra lui e chi ha spedito il messaggio: se proviene da davanti sarà aggiornato il campo CMFR,
@@ -65,13 +67,15 @@ Gli algoritmi~\ref{fig:algoritmo-invio-msg-hello} e~\ref{fig:algoritmo-ricezione
 \end{italianalgorithm}
 %
 \section{Fase di inoltro}\label{sec:fb-fase-inoltro}
-Lo scopo di questa fase consiste nel determinare il veicolo migliore per inoltrare un messaggio.
-Questo viene fatto sfruttando le informazioni sulla stima del raggio trasmissivo raccolte nella fase precedente:
+Lo scopo di questa fase consiste nel determinare il veicolo migliore per inoltrare un messaggio
+e viene ``attivata'' nel momento in cui ci sia bisogno di propagare velocemente una certa informazione
+agli altri veicoli.
+Questo viene fatto sfruttando la conoscenza sulla stima del raggio trasmissivo ottenuta nella fase precedente:
 ogni veicolo si assegna una priorità nell'inoltro basandosi sulla distanza dal veicolo che ha trasmesso il messaggio;
-la priorità cresce all'aumentare della distanza.
-
-All'attivazione di questa fase, viene generato un messaggio di \textit{Broadcast} che dev'essere propagato lungo tutta l'area di interesse del mittente.
-All'interno troviamo due campi di interesse: la posizione del veicolo e la stima del raggio trasmissivo; quest'ultima, caratteristica proprio di questo protocollo,
+la priorità cresce all'aumentare della distanza e sarà quindi il veicolo più lontano ad avere maggiore
+probabilità di effettuare l'inoltro.
+La fase ha inizio con la generazione di un messaggio di \textit{Broadcast} (inoltro),
+dove si trovano due valori di interesse: la posizione del veicolo e la stima del raggio trasmissivo; quest'ultima, caratteristica proprio di questo protocollo,
 rappresenta quanto all'indietro ci si aspetta che arrivi il segnale prima che diventi troppo debole da non essere rilevabile.
 
 Questo valore sarà poi sfruttato per determinare quale veicolo dovrà inoltrare il messagio in modo da minimizzare il numero di salti (\textit{hop}) e di conseguenza
@@ -80,7 +84,7 @@ Nel dettaglio, quando un veicolo deve inviare o inoltrare un messaggio Broadcast
 
 In fase di ricezione, un veicolo attente una quantità di tempo determinata in maniera casuale partendo dal valore di una finestra di contesa (\textit{contention window}).
 Il valore di questa finestra varia fra un valore minimo (\textit{CWMin}) e un valore massimo (\textit{CWMax}), in funzione della distanza dal veicolo che ha inviato il messaggio
-e la stima del raggio trasmissivo secondo la formula espressa in~\ref{eq:contention-window}.
+e la stima del raggio trasmissivo secondo la Formula~\ref{eq:contention-window}.
 È facile vedere come maggiore è la distanza dal mittente e minore è l'intervallo d'attesa.
 \begin{gather}\label{eq:contention-window}
 	\left\lfloor \left( \frac{\text{PortataMassima} - \text{Distanza}}{\text{PortataMassima}} \times (\text{CWMax} - \text{CWMin}) \right) + \text{CWmin}  \right\rfloor
@@ -88,8 +92,8 @@ e la stima del raggio trasmissivo secondo la formula espressa in~\ref{eq:content
 
 Se durante l'attesa viene ricevuto lo stesso messaggio proveniente dai veicoli che seguono, ciò significa che il messaggio è già stato propagato in avanti e quindi non è necessario
 che il veicolo corrente lo inoltri.
-Se, invece, a inviarlo è un veicolo che precede significa che il messaggio è già stato inoltrato da un altro mezzo; la procedura quindi dev'essere riavviata includendo i parametri appena ricevuti.
-Nel caso in cui l'attesa finisca senza aver ricevuto nessun altro messaggio (o collisioni), il veicolo può procedere con l'inoltro includendo nei dati inviati la stima del raggio trasmissivo.
+Se, invece, a inviarlo è un veicolo che precede significa che il messaggio è già stato inoltrato da un altro mezzo; la procedura quindi dev'essere fatta ripartire includendo i parametri appena ricevuti.
+Nel caso in cui l'attesa finisca senza aver ricevuto nessun altro messaggio (o collisioni), il veicolo può procedere con l'inoltro includendo nell'invio la stima del raggio trasmissivo.
 
 Gli algoritmi~\ref{fig:algoritmo-invio-msg-alert} e~\ref{fig:algoritmo-inoltro-msg-alert} riassumono quanto detto.
 %
@@ -122,12 +126,17 @@ Gli algoritmi~\ref{fig:algoritmo-invio-msg-alert} e~\ref{fig:algoritmo-inoltro-m
 %
 \section{Estensione a due dimensioni}\label{sec:fb-estensione-due-dimensioni}
 % non mi piace molto
-Nello studio originale del protocollo i veicoli erano distribuiti lungo una strada con un singolo senso di marcia.
-Ciò comportava che, presi due veicoli, fosse facile definire la provenienza, cioè chi dei due fosse davanti e chi dietro
-e di conseguenza a chi inoltrare il messaggi (immagine in alto in Figura~\ref{fig:v2v-1d-2d}).
-Se, invece, si considera uno scenario nel quale i veicoli circolano in una rete stradale a due o più sensi di marcia,
-quali sono i veicoli che si trovano davanti e quali invece dietro (immagine in basso in Figura~\ref{fig:v2v-1d-2d})?
-
+Nello studio originale del protocollo i veicoli erano distribuiti lungo una strada rettilinea con un singolo senso di marcia.
+Ciò comportava che presi due veicoli fosse facile definirne la provenienza e la direzione, ossia chi dei due fosse davanti e chi dietro
+e di conseguenza a chi inoltrare il messaggio.
+Se si considera uno scenario nel quale i veicoli circolano in una rete stradale a due o più sensi di marcia,
+quali sono i veicoli che si trovano davanti e quali invece dietro?
+Si prenda l'esempio in \figurename~\ref{fig:v2v-1d-2d}:
+se il primo veicolo a sinistra ha bisogno di propagare un messaggio il più lontano possibile,
+allora è facile intuiore che a inoltrarlo dovrà essere il veicolo più a destra.
+Ora invece si consideri lo scenario nell'immagine sottostante:
+se è il veicolo A a dover inviare il messaggio, quale mezzo dovrà inoltrarlo, B o C?
+Non è più sufficiente la differenziazione davanti-dietro.
 Una soluzione a questo problema è stata proposta in~\cite{Barichello2017propagazione}:
 qui la distinzione viene effettuata basandosi sulla posizione del veicolo che ha generato il messaggio.
 La fase di stima non richiede modifiche sostanziali: viene eliminato il concetto di direzione e conseguentemente si utilizza solo uno dei due campi CMBR e CMFR
@@ -137,11 +146,11 @@ La prima modifica necessaria è quindi la presenza nel messaggio di inoltro dell
 In fase di ricezione, si controlla che la distanza origine-mezzo sia maggiore o uguale a quella origine-mittente: in tal caso il veicolo è un candidato per inoltrare il messaggio;
 se così non avviene il messaggio viene scartato.
 %
-\begin{figure}[htbp]
+\begin{figure}[!h]
 	\centering
-		\includegraphics[width=.85\textwidth]{v2v-1d.png} \\
-		\vspace{7pt}
-		\includegraphics[width=.85\textwidth]{v2v-2d.png}
-\caption{Esempio di propagazione di un messaggio in una e due dimensioni (fonti: TheDrive e Car2Car).\label{fig:v2v-1d-2d}}
+		\includegraphics[width=.75\textwidth]{v2v-1d.png} \\
+		\vspace{12pt}
+		\includegraphics[width=.75\textwidth]{v2v-2d.png}
+\caption{Esempio di propagazione di un messaggio in una e due dimensioni (fonte: TheDrive e Car2Car).\label{fig:v2v-1d-2d}}
 \end{figure}
 %
