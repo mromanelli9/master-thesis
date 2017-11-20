@@ -3,11 +3,14 @@
 %!TeX spellcheck = it_IT
 %!TEX root = ../tesi.tex
 
+% TODO: da rifare
+
 \chapter{Tabelle dei risultati}\label{chap:risultati-in-tabella}
+\section{Scenario a griglia}
 %----------------------------------------------------------------------------------------
 % GRUPPO SIMULAZIONI : GRIGLIA
 %----------------------------------------------------------------------------------------
-\begin{table}[!h]
+\begin{table}[htbp]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -15,30 +18,30 @@
 		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura totale} 		\\	\cline{3-4}
 		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
 		\thickerline
-		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,46$\%					&			$92,66$\%					\\ \cline{2-4}
-																			&	$500$m															&			$98,14$\%					& 		$94,27$\%					\\ \hline
-		\multirow{2}{*}{\statica}					&	$300$m															&			$92,61$\%					&			$92,66$\%					\\ \cline{2-4}
-																			&	$500$m															&			$98,59$\%					& 		$94,25$\%					\\	\hline
-		\multirow{2}{*}{\staticb}					&	$300$m															&			$96,54$\%					&			$94,86$\%					\\ \cline{2-4}
-																			&	$500$m															&			$98,26$\%					& 		$93,75$\%					\\
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,46$\%					&			$97,29$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,14$\%					& 		$98,25$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$97,46$\%					&			$97,34$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,59$\%					& 		$98,59$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$96,54$\%					&			$96,68$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,26$\%					& 		$98,09$\%					\\
 		\bottomrule
 		\multicolumn{4}{c}{} 	\\
 		\toprule
 		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura sulla circonferenza} 		\\	\cline{3-4}
 		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
 		\thickerline
-		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,00$\%					&			$93,00$\%					\\ \cline{2-4}
-																			&	$500$m															&			$97,28$\%					& 		$96,78$\%					\\ \hline
-		\multirow{2}{*}{\statica}					&	$300$m															&			$97,22$\%					&			$91,65$\%					\\ \cline{2-4}
-																			&	$500$m															&			$98,22$\%					& 		$96,33$\%					\\	\hline
-		\multirow{2}{*}{\staticb}					&	$300$m															&			$97,17$\%					&			$96,17$\%					\\ \cline{2-4}
-																			&	$500$m															&			$97,33$\%					& 		$97,06$\%					\\
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,00$\%					&			$97,44$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,28$\%					& 		$97,44$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$97,22$\%					&			$97,50$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,22$\%					& 		$99,28$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$97,17$\%					&			$97,06$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,33$\%					& 		$98,11$\%					\\
 		\bottomrule
 	\end{tabular}
-	\caption{Scenario a griglia: copertura di veicoli in totale e sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura}}
+	\caption{Scenario a griglia: copertura dei veicoli in totale e sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura}}
 \end{table}
 %
-\begin{table}[!h]
+\begin{table}[htbp]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -46,14 +49,218 @@
 		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Numero di salti} 		\\	\cline{3-4}
 		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
 		\thickerline
-		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$10,240$\%				&			$11,247$\%				\\ \cline{2-4}
-																			&	$500$m															&			$5,581$\%					& 		$6,309$\%					\\ \hline
-		\multirow{2}{*}{\statica}					&	$300$m															&			$10,201$\%				&			$11,150$\%				\\ \cline{2-4}
-																			&	$500$m															&			$6,013$\%					& 		$6,360$\%					\\	\hline
-		\multirow{2}{*}{\staticb}					&	$300$m															&			$11,797$\%				&			$13,154$\%				\\ \cline{2-4}
-																			&	$500$m															&			$5,632$\%					& 		$6,270$\%					\\
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$10,240$				&			$10,301$				\\ \cline{2-4}
+																			&	$500$m															&			$5,581$					& 		$5,623$					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$10,201$				&			$10,221$				\\ \cline{2-4}
+																			&	$500$m															&			$6,013$					& 		$6,047$					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$11,797$				&			$11,960$				\\ \cline{2-4}
+																			&	$500$m															&			$5,632$					& 		$5,577$					\\
 		\bottomrule
 	\end{tabular}
-	\caption{Scenario a griglia: numero di salti per inoltrare il messaggio fino al bordo della griglia.\label{tab:risulati-simulazioni-griglia-salti}}
+	\caption{Scenario a griglia: numero di salti.\label{tab:risulati-simulazioni-griglia-salti}}
 \end{table}
+%
+\begin{table}[htbp]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+	\toprule
+	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi inviati} 		\\	\cline{3-4}
+	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+	\thickerline
+	\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$271$					&			$275$					\\ \cline{2-4}
+																		&	$500$m															&			$90$						& 		$96$					\\ \hline
+	\multirow{2}{*}{\statica}					&	$300$m															&			$269$						&			$275$				\\ \cline{2-4}
+																		&	$500$m															&			$94$						& 		$98$				\\	\hline
+	\multirow{2}{*}{\staticb}					&	$300$m															&			$279$						&			$286$					\\ \cline{2-4}
+																		&	$500$m															&			$90$					& 		$95$						\\
+	\bottomrule
+	\multicolumn{4}{c}{} 	\\
+	\toprule
+	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi ricevuti} 		\\	\cline{3-4}
+	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+	\thickerline
+	\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$27525$						&			$27694$					\\ \cline{2-4}
+																		&	$500$m															&			$30231$						& 		$32288$						\\ \hline
+	\multirow{2}{*}{\statica}					&	$300$m															&			$27359$					&			$27626$						\\ \cline{2-4}
+																		&	$500$m															&			$31775$						& 		$33199$					\\	\hline
+	\multirow{2}{*}{\staticb}					&	$300$m															&			$28947$						&			$29279$					\\ \cline{2-4}
+																		&	$500$m															&			$30426$					& 		$32116$					\\
+	\bottomrule
+\end{tabular}
+\caption{Scenario a griglia: numero di messaggi di inoltro inviati e ricevuti.\label{tab:risulati-simulazioni-griglia-copertura}}
+\end{table}
+\clearpage
+%
+\section{Scenario Los Angeles}
+%----------------------------------------------------------------------------------------
+% GRUPPO SIMULAZIONI : LA
+%----------------------------------------------------------------------------------------
+\begin{table}[htbp]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura totale} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$97,60$\%					&			$69,55$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,40$\%					& 		$91,69$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$97,82$\%					&			$68,76$\%					\\ \cline{2-4}
+																			&	$500$m															&			$85,33$\%					& 		$71,60$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$97,41$\%					&			$69,86$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,40$\%					& 		$93,87$\%					\\
+		\bottomrule
+		\multicolumn{4}{c}{} 	\\
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura sulla circonferenza} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$96,17$\%					&			$69,57$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,91$\%					& 		$97,95$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$97,43$\%					&			$68,68$\%					\\ \cline{2-4}
+																			&	$500$m															&			$84,11$\%					& 		$68,92$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$95,54$\%					&			$68,92$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,29$\%					& 		$97,52 $\%					\\
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario L.A.: copertura dei veicoli in totale e sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura}}
+\end{table}
+%
+\begin{table}[htbp]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Numero di salti} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$4,193$				&			$5,837$				\\ \cline{2-4}
+																			&	$500$m															&			$2,195$					& 		$2,058$					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$4,076$				&			$5,919$				\\ \cline{2-4}
+																			&	$500$m															&			$2,805$					& 		$3,662$					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$4,549$				&			$6,263$				\\ \cline{2-4}
+																			&	$500$m															&			$2,167$					& 		$2,090$					\\
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario L.A.: numero di salti.\label{tab:risulati-simulazioni-griglia-salti}}
+\end{table}
+%
+\begin{table}[htbp]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+	\toprule
+	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi inviati} 		\\	\cline{3-4}
+	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+	\thickerline
+	\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$62$					&			$185$					\\ \cline{2-4}
+																		&	$500$m															&			$27$						& 		$78$					\\ \hline
+	\multirow{2}{*}{\statica}					&	$300$m															&			$62$						&			$178$				\\ \cline{2-4}
+																		&	$500$m															&			$21$						& 		$43$				\\	\hline
+	\multirow{2}{*}{\staticb}					&	$300$m															&			$62$						&			$185$					\\ \cline{2-4}
+																		&	$500$m															&			$27$					& 		$83$						\\
+	\bottomrule
+	\multicolumn{4}{c}{} 	\\
+	\toprule
+	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi ricevuti} 		\\	\cline{3-4}
+	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+	\thickerline
+	\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$7146$						&			$4923$					\\ \cline{2-4}
+																		&	$500$m															&			$7484$						& 		$11483$						\\ \hline
+	\multirow{2}{*}{\statica}					&	$300$m															&			$7070$					&			$4776$						\\ \cline{2-4}
+																		&	$500$m															&			$6265$						& 		$6416$					\\	\hline
+	\multirow{2}{*}{\staticb}					&	$300$m															&			$7173$						&			$4994$					\\ \cline{2-4}
+																		&	$500$m															&			$7400$					& 		$12085$					\\
+	\bottomrule
+\end{tabular}
+\caption{Scenario L.A.: numero di messaggi di inoltro inviati e ricevuti.\label{tab:risulati-simulazioni-griglia-copertura}}
+\end{table}
+\clearpage
+%
+\section{Scenario Padova}
+%----------------------------------------------------------------------------------------
+% GRUPPO SIMULAZIONI : PD
+%----------------------------------------------------------------------------------------
+\begin{table}[htbp]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura totale} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$96,54$\%					&			$45,60$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,86$\%					& 		$94,08$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$96,84$\%					&			$47,45$\%					\\ \cline{2-4}
+																			&	$500$m															&			$69,85$\%					& 		$56,11$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$96,52$\%					&			$50,30$\%					\\ \cline{2-4}
+																			&	$500$m															&			$97,86$\%					& 		$94,08$\%					\\
+		\bottomrule
+		\multicolumn{4}{c}{} 	\\
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura sulla circonferenza} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$98,57$\%					&			$24,07$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,22$\%					& 		$94,83$\%					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$97,23$\%					&			$22,06$\%					\\ \cline{2-4}
+																			&	$500$m															&			$70,48$\%					& 		$63,90$\%					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$98,15$\%					&			$27,78$\%					\\ \cline{2-4}
+																			&	$500$m															&			$98,21$\%					& 		$93,88$\%					\\
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario Padova: copertura dei veicoli in totale e sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura}}
+\end{table}
+%
+\begin{table}[htbp]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+		\toprule
+		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Numero di salti} 		\\	\cline{3-4}
+		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+		\thickerline
+		\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$4,199$				&			$6,938$				\\ \cline{2-4}
+																			&	$500$m															&			$2,134$					& 		$2,128$					\\ \hline
+		\multirow{2}{*}{\statica}					&	$300$m															&			$4,100$				&			$6,619$				\\ \cline{2-4}
+																			&	$500$m															&			$2,801$					& 		$3,400$					\\	\hline
+		\multirow{2}{*}{\staticb}					&	$300$m															&			$4,628$				&			$7,574$				\\ \cline{2-4}
+																			&	$500$m															&			$2,168$					& 		$2,054$					\\
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario Padova: numero di salti.\label{tab:risulati-simulazioni-griglia-salti}}
+\end{table}
+%
+\begin{table}[htbp]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
+	\toprule
+	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi inviati} 		\\	\cline{3-4}
+	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+	\thickerline
+	\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$72$					&			$218$					\\ \cline{2-4}
+																		&	$500$m															&			$32$						& 		$107$					\\ \hline
+	\multirow{2}{*}{\statica}					&	$300$m															&			$72$						&			$236$				\\ \cline{2-4}
+																		&	$500$m															&			$20$						& 		$44$				\\	\hline
+	\multirow{2}{*}{\staticb}					&	$300$m															&			$73$						&			$253$					\\ \cline{2-4}
+																		&	$500$m															&			$32$					& 		$106$						\\
+	\bottomrule
+	\multicolumn{4}{c}{} 	\\
+	\toprule
+	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi ricevuti} 		\\	\cline{3-4}
+	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
+	\thickerline
+	\multirow{2}{*}{Fast Broadcast}		&	$300$m															&			$8096$						&			$4151$					\\ \cline{2-4}
+																		&	$500$m															&			$8631$						& 		$14510$						\\ \hline
+	\multirow{2}{*}{\statica}					&	$300$m															&			$8020$					&			$4435$						\\ \cline{2-4}
+																		&	$500$m															&			$5768$						& 		$6168$					\\	\hline
+	\multirow{2}{*}{\staticb}					&	$300$m															&			$8200$						&			$4644$					\\ \cline{2-4}
+																		&	$500$m															&			$8634$					& 		$14280$					\\
+	\bottomrule
+\end{tabular}
+\caption{Scenario Padova: numero di messaggi di inoltro inviati e ricevuti.\label{tab:risulati-simulazioni-griglia-copertura}}
+\end{table}
+\clearpage
 %
