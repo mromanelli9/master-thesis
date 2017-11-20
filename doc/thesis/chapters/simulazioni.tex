@@ -5,9 +5,9 @@
 
 \chapter{Simulazioni}\label{chap:simulazioni}
 % INTRO: cosa c'è in questa sezione?
-Dopo aver illustrato il protocollo in esame e il modello di propagazione utilizzato, si passa ora alla fase di valutazione.
-Il capitolo procederà, quindi, nel dettaglio dei diversi scenari affrontati illustrando
-le motivazioni che hanno portato alla loro realizzazione, definendone i parametri e motivando i risulati ottenuti.
+Dopo aver illustrato il protocollo in esame e il modello di propagazione utilizzato si passa ora alla fase di valutazione.
+Il capitolo procederà nel dettaglio dei diversi scenari affrontati,
+illustrandone le motivazioni e le caratteristiche e discutendo i risultati ottenuti.
 %
 \section{Scenario a griglia}\label{sec:configurazione-griglia}
 % \subsection{Panoramica}
@@ -17,15 +17,15 @@ le motivazioni che hanno portato alla loro realizzazione, definendone i parametr
 %  - risulati
 Il primo gruppo di simulazioni ha lo scopo di analizzare l'impatto degli edifici sul comportamento del protocollo
 Fast Broadcast all'interno di uno scenario conosciuto, ossia quello presentato nella tesi originale~\cite{Barichello2017propagazione}
-a cui sono stati aggiunti degli edifici creati apposititamente.
+a cui sono stati aggiunti degli edifici.
 La configurazione dello scenario, dei nodi e della rete è la stessa ed è riassunta in Tabella~\ref{tab:parametri-simulazioni-barichello}.
 L'ambiente è una città fittizia con strade a griglia in stile Manhattan di lunghezza $4000$ metri e distanti l'una dall'altra $300$ metri.
 I veicoli sono disposti a $12$ metri di distanza per un totale di $8064$.
 Il veicolo che da inizio alla fase di inoltro (generazione del primo messaggio di inoltro),
 che per facilità verrà chiamato veicolo \textit{zero}, è posizionato al centro della griglia.
-Seguendo l'idea originale, è stata definita anche un circonferenza di raggio pari a $1000\pm12$ metri, utilizzata per definire alcune metriche che verranno descritte in seguito;
+Seguendo l'idea originale, è stata definita anche un circonferenza di raggio pari a $1000\pm12$ metri utilizzata per definire alcune metriche di valutazione;
 la circonferenza ha centro in corrispondenza del veicolo zero.
-Il raggio trasmissivo effettivo (fisico) assume due valori possibili: $300$ o $500$ metri;
+Il raggio trasmissivo effettivo (fisico) assume due valori possibili: $300$ o $500$ metri.
 %
 \begin{table}[!h]
 	\centering
@@ -40,10 +40,10 @@ Il raggio trasmissivo effettivo (fisico) assume due valori possibili: $300$ o $5
 		Posizione del veicolo zero						&			centrale						&					\\
 		\thickerline
 		Dimensioni pacchetto									&				$164$							&			byte		\\	\hline
-		Standard tramissione									&				$802.11$b					&							\\	\hline
+		Standard trasmissione									&				$802.11$b					&							\\	\hline
 		Frequenza															&				$2.4$							&			GHz			\\	\hline
 		Banda del canale											&				$22$							&			MHz			\\	\hline
-		Velocità di tramissione								&				$11$							&			Mbps		\\	\hline
+		Velocità di trasmissione							&				$11$							&			Mbps		\\	\hline
 		Potenza trasmissione									&				$7,5$							&			dBm			\\	\hline
 		Raggio trasmissivo										&				$300$-$500$				&			m				\\	\hline
 		Codifica															&				DSSS\footnotemark	&							\\	\hline
@@ -58,12 +58,12 @@ Il raggio trasmissivo effettivo (fisico) assume due valori possibili: $300$ o $5
 \footnotetext{\textit{Direct Sequence Spread Spectrum}}	% TODO controllare la posizone, che sia nella stessa pagina della tabella.
 %
 Per valutare il protocollo sono stati presi in esame diversi parametri: la copertura totale e la copertura sulla circonferenza,
-il numero di salti necessari per raggiungere il bordo della griglia, il numero totale di messaggi di inoltro ricevuti e inviati.
-In modo da aver un metro di paragone per il protocollo Fast Broadcast, quest'ultimo è stato comparato con altri due metodi, chiamati \statica e \staticb,
+il numero di salti necessari a raggiungere il bordo della griglia, il numero totale di messaggi di inoltro ricevuti e inviati.
+Per poter confrontare le prestazioni del protocollo Fast Broadcast, quest'ultimo è stato comparato con altri due metodi chiamati \statica e \staticb,
 che utilizzano una stima fissa del raggio tramissivo rispettivamente di $300$ e $500$ metri.
-Il raggio trasmissivo viene variato agendo sul modello di propagazione \textsf{ns3::RangePropagation},
-nel quale una trasmissione viene ricevuta se è a una distanza minore o uguale della portata impostata.
-Gli edifici, non presenti nello scenario originale, sono stati creati manualmente, in modo che ogni edificio fosse contenuto all'interno dello spazio creato dalle strade.
+Il raggio trasmissivo varia agendo sul modello di propagazione \textsf{ns3::RangePropagation},
+implementazione di ns-3 del modello a disco unitario, nel quale una trasmissione viene ricevuta se è a una distanza minore o uguale della portata impostata.
+Gli edifici, non presenti nello scenario originale, sono stati creati manualmente in modo che ogni edificio fosse contenuto all'interno dello spazio creato dalle strade.
 Così facendo, risultano $169$ edifici di $295$x$295$ metri (i muri sono distanziati di $5$ metri dalla strada).
 
 Le simulazioni sono state eseguite sfruttando l'attrezzatura in dotazione al servizio di \textit{High Performance Computing} dell'università di Padova,
@@ -79,33 +79,18 @@ eseguendono un numero pari a $50$ simulazioni per ogni configurazione.
 % \end{figure}
 %
 \subsection{Risultati}\label{sec:configurazione-griglia-risultati}
-% I grafici in \figurename~\ref{fig:risultati-griglia-copertura} mostrano il cambiamento della copertura dei veicoli in totale e sulla circonferenza,
-% dove si hanno rispettivamente $8064$ e $36$ veicoli, quando si vanno a considerare gli edifici.
-% Nelle simulazioni rappresentato a sinistra
-% Si può notare un generale calo della copertura causato dalla perdita di segnale per effetto dell'ombreggiatura,
-% anche se non significativo; la differenza è leggermente maggiore considerando solo i veicoli sulla circonferenza.
-% Analizzando invece il numero dei salti (\figurename~\ref{fig:risultati-griglia-salti}) necessari a raggiungere il perimetro della griglia
-% si nota un aumento generale di questo valore, leggermente maggiore con raggio trasmissivo $300$ metri.
-% Questo comporta che, mediamente, ci vogliono $1,104$ salti in più per raggiungere il perimetro se il raggio
-% trasmissivo è di $300$m, mentre ce ne vogliono $0,571$ se è di $500$m.
-% Il grafico in \figurename~\ref{fig:risultati-griglia-messaggi}) mostra un aumento del numero di messaggi
-% di inoltro inviati, in media, del $17,9$\% nel caso del raggio trasmissivo di $300$m
-% e del $163,9$\% nel secondo caso.
-% Combinando questi risultati con i precenti, si denota che, nel caso degli edifici,
-% un alto numero di pacchetti venga perso a causa della troppa attenuazione del segnale;
-% infatti per coprire (circa) la stessa percentuale di veicoli è necessario un numero molto maggiore di inoltri.
 I grafici dalla \figurename~\ref{fig:risultati-griglia-copertura} alla~\ref{fig:risultati-griglia-messaggi}\footnotemark
 \footnotetext{Tutti i grafici mostrati utilizzano come misura di errore l'errore standard con intervallo di confidenza del $95\%$.}
 mostrano i risultati di questo gruppo di simulazioni.
 Come si può notare, la presenza degli ostacoli influisce molto poco sui quasi tutti i parametri presi in esame.
 La differenza sulla copertura totale è, in generale, inferiore o vicina all'$1\%$, tuttavia utilizando i protocolli FB e \statica{} si vede
 un leggero calo nel caso di raggio tramissivo pari a $300$m e un leggero incremento con $500$m, mentre
-è l'opposto con \staticb{}; la differenza è comunque minima per ipotizzare una causa di questo comportamento. % ?
+è l'opposto con \staticb{}; la differenza è comunque minima per ipotizzare la causa di questo comportamento. % ?
 I veicoli sulla circonferenza (di raggio $1000$m) ottengono una copertura legggermente migliore
 (in media dello $0,5\%$), tranne nel caso di \staticb{} con raggio trasmissivo $500$m.
 Questo leggero aumento della copertura potrebbe essere dovuto a quello che gli autori del modello a ostacoli (~\cite{Carpenter:2015:OMI:2756509.2756512})
 chiamano ``L'effetto cena con amici'' (\textit{The Dinner Party effect}): la presenza di ostacoli come edifici
-può aumentare, localmente, la probabilità di tramissioni con successo, in quanto aumenterebbe il riuso delle spazio.
+può aumentare, localmente, la probabilità di tramissioni con successo in quanto aumenterebbe il riuso delle spazio.
 Tale fenomeno può anche essere visto nel grafico in \figurename~\ref{fig:risultati-griglia-messaggi}
 dove nel caso di raggio trasmissivo pari a $500$m è presente un aumento, in media, del $5,6$\%
 nel numero di messaggi di intoltro ricevuti, mentre quelli inviati sono più simili al caso senza edifici.
@@ -142,7 +127,7 @@ a proseguire lungo la strada.
 %
 %
 \section{Scenario urbano reale} % un titolo migliore no?
-Le configurazioni precedenti avevano il difetto di essere poco veritiere, sia dal punto di vista della topologia stradale
+Le configurazioni precedenti avevano il difetto di essere poco veritiere, dal punto di vista della topologia stradale
 che sulla geometria degli edifici.
 Le strade formavano una griglia perfetta, con strade identiche e incroci esatti;
 gli edifici erano molto grandi e tutti della stessa forma e dimensione.
@@ -150,13 +135,24 @@ In questo gruppo di simulazioni, invece, si è cercato di rappresentare un vero 
 con strade di lunghezza diversa e non perfettamente allineate,
 con edifici meno squadrati, a ridosso della strada o anche assenti in alcune zone (difficile in città, ma possibile).
 
-A questo proposito sono state scelte due città, Padova (IT) e Los Angeles (California, USA) (Figura~\ref{fig:scenari-la-pd-osm}), definite due aree nella zona centrale di circa $5$ kilometri quadrati (Figura~\ref{fig:scenari-la-pd-osm})
+A questo proposito sono state scelte due città, Padova (IT) e Los Angeles (California, USA) (Figura~\ref{fig:scenari-la-pd-osm}), definite due aree nella zona centrale di circa $5$ kilometri quadrati
 e, seguendo il procedimento descritto nella Sezione~\ref{sec:sumo}, sono state estratte le informazioni necessarie alla configurazione delle simulazioni.
-Altre informazioni sugli scenari e sui parametri delle rete (se diversi dalle precedenti) sono elencati in Tabella~\ref{tab:parametri-simulazioni-pd-la}.
+Altre informazioni sugli scenari e sui parametri delle rete (se diverse dalle precedenti) sono elencati in Tabella~\ref{tab:parametri-simulazioni-pd-la}.
 La scelta è ricaduta su Los Angeles poiché la sua rete stradale è paragonabile a una griglia in stile Manhattan, come nello scenario precedente,
 mentre Padova (sede anche dell'Università dove si è svolto questo lavoro) ha una toplogià più irregolare, con strade più strette ed edifici a ridosso di queste,
 zone pedonali e ZTL.
-In questo modo si ha il primo scenario che si discosta meno dal precendete, mentre il secondo in modo più deciso.
+In questo modo si ha uno scenario che si avvicina al precente come concezione,
+una sua versione reale, mentre un secondo con caratteristiche proprie.
+
+In questo gruppo di simulazioni sono state utilizzate le medesime metriche del caso precendente,
+fatta eccezione per il numero di salti che ora sono per raggiungere la circonferenza, invece che il perimetro della mappa.
+Questo perché nella configurazione a griglia lungo il bordo esterno erano sicuramente posizionati dei veicoli,
+mentre ora il limite ``quadratico'' dell'area è ideale.
+
+Inoltre, per rappresentare al meglio il mezzo trasmissivo è stato utilizzato come modello di propagazione base
+quello a doppio raggio (Two-Ray Ground), in quanto quello precedente (portata fissa) non teneva in considerazione
+diversi parametri essenziali, come la potenza della trasmissione, la frequenza del segnale o l'altezza delle antenne rispetto al suolo;
+inoltre l'assunzione che il segnale si propaghi uniformemente fino a una certa distanza prefissata è poco reale.
 %
 \begin{table}[htbp]
 	\centering
@@ -192,41 +188,29 @@ Il cerchio rosso evidenzia la posizione del nodo di partenza mentre i tre rimane
 e i due intervalli di confidenza.\label{fig:scenari-la-pd-osm}}
 \end{figure}
 %
-Anche in questo gruppo di simulazioni sono state utilizzate le medesime metriche del caso precendente,
-fatta eccezione per il numero di salti che ora sono per raggiungere la circonferenza, non il bordo dello scenario.
-Questo perché nella configurazione a griglia lungo il perimetro esterno erano sicuramente posizionati dei veicoli,
-mentre ora il limite ``quadratico'' dell'area è ideale (non tutte le strade finisco esattamente sul bordo della mappa).
-
-Inoltre, per rappresentare al meglio il mezzo trasmissivo è stato utilizzato come modello di propagazione base
-quello a doppio raggio (Two-Ray Ground), in quanto quello precedente (portata fissa) non teneva in considerazione
-diversi parametri essenziali, come la potenza della trasmissione, la frequenza del segnale o l'altezza delle antenne rispetto al suolo;
-inoltre l'assunzione che il segnale si propaghi uniformemente fino a una certa distanza prefissata non è reale.
-%
 \subsection{Los Angeles}\label{subsec:risultati-la}
 A differenza del precente, quando si va a considerare l'effetto dell'ombreggiatura in questo scenario
 si notano dei maggiori cambiamenti.
 In primo luogo, come si può vedere dalla \figurename~\ref{fig:risultati-la-copertura},
-si nota una diminuzione della copertura dei veicoli che è più marcata con raggio trasmissivo $300$m.
+è presente una diminuzione della copertura dei veicoli che è più marcata con raggio trasmissivo $300$m.
 Nelle simulazioni, infatti, le due diverse distanze massime raggiungibili dal segnale,
 $300$ e $500$ metri senza ostruzioni, sono state implementate tramite una diversa potenza in fase di trasmissione.
 Un sengale più potente ha, naturalmente,
 più probabilità di ``superare'' un ostacolo rispetto a un segnale con meno potenza.
 Inoltre, avendo una portata maggiore potrebbe raggiungere altri elementi in ricezione,
-permettere degli inoltri e coprire quindi ulteriori veicoli.
-
+permettere degli inoltri e coprire ulteriori veicoli.
 Da notare è il cambio di tendenza nel caso del protocollo \statica{}:
 in presenza di edifici si ha una copertura maggiore con raggio trasmissivo di $500$m.
 Il motivo potrebbe essere che l'effetto dell'ombreggiatura influisce maggiormente rispetto
 allo non stimare correttamente il mezzo fisico.
-Questo fenomeno rimarrà costante anche nello sceario successivo.
+Questo fenomeno rimarrà costante anche nello scenario successivo.
 
 Per quanto riguarda il numero medio di salti necessari a raggiungere i veicoli sulla circonferenza,
 in \figurename~\ref{fig:risultati-la-salti},
 % TODO: contorllare che sia così anceh avendo nuovi dati
-si ha un incremento del $36,5\%$ nel caso di raggio trasmissivo $300$m mentre solo del $5\%$ nella controparte a $500$.
-Inoltre si può osservare come il protocollo FB abbia prestazioni migliori delle alternative statiche
+si ha un incremento del $36,5\%$ nel caso di raggio trasmissivo $300$m mentre solo del $5\%$ nella controparte a $500$m.
+Inoltre, si può osservare come il protocollo FB abbia prestazioni migliori delle alternative statiche
 di circa il $10\%$ con $300$m e del $23\%$ con $500$m. % ha senso confrontarli così?
-
 Considerando il numero di messaggi di inoltro che vengono scambiati nella rete (\figurename~\ref{fig:risultati-la-messaggi}),
 rimane anomalo il caso \statica{}-$500$m, dove si ha un valore inferiore rispetto agli altri protocolli,
 anche se rimane coerente nel considerare l'effetto ombreggiatura (rispetto allo scenario senza).
@@ -235,10 +219,10 @@ con $500$m.
 Un andamento inverso caratterizza il numero totale di messaggi di inoltro ricevuti:
 se si considera un raggio trasmissivo di $500$m si ha un aumento del $43\%$ in presenza di edifici,
 mentre un calo del $32,2\%$ con $300$m.
-Ciò significa che, nel primo caso, gli ostacoli considerati causano la perdita di una grossa quantità di messaggi
+Ciò significa che nel primo caso gli ostacoli considerati causano la perdita di una grossa quantità di messaggi
 mentre così non avviene nel secondo.
-La causa di questo fenomeno potrebbe trovarsi nella topologia stradale presente in questo specifico scenario.
-Gli isolati più piccoli hanno una dimensioni di circa $50$x$175$ metri mentre quelli più grandi
+La causa di questo fenomeno potrebbe trovarsi nella topologia stradale presente in questo specifico scenario:
+gli isolati più piccoli hanno una dimensione di circa $50$x$175$ metri mentre quelli più grandi
 (visibili nella mappa in basso a destra) sono lunghi circa $400$ metri.
 Il raggio trasmissivo minore non riesce a superarli mentre è così per quello maggiore che raggiunge
 di conseguenza anche i veicoli posizionati sugli e nelle vicinanze degli incroci.
@@ -247,7 +231,14 @@ fino a tre se si hanno $500$m.
 Inoltre, potrebbe essere che il segnale generato nel caso di raggio trasmissivo minore
 non sia sufficiente a penetrare gli edifici presenti all'interno di un isolato (in larghezza),
 mentre è abbastanza forte quello con raggio trasmissivo maggiore.
-% i grafici su potenza-sengale-isolati-la lo confermeranno?
+
+Osservando i grafici si nota una maggior variabilità dei dati quando si considerano gli ostacoli.
+Questo può voler dire che per avere risultati più stabili è necessario eseguire più simulazioni
+con ostacoli rispetto alla controparte che non li considera.
+Questo fenomeno è più visibile con il protocollo FB che a differenza degli altri
+ha una componente probabilistica in più, ossia lo scambio iniziale di messaggi Hello.
+Ciò potrebbe voler dire anche che per effettuare una buona stima del raggio trasmissivo
+sono necessari più scambi di messaggi di quelli che si erano visti non considerando gli ostacoli. % --> sicuro? boh
 
 Anche in questo scenario, il protocollo FB si comporta secondo le aspettative
 garantendo una copertura migliore % TODO da confermare dopo con i nuovi dati
@@ -298,12 +289,12 @@ oppure dalla diverse struttura stradale, che vede strade più strette,
 rettilinei di lunghezza inferiore e cambi di direzione repentini.
 
 Per quanto riguarda il numero di salti (per raggiungere la circonferenza) in \figurename~\ref{fig:risultati-padova-salti},
-i risultati sono coerenti con le aspettative e con lo scenario Los Angeles;
+i risultati sono coerenti con le aspettative e con lo scenario Los Angeles:
 il protocollo Fast Broadcast si comporta leggermente peggio in Padova che in L.A.
 ma rimane il migliore nell'adattarsi al cambiamento di raggio trasmissivo reale.
 
 Rimane l'anomalia nel caso \statica{}-$500$m del numero di messaggi di inoltro in \figurename~\ref{fig:risultati-padova-messaggi},
-dove si ha un valore inferiore rispetto al protocollo statitico con stima corretta.
+dove si ha un valore inferiore rispetto al protocollo statico con stima corretta.
 Come nello scenario precedente, la causa potrebbe essere la maggior influenza dell'ombreggiatura rispetto
 all'effettuare una stima corretta del mezzo fisico.
 Considerando l'effetto degli edifici si ha un aumento dei messaggi inviati del $234\%$ nel caso $300$m e del $197\%$ nell'altro,
@@ -332,6 +323,7 @@ come nelle simulazioni con la città californiana.
 		\includegraphics[width=\textwidth]{grafici/pd/messaggi_ricevuti.png}
 \caption{Scenario Padova: numero di messaggi di inoltro inviati e ricevuti.\label{fig:risultati-padova-messaggi}}
 \end{figure}
+\clearpage
 %
 %
 \section{Scenario urbano con sensori}
@@ -340,8 +332,7 @@ intra-veicolare e che, grazie ai progressi tecnologici, sempre più veicoli poss
 Tuttavia bisogna prendere atto che, almeno per il momento, non siamo nelle condizioni
 di poter affermare che ogni ogni veicolo è grado di comunicare.
 Per questo motivo, si può pensare di rilassare tale assunzione e permettere che alcuni veicoli
-siano esclusi dal traffico; la loro presenza all'interno dello scenario rimane, ma non partecipano allo scambio
-di messaggi e alla propagazione del messaggio.
+siano esclusi dal traffico; la loro presenza all'interno dello scenario rimane ma non partecipano allo scambio di messaggi.
 
 Viene aggiunta una seconda assunzione: sparpagliati lungo la città sono posizionati dei sensori a basso costo
 che contribuiscono alla propagazione dei messaggi tramite il semplice Algortimo~\ref{fig:algoritmo-inoltro-dummy}
@@ -358,12 +349,12 @@ che inoltra (in broadcast) un messaggio solo la prima volta.
 \end{italianalgorithm}
 %
 Nel mondo reale questi sensori potrebbero essere dedicati come aiuto propagazione,
-cioè installati al solo scopo di aiutare la diffusione dei messaggi,
+cioè installati al solo scopo di aiutare la diffusione dei messaggi
 oppure essere presenti per altri motivi ma con la capacità di ricevere/inoltrare messaggi
 in caso di bisogno; ad esempio sensori per l'analisi delle polveri sottili,
 oppure per il monitoraggio del traffico stradale.
 Si assume, inoltre, che questi sensori siano posizionati a una certa altezza prefissata;
-potrebbe essere che, in fase di installazione, si sia scelto di utilizzare delle infrastrutture
+potrebbe essere che, in fase di installazione si sia scelto di utilizzare delle infrastrutture
 pre-esistenti, come per esempio delle lanterne semaforiche, sulle quali montare i sensori in modo da ridurre i costi.
 Prendendo come spunto l'esempio indicato, si è visto che nel classico semaforo a tre tempi
 la parte contenente i segnali luminosi dev'essere posizionata
@@ -379,7 +370,8 @@ mentre i sensori il semplice inoltro visto in precedenza.
 Nelle varie simulazioni si andrà a variare la percentuale di veicoli ``disabilitati'',
 ovvero senza capacità di comunicazione, prendendo un campione casuale della popolazione.
 La configurazione sopra descritta è riassunta in Tabella~\ref{tab:parametri-simulazioni-sensori},
-mentre alcune informazioni sulle altezze degli ostacoli\footnotemark{} (fra cui gli edifici) si possono vedere in Tabella~\ref{tab:simulazioni-sensori-altezze-edfici}.
+mentre alcune informazioni sulle altezze degli ostacoli\footnotemark{} (fra cui gli edifici) si possono vedere in Tabella~\ref{tab:simulazioni-sensori-altezze-edfici},
+da cui si evince la diffusione di ostacoli con informazioni tridimensionali.
 \footnotetext{Altezze predefinite per un piano e un sottotetto rispettivamente di $2,7$ e $2,1$ metri.}
 %
 \begin{table}[htbp]

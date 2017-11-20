@@ -6,12 +6,13 @@
 \chapter{Applicativi}\label{chap:applicativi}
 \section{Network Simulator 3}\label{sec:ns-3}
 Network Simulator 3 (ns-3)~\cite{ns3Website} è un simulatore a eventi discreti utilizzato principalmente in ambito accademico e di ricerca,
-scritto in \Cpp{} e Python; è un software libero distribuito sotto licenza GNU GPLv2.
-Creato nel 2006 da un gruppo coordinato da Tom Henderson, George Riley, Sally Floyd e Sumit Roy con lo scopo
-di ovviare ad alcune grosse limitazioni della precedente versione (ns-2), come ad esempio la necessità di utilizzare
+scritto in \Cpp{} e Python; è un software libero ed è distribuito sotto licenza GNU GPLv2.
+Creato nel 2006 da un gruppo coordinato da Tom Henderson, George Riley, Sally Floyd e Sumit Roy
+aveva come scopo quello di ovviare ad alcune grosse limitazioni della precedente versione (ns-2), come ad esempio la necessità di utilizzare
 un linguaggio di \textit{scripting} dedicato per modellare le simulazioni o una maggiore scalabilità~\cite{Henderson:2006:NPG:1190455.1190468}.
-Attualmente è l'unica versione della serie a essere sviluppata.
-È d'obbligo menzionare che, sebbene tutte le versione siano state scritte in \Cpp, ns-3 non è retrocompatibile i precedenti.
+Attualmente è l'unica versione della serie a essere mantenuta.
+È d'obbligo menzionare che, sebbene tutte le versioni siano state scritte in \Cpp,
+le simulazioni scritte per ns-3 non sono retrocompatibili.
 %
 % \begin{figure}[htbp]
 % 	\centering
@@ -21,19 +22,19 @@ Attualmente è l'unica versione della serie a essere sviluppata.
 %
 \paragraph{Elementi chiave}
 In ns-3, il dispositivo di elaborazione di base (unità elementare) è chiamato \textit{nodo}
-e fornisce i metodi per gestire i dispositivi nelle simulazioni;
-Può essere paragonato a un computer a cui è possibile aggiungere funzionalità come applicazioni,
+e fornisce i metodi per gestire i dispositivi all'interno delle simulazioni;
+può essere paragonato a un computer a cui è possibile aggiungere funzionalità come applicazioni,
 stack protocollari e schede periferiche.
-Sui nodi sono eseguite delle attività per raggiungere uno scopo, le \textit{applicazioni};
+Sui nodi sono eseguite delle attività,le \textit{applicazioni}, al fine di raggiungere un certo obbiettivo.
 Per esempio, le applicazioni \textsf{UdpEchoClientApplication} e \textsf{UdpEchoServerApplication} compongono
-un'aplicazione client/server per gestire e scambiare pacchetti nella rete.
-Le comunicazioni fra i nodi avvengono tramite degli speciali \textit{canali};
-questi possono essere definiti dallo sviluppatore e permettono di modellare concetti semplici come un collegamento su cavo
-fino a quelli più complessi come uno \textit{switch Ethernet}.
-Su un nodo è possibile installare uno o più \textit{dispositivi di rete} che permettono la comunicazione con altri nodi attraverso i canali.
-Un nodo può essere connesso a più canali attraverso diversi dispositivi di rete.
+un'applicazione client/server per gestire e scambiare pacchetti nella rete.
+Le comunicazioni fra i nodi avvengono tramite degli speciali \textit{canali}
+che possono essere definiti dallo sviluppatore e permettono di modellare concetti semplici, come un collegamento su cavo,
+fino a quelli più complessi, come uno \textit{switch Ethernet}.
+Su un nodo è possibile installare uno o più \textit{dispositivi di rete} che permettono la comunicazione con altri nodi attraverso i canali;
+un nodo può essere connesso a più canali attraverso diversi dispositivi di rete.
 La simulazione di una grande rete obbliga lo sviluppatore a creare migliaia di nodi, dispositivi di rete e canali.
-Per facilitare questo tipo di operazioni molto comuni sono state inserite nel simulatore degli agenti, chiamati \textit{Helper}.
+Per facilitare questo tipo di operazioni molto comuni sono state inseriti nel simulatore degli agenti, chiamati \textit{Helper}.
 %
 \paragraph{Struttura di una simulazione}
 Per creare una semplice simulazione è necessario:
@@ -44,28 +45,28 @@ Per creare una semplice simulazione è necessario:
 	\item configurare il livello fisico e MAC;
 	\item impostare il livello di rete, il protocollo di routing e gli indirizzi;
 	\item configurare e installare le applicazioni;
-	\item impostare la poszione iniziale dei nodi e l'eventuale mobilità;
+	\item impostare la posizione iniziale dei nodi e l'eventuale mobilità;
 	\item pianificare eventuali eventi definiti dall'utente;
 	\item avviare la simulazione.
 \end{itemize}
 %
 \section{\SUMO}\label{sec:sumo}
-\SUMO~\cite{SUMO2012} è un simulatore per traffico veicolare su larga scala; è \textit{open source}, scritto in \Cpp
+\SUMO{} (SUMO)~\cite{SUMO2012} è un simulatore per traffico veicolare su larga scala, \textit{open source}, scritto in \Cpp
 e distribuito sotto licenza Eclipse Public V2.
 Al suo interno si trovano diversi applicativi utili, dall'importazione di dati reali alla creazione di percorsi
 per pedoni, diverse tipologie di veicoli, eccetera.
-Proprio queste \textit{utility} sono state utilizzate per l'elaborazione delle informazioni sugli edifici (fornite poi
-al modello \textit{Obstacle Shadowing}) e il posizionamento dei veicoli.
+Proprio queste \textit{utility} sono state utilizzate per l'elaborazione delle informazioni sugli ostacoli (fornite poi
+al modulo \textit{Obstacle Shadowing}) e il posizionamento dei veicoli.
 %
 % \subsection{Realizzazione degli scenari}
-Per creare uno scenario derivato da un ambiente reale, come quelli che saranno utilizzati nelle simulazioni,
+Per creare uno scenario derivato da un ambiente reale come quelli che saranno utilizzati nelle simulazioni,
 e poterlo utilizzare in ns-3, sono necessarie alcune elaborazioni intermedie.
 
 Il primo passo consiste nell'utilizzare la piattaforma gratuita OpenStreetMap (OSM)~\cite{osmWebsite} per
 ottenere le informazioni sul mondo reale (Figura~\ref{fig:esempio-file-osm}) e da queste estrarre i dati sugli ostacoli.
 Il file ottenuto viene convertito dall'\textit{utiliy} di SUMO Polyconvert che si occupa di tradure alcune informazioni
 sugli ostacoli, come per esempio convertire la posizione da coordinate geografiche a cartesiane;
-il file risultante conterrà i poligoni che saranno letti dal modulo \textit{Obstacle Shadowing}) (Figura~\ref{fig:esempio-file-poly}).
+il file risultante conterrà i poligoni che saranno letti dal modulo \textit{Obstacle Shadowing} (Figura~\ref{fig:esempio-file-poly}).
 Il secondo passo è la generazione delle posizioni dei veicoli.
 A questo scopo è stato creato uno \textit{script} apposito che, sfruttando le librerie per Python messe a disposizione
 nel pacchetto di SUMO, partendo da un punto e percorrendo le strade ammissibili posiziona i veicoli a una certa distanza.
@@ -76,7 +77,8 @@ Il file ottenuto dal processo viene convertito in un formato per ns-2 tramite lo
 e questo sarà poi eseguito dal modulo di ns-3 \textsf{Ns2MobilityHelper} in modo da posizionare i nodi durante la simulazione.
 Il processo completo è riassunto nella Figura~\ref{fig:generazione-file-sumo}.
 
-Il pacchetto SUMO include anche un'interfaccia grafica per visualizzare le simuazion (Figura~\ref{fig:esempio-file-poly}).
+Le immagini in \figurename~\ref{fig:esempio-file-poly} mostrano l'utilizzo dell'interfaccia grafica
+inclusa nel pacchetto SUMO che permette la creazione, gestione e simulazione della rete.
 % TODO: provare a stampare per vedere come si vedono le immagini !
 %
 \begin{figure}[htbp]
