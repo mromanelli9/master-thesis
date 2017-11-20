@@ -8,4 +8,40 @@ Lo scopo di questo lavoro è stato valutare l'impatto dell'effetto ombreggiatura
 presenza di edifici sulla propagazione di messaggi in una rete VANET all'intero di uno scenario urbano;
 oltre a questo, osservare il comportamento del protocollo Fast Broadcast sotto queste condizioni,
 un protocollo che stima dinamicamente il raggio trasmissivo per propagare il messaggio
-con meno salti possibile.
+con meno salti possibili.
+Dalle prove effettuate è sorto evidente come l'effetto ombreggiatura causato dagli ostacoli
+sia un fattore chiave nelle simulazioni delle VANET, specialmente se si è in uno scenario
+urbano o suburbano dove abitazioni, uffici, ospedali, edifici in genere sono sempre presenti.
+L'utilizzo di dati reali sulla posizione e/o mobilità dei veicoli è altresì decisiva,
+permettendo di cogliere effetti causati dalle caratteristiche intrinseche dell'ambiente sottostante.
+% TODO controllare dopo i risultati totali
+Nel caso specifico, si è visto come a parità di portata del raggio trasmissivo la struttura
+del centro cittadino di Padova influisce maggiormente sullo scambio di messaggi
+rispetto allo scenario della città di Los Angeles;
+pertanto per ottenere dei risulati uniformi, o se si vuole astrarre da uno scenario in particolare,
+è necessario utilizzare una trasmissione con una portata maggiore.	% assunzioni forti
+Il protocollo Fast Broadcast si comporta come previsto, confermando che una stima dinamica sul mezzo
+tramissivo permette di coprire più veicoli all'interno dell'area prefissata e in minor tempo.
+I risultati mostrano, tuttavia, che, in alcuni casi, l'effetto dell'ombreggiatura
+potrebbe impattare in modo maggiore rispetto allo non stimare correttamente il mezzo fisico. % --> boh
+È opinione degli autori che un adeguato modello di rappresentazione dell'ambiente sia
+sempre necessario durante lo sviluppo di un protocollo di questo tipo
+e che la presenza degli ostacoli non può essere esclusa.
+% TODO inserire risultati scenario sensori
+
+Sebbene questi scenari prendevano in considerazione la topologia stradale nel posizionamento dei veicoli,
+sarebbe necessario che i veicoli avessero la capacità di muoversi, seguendo uno dei diversi modelli di mobilità
+proposti in letteratura;
+ancora meglio sarebbe la possibilità di utilizzare tracce reali in modo da cogliere eventuali problematiche
+che potrebbero non presentarsi utilizzando un modello teorico.
+Un'altra possibile continuazione di questo lavoro consiste nell'effettuare degli esperimenti reali
+degli scenari proposti, anche se su aree ridotte, con lo scopo di determinare l'effettiva efficacia e
+validità del modello a ostacoli.
+Sempre in relazione a quest'ultimo, la modifica tridimensionale proposta è una delle
+possibili soluzioni e ulteriori prove sono sicuramente necessarie per determinare
+se e quanto l'utilizzo della terza dimensione impatti sui risulati delle simulazioni.
+% sviluppo futuri
+% - mobilità con traccie reali (maps ?)
+% - esperimenti veri
+% - sviluppo del mod. 3d
+% - qualche sviluppo sullo scenario sensori
