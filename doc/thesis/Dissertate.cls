@@ -306,7 +306,7 @@
 	\setstretch{1.5}
 
 	\scshape{\Large{Università degli Studi di Padova}} \\
-	\line(1, 0){400} \\
+	{\color{SchoolColor}\line(1, 0){400}} \\
 	\scshape{\large{Dipartimento di Matematica ``Tullio Levi-Civita''}} \\
 
 	\vspace{5pt}
