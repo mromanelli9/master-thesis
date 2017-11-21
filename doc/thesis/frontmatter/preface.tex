@@ -9,21 +9,17 @@
 Le reti veicolari (\textit{Vehicular Ad-hoc Networks}, VANET) stanno riscuotendo un crescente interesse
 grazie ai recenti progressi tecnologici e ai molti campi d'applicazione possibili, dalla sicurezza dei veicoli
 e delle strade allo sviluppo di servizi multimediali intra-veicolari.
-% Vista l'impossibilità per un'infrastruttura centrale di garantire una copertura totale, un settore della ricerca % mah
-% verte sullo studio di protocolli di comunicazione intelligenti in grado di propagare informazioni velocemente.
-% Per la progettazione e la verifica di questi spesso si utilizzano simulazioni software in grado di analizzare
-% diversi scenari limitando i costi di sviluppo.
-Affinché tali reti rappresentino al meglio la complessità del mondo reale, si rende necessario lo sviluppo di modelli di propagazione del segnale
-che considerino i vari effetti di degradazione, come la distanza, cammini multipli da riflessione, ombreggiatura.
-Proprio quest'ultima ricopre un ruolo essenziale se lo scenario considerato è urbano o suburbano; in tal caso, infatti,
-l'attenuazione del segnale radio causata dagli edifici non può essere ignorata.
-Considerando uno dei modelli a ostacoli presenti in letteratura,
-combinandolo con dati reali sulla topologia stradale e sulla geometria degli edifici
-si ottengono simulazioni più fedeli alla realtà, mantenendo tuttavia limitato il loro costo computazionale.
-Si andrà, quindi, a studiare l'impatto che l'effetto ombreggiatura da ostacoli ha sul traffico
-di una rete VANET in diversi scenari urbani,
-utilizzando un protocollo per la propagazione di messaggi chiamato Fast Broadcast.
-Infine, si andrà a proporre una modifica per estendere il modello a ostacoli in un ambiente tridimensionale.
-%
-% TODO, NB: Sotto sono risultati, da controllare alla fine!
-% I risultati mostrano come includendo questi fattori nella simulazione migliori la valutazione sulle prestazioni del protocollo in esame.
+All'intero di questo contesto è stato ideato Fast Broadcast,
+un protocollo che sfrutta una stima del raggio trasmissivo per la rapida propagazione di informazioni.
+Per rappresentare al meglio il mezzo fisico si rende necessario lo sviluppo di modelli di propagazione del segnale
+che prendano in considerazione i vari effetti di degradazione, come la distanza, cammini multipli da riflessione, ombreggiatura da ostacoli.
+Quest'ultima ricopre un ruolo essenziale se lo scenario considerato è urbano o suburbano,
+dove gli edifici costitiscono un'ostruzione che non può essere ignorata.
+Uno dei modelli per l'ombreggiatura da ostacoli presenti in letteratura
+sfrutta dati reali sulla topologia stradale e sulla geometria degli ostacoli per ottenere simulazioni più realistiche.
+Si andrà, quindi, a valutare il protocollo Fast Broadcast all'interno di due diversi scenari urbani reali.
+Successivamente, sarà presa in considerazione la possibilità che alcuni veicoli non siano in grado
+di partecipare allo scambio dei messaggi, includendo all'interno dello scenario
+una rete di sensori per aiutare la propagazione.
+Per permettere la possibilità che questi dispositivi siano posizionati a un'altezza diversa dal suolo
+si andrà a proporre un'estensione al modello a ostacoli che consideri lo spazio tridimensionale.
