@@ -205,3 +205,37 @@ Le modifiche sono riportate nell'Algoritmo~\ref{algo:algoritmo-getobstucteddista
 \end{algorithmic}
 \end{italianalgorithm}
 %
+\paragraph{Esempio} Si prenda lo scenario in \figurename~\ref{fig:propagazione-osm}
+che comprende un blocco di tre edifici in una zona suburbana nella periferia di Los Angeles.
+Si consideri un veicolo fermo sulla 11th Avenue (a sinistra)
+che trasmette a un veicolo che lentamente si sposta lungo la West 85th Street (in alto);
+lo scopo è quello di registrare la potenza del segnale in ricezione (\textit{Received signal strength}, RSS).
+In una prima prova è stato utilizzato il modulo originale ($2$D) mentre nella successiva
+l'estensione tridimensionale, sostituendo al primo veicolo con un drone ad un'altezza di $50$ metri.
+Nella prima immagine in \figurename~\ref{fig:propagazione-2d-3d} si vede la degradazione del valore RSS
+mentre il secondo veicolo si muove lungo la strada durante la prima prova.
+Non appena viene superato l'ostacolo, e la visuale passa da LOS a OLOS, la potenza
+del segnala cala bruscamente (passando da $-72$ dBm a $-91$ dBm);
+nella figura il colore rosso indica un valore RSS più basso e di conseguenza una degradazione del segnale maggiore.
+La seconda immagine rappresenta, invece, la seconda prova, dove si può vedere
+che il segnale viene bloccato solamente dal primo edifico (più alto).
+Questo comportamento non viene catturato dal modulo in due dimensioni
+in quanto non considera la terza componente $z$ della posizione spaziale.
+%
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=.49\textwidth]{propagazione-osm-3d.png}
+		\hfill
+	\includegraphics[width=.49\textwidth]{propagazione-osm.png}
+\caption{Esempio di un blocco edifici utilizzato per le simulazioni 2D-3D.\label{fig:propagazione-osm}}
+\end{figure}
+%
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=.49\textwidth]{propagazione-2d.png}
+	\hfill
+	\includegraphics[width=.49\textwidth]{propagazione-3d.png}
+\caption{Degradazione del valore RSS mentre il secondo veicolo è in movimento.
+Ogni linea indica una trasmissione, mentre il colore rappresenta l'RSS.\label{fig:propagazione-2d-3d}}
+\end{figure}
+%
