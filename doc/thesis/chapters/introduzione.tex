@@ -58,9 +58,15 @@ Considerato questo e la presenza di una implementazione sia del modello a ostaco
 che del protocollo Fast Broadcast per ns-3 la scelta del simulatore da utilizzare
 è ricaduta su quest'ultimo.
 
-Riassumendo, risulta interessante analizzare l'impatto che l'effetto ombreggiatura derivato dalla
-presenza di edifici, e ostacoli in generale, ha sulla propagazione dei messaggi e
-sulle prestazioni del protocollo Fast Broadcast. % ci starebbe un e.., ma cosa mettere?
+I principali contributi di questo lavoro si possono così riassumere.
+\setlist{nolistsep}
+\begin{itemize}[noitemsep]
+	\item La valutazione del protocollo Fast Broadcast in un contesto urbano reale,
+				utilizzando mappe geografiche e dati sugli ostacoli presenti di due città diverse (Sezione ~\ref{sec:configurazione-la-pd}).
+	\item L'analisi di uno scenario nel quale alcuni veicoli non hanno la possibilità di partecipare allo scambio di messaggi
+				e nel quale è stata prevista la presenza di sensori in aiuto alla propagazione (Sezione ~\ref{sec:configurazione-sensori}).
+	\item Lo studio di un modello per l'ombreggiatura da ostacoli e una sua possibile estensione nello spazio tridimensionale (Capitolo ~\ref{chap:modello-a-ostacoli}).
+\end{itemize}
 %
 \paragraph{}
 Il presente lavoro è strutturato come segue.
@@ -69,7 +75,7 @@ Il Capitolo~\ref{chap:modello-a-ostacoli} analizzerà il modello a ostacoli, sia
 concluderà presentando una possibile soluzione per rendere il modello tridimensionale.
 Il Capitolo~\ref{chap:applicativi} darà una veloce panoramica sui software utilizzati e il metodo utilizzato per la creazione degli scenari.
 Il Capitolo~\ref{chap:simulazioni} illusterà i diversi gruppi di simulazioni effettuati e i relativi risultati ottenuti.
-Infine, nel Capitolo~\ref{chap:conclusioni}
+Infine, il Capitolo~\ref{chap:conclusioni}
 si concluderà riassumento i risultati ed evidenziando alcuni possibili sviluppi.
 %
 \section{Modelli di radiopropagazione}\label{sec:modelli-propagazione}

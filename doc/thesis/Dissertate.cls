@@ -389,7 +389,7 @@
 
 \newcommand{\abstract}{
 	\phantomsection
-	\chapter*{Riassunto}
+	\chapter*{Breve riassunto}
 	\input{frontmatter/preface}
 }
 
