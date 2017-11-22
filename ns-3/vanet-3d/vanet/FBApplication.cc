@@ -142,7 +142,13 @@ FBApplication::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
 
+	// Get startingNode as node and as fbNode
 	m_startingNode = this->GetNode ()->GetId ();
+
+	if (m_id2id.count(m_startingNode) == 0)
+	{
+		NS_LOG_ERROR ("Starting node is not a fb node!");
+	}
 
 	if (!m_staticProtocol)
 	{
@@ -194,7 +200,7 @@ FBApplication::StartBroadcastPhase (void)
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Start Broadcast Phase.");
 
-	Ptr<FBNode> fbNode = m_nodes.at (m_startingNode);
+	Ptr<FBNode> fbNode = this->GetFBNode(m_startingNode);
 
 	// Generate the first alert message
 	GenerateAlertMessage (fbNode);
@@ -476,7 +482,21 @@ FBApplication::GetFBNode (Ptr<Node> node)
 		NS_LOG_ERROR ("Error: key for node " << node->GetId () << " not found in fb application.");
 	}
 
-	uint32_t idin = m_id2id[node->GetId ()];
+	return this->GetFBNode (node->GetId ());
+}
+
+Ptr<FBNode>
+FBApplication::GetFBNode (uint32_t id)
+{
+	NS_LOG_FUNCTION (this);
+
+	if (m_id2id.count(id) == 0)
+	{
+		// We got a problem: key not found
+		NS_LOG_ERROR ("Error: key for node " << id << " not found in fb application.");
+	}
+
+	uint32_t idin = m_id2id[id];
 
 	return m_nodes.at (idin);
 }
@@ -498,11 +518,12 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 
 	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
-		// Skip the starting node
-		if (i == m_startingNode)
-			continue;
-
 		Ptr<FBNode> current = m_nodes.at (i);
+		uint32_t nodeId = current->GetId ();
+
+		// Skip the starting node
+		if (nodeId == m_startingNode)
+			continue;
 
 		// If this isn't a vehciles, skip
 		if (!current->AmIaVehicle ())
@@ -513,7 +534,7 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 			cover++;
 
 		// Compute cover on circumference of radius m_aoi
-		Ptr<FBNode> startingNode = m_nodes.at (m_startingNode);
+		Ptr<FBNode> startingNode = this->GetFBNode(m_startingNode);
 
 		Vector currentPosition = current->GetPosition ();
 		Vector startingNodePosition = startingNode->GetPosition ();
@@ -539,12 +560,12 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 		}
 	}
 
-	Time timeref = m_nodes.at (m_startingNode)->GetTimestamp();
+	Time timeref = this->GetFBNode(m_startingNode)->GetTimestamp();
 
 	dataStream << circCont << ","
 			<< cover << ","
 			<< circ << ","
-			<< timeref.GetMicroSeconds () - (time_sum / (double) circ) -  << ","
+			<< timeref.GetMicroSeconds () - (time_sum / (double) circ)  << ","
 			<< (nums_sum / (double) circ) << ","
 			<< (slots_sum / (double) circ) << ","
 			<< m_sent << ","

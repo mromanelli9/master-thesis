@@ -445,7 +445,7 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_alertGeneration (20),
 		m_areaOfInterest (1000),
 		m_vehiclesDistance (250),
-		m_scenario (2),
+		m_scenario (1),
 		m_loadBuildings (0),
 		m_traceFile (""),
 		m_bldgFile (""),
@@ -634,44 +634,34 @@ FBVanetExperiment::ConfigureApplications ()
 
 	// Extract randomly which vehicles must be disabled
 	// First manage extremities
-	std::vector<uint32_t> ids;
+	std::vector<uint32_t> nogood;
 
-	if (m_nDisabled == 0)
+	if (m_nDisabled != 0)
 	{
-		// Push all vehicles
-		for (uint32_t i = 0; i < m_nVehicles; i++)
-			ids.push_back (i);
-	}
-	else
-	{
-		uint32_t portion = m_nVehicles - std::floor(m_nVehicles / 100.0 * m_nDisabled);
+		uint32_t portion = std::floor(m_nVehicles / 100.0 * m_nDisabled);
 		uint32_t candidate = 0;
 		bool found = false;
 
-		NS_LOG_INFO ("Selected " << portion << " vehicles (with V2V comm enabled).");
+		NS_LOG_INFO (portion << " vehicles down (with V2V comm disabled).");
 
-		for (uint32_t i = 0; i < portion - 1; i++)
+		for (uint32_t i = 0; i < portion; i++)
 		{
 			found = true;
 			while (found) {
 				candidate = (rand() % m_nVehicles) + 1;
 
+				// m_startingNode can't be in here
 				if (candidate == m_startingNode)
 					continue;
 
-				if (std::find(ids.begin(), ids.end(), candidate) == ids.end()) {
+				if (std::find(nogood.begin(), nogood.end(), candidate) == nogood.end()) {
 					found = false;
 				}
 			}
 
-			ids.push_back (candidate);
+			nogood.push_back (candidate);
 		}
-
-		// starting node must be always in
-		ids.push_back (m_startingNode);
 	}
-
-	m_nVehiclesEnabled = ids.size ();
 
 	// Delete pre-existing application
 	if (m_fbApplication)
@@ -689,19 +679,17 @@ FBVanetExperiment::ConfigureApplications ()
 	m_fbApplication->SetStartTime (Seconds (1));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
-	// Add vehciles to the application except whose who are in ids
-	for (uint32_t i = 0; i < m_nVehiclesEnabled; i++)
+	// Add vehicles to the application except whose who are in ids
+	for (uint32_t i = 0; i < m_nVehicles; i++)
 	{
-		uint32_t legit = ids.at (i);
-
-		// id should be an id of a vehicles
-		// I'll do a check
-		if (legit < 0 or legit >= m_nVehicles)
-			NS_LOG_ERROR("Error: you're trying to install the FB app onto a sensor.");
-
-		m_fbApplication->AddNode (m_adhocNodes.Get (legit),
-														m_adhocSources.at (legit),
-														m_adhocSinks.at (legit),
+		// If this vehicles is disabled, skip
+		if (std::find(nogood.begin(), nogood.end(), i) != nogood.end()) {
+			continue;
+		}
+		m_nVehiclesEnabled++;
+		m_fbApplication->AddNode (m_adhocNodes.Get (i),
+														m_adhocSources.at (i),
+														m_adhocSinks.at (i),
 														true);
 	}
 
@@ -710,19 +698,19 @@ FBVanetExperiment::ConfigureApplications ()
 
 	if (m_enableSensors != 0)
 	{
-		if (m_scenario == 2)
-		{
-			// sensor use FB app
-			for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
-			{
-				m_fbApplication->AddNode (m_adhocNodes.Get (i),
-																	m_adhocSources.at (i),
-																	m_adhocSinks.at (i),
-																	false);
-			}
-		}
-		else
-		{
+		// if (m_scenario == 2)
+		// {
+		// 	// sensor use FB app
+		// 	for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
+		// 	{
+		// 		m_fbApplication->AddNode (m_adhocNodes.Get (i),
+		// 															m_adhocSources.at (i),
+		// 															m_adhocSinks.at (i),
+		// 															false);
+		// 	}
+		// }
+		// else
+		// {
 			// sensor as dummy forwarder
 
 			for (uint32_t id = m_nVehicles; id < m_nNodes; id++)
@@ -731,7 +719,7 @@ FBVanetExperiment::ConfigureApplications ()
 
 				m_adhocSinks.at (id)->SetRecvCallback (MakeCallback (&FBVanetExperiment::DummyForwarding, this));
 			}
-		}
+		// }
 	}
 }
 
@@ -770,26 +758,25 @@ FBVanetExperiment::SetupScenario ()
 	m_alertGeneration = 9;	// 10 -1 (start time of the application)
 	m_TotalSimTime = 990000.0;
 	m_areaOfInterest = 400;	// meters, radius
-	m_vehiclesDistance = 25;	// meters
 	m_bldgFile = "LA-1x1.3Dpoly.xml";
-
 
 	if (m_scenario == 1)
 	{		// Setup #1
 		m_traceFile = "LA-1x1.conf1.ns2mobility.xml";
+		m_vehiclesDistance = 50;
 
-		m_nVehicles = 630;
-		m_nSensors = 120;
-		m_startingNode = 292;		// shoud be 0 <= m_startingNode < m_nVehicles
+		m_nVehicles = 295;
+		m_startingNode = 190;		// shoud be 0 <= m_startingNode < m_nVehicles
 	}
 	else
 	{		// Setup #2
 		m_traceFile = "LA-1x1.conf2.ns2mobility.xml";
+		m_vehiclesDistance = 100;
 
-		m_nVehicles = 630;
-		m_nSensors = 90;
-		m_startingNode = 292;		// shoud be 0 <= m_startingNode < m_nVehicles
+		m_nVehicles = 166;
+		m_startingNode = 109;		// shoud be 0 <= m_startingNode < m_nVehicles
 	}
+	m_nSensors = 119;
 
 	m_nNodes = m_nVehicles + m_nSensors;
 

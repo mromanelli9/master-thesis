@@ -182,6 +182,13 @@ private:
 	Ptr<FBNode> GetFBNode (Ptr<Node> node);
 
 	/**
+	 * \brief Retrieve a fbNode from a ns3::Node
+	 * \param id original node id
+	 * \return a fbNode
+	 */
+	Ptr<FBNode> GetFBNode (uint32_t id);
+
+	/**
 	 * \brief Compute contention window
 	 * \param maxRange estimated range (meters)
 	 * \param distance distance between nodes (meters)
