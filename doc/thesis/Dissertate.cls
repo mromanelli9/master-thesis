@@ -139,10 +139,28 @@
 
 
 % Headings and headers.
+\RequirePackage{emptypage}
 \RequirePackage{fancyhdr}
 \RequirePackage[tiny, md, sc]{titlesec}
 \setlength{\headheight}{15pt}
-\pagestyle{plain}
+% \pagestyle{myheadings}
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{%
+ \markboth{\chaptername
+ \ \thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{Sezione \thesection.\ #1}{}}
+% E: Even page, O: Odd page, L: Left field, C: Center field
+% R: Right field, H: Header, F: Footer
+\fancyhead{} % clear all header fields
+\fancyhead[RE]{\leftmark}
+\fancyhead[LO]{\rightmark}
+\fancyhead[RO,LE]{\thepage}
+\fancyfoot{} % clear all footer fields
+% \fancyfoot[CE,CO]{\thepage}
+% \fancyfoot[CO,CE]{Marco Romanelli}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
 \RequirePackage{titling}
 
 % Front matter.
@@ -244,13 +262,15 @@
 
 
 \renewcommand{\frontmatter}{
-	\pagenumbering{roman}
+	% \pagenumbering{roman}
+	\pagestyle{empty}
 	\input{frontmatter/personalize}
 	\maketitle
 	\frontispiece
 	\dedicationpage
-	% \abstractpage
-	\abstract
+	\pagestyle{fancy}
+	\abstractpage
+	% \abstract
 	\tableofcontents
 	\phantomsection
 	\clearpage
@@ -360,8 +380,9 @@
 }
 
 \newcommand{\frontispiece}{
-	\newpage
+	\phantomsection
 	\thispagestyle{empty}
+	\newpage
 	\vspace*{\fill}
 	\begin{center}
 	\end{center}
@@ -402,10 +423,11 @@
 
 \newcommand{\abstractpage}{
 	\phantomsection
+	\pagenumbering{roman}
 	\setcounter{page}{5}
-	\addcontentsline{toc}{chapter}{Abstract}
-	\chapter*{Abstract}
-	\input{frontmatter/abstract}
+	\addcontentsline{toc}{chapter}{Breve riassunto}
+	\chapter*{Breve riassunto}
+	\input{frontmatter/preface}
 }
 
 
