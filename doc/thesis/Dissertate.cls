@@ -410,7 +410,7 @@
 
 \newcommand{\abstract}{
 	\phantomsection
-	\chapter*{Breve riassunto}
+	\chapter*{Abstract}
 	\input{frontmatter/preface}
 }
 
@@ -425,8 +425,8 @@
 	\phantomsection
 	\pagenumbering{roman}
 	\setcounter{page}{5}
-	\addcontentsline{toc}{chapter}{Breve riassunto}
-	\chapter*{Breve riassunto}
+	\addcontentsline{toc}{chapter}{Abstract}
+	\chapter*{Abstract}
 	\input{frontmatter/preface}
 }
 
