@@ -4,45 +4,43 @@
 %!TEX root = ../tesi.tex
 
 \chapter{Conclusioni}\label{chap:conclusioni}
-Lo scopo di questo lavoro è stato valutare l'impatto dell'effetto ombreggiatura derivato dalla
-presenza di edifici sulla propagazione di messaggi in una rete VANET all'intero di uno scenario urbano;
-oltre a questo, osservare il comportamento del protocollo Fast Broadcast sotto queste condizioni,
-un protocollo che stima dinamicamente il raggio trasmissivo per propagare il messaggio
-con meno salti possibili.
-Dalle prove effettuate è sorto evidente come l'effetto ombreggiatura causato dagli ostacoli
-sia un fattore chiave nelle simulazioni delle VANET, specialmente se si è in uno scenario
-urbano o suburbano dove abitazioni, uffici, ospedali, edifici in genere sono sempre presenti.
+Lo scopo di questo lavoro è stato valutare il protocollo Fast Broadcast per la propagazione dei messaggi
+all'intero di un contesto urbano reale, con particolare attenzione all'impatto dell'effetto ombreggiatura derivato dalla
+presenza di ostacoli.
+Dalle prove effettuate è sorto evidente come questo sia un fattore chiave nelle simulazioni delle VANET,
+specialmente se si considera uno scenario cittadino dove abitazioni, uffici, ospedali, edifici in genere sono sempre presenti.
 L'utilizzo di dati reali sulla posizione e/o mobilità dei veicoli è altresì decisiva,
 permettendo di cogliere effetti causati dalle caratteristiche intrinseche dell'ambiente sottostante.
-% TODO controllare dopo i risultati totali
 Nel caso specifico, si è visto come a parità di portata del raggio trasmissivo la struttura
 del centro cittadino di Padova influisce maggiormente sullo scambio di messaggi
-rispetto allo scenario della città di Los Angeles;
+rispetto allo scenario della città di Los Angeles,
 pertanto per ottenere dei risulati uniformi, o se si vuole astrarre da uno scenario in particolare,
 è necessario utilizzare una trasmissione con una portata maggiore.	% assunzioni forti
 Il protocollo Fast Broadcast si comporta come previsto, confermando che una stima dinamica sul mezzo
 tramissivo permette di coprire più veicoli all'interno dell'area prefissata e in minor tempo.
-I risultati mostrano, tuttavia, che, in alcuni casi, l'effetto dell'ombreggiatura
+I risultati mostrano tuttavia che, in alcuni casi, l'effetto dell'ombreggiatura
 potrebbe impattare in modo maggiore rispetto allo non stimare correttamente il mezzo fisico. % --> boh
 È opinione degli autori che un adeguato modello di rappresentazione dell'ambiente sia
-sempre necessario durante lo sviluppo di un protocollo di questo tipo
-e che la presenza degli ostacoli non può essere esclusa.
-% TODO inserire risultati scenario sensori
+necessario durante lo studio di questa tipologia di scenari in quanto la presenza degli ostacoli non può essere esclusa.
+L'utilizzo di dati effettivi sulla geometria di questi permette di ridurre ulteriormente il divario fra simulazioni software e prove sul campo.
+In aggiunta, si è visto come la bassa copertura dei veicoli può essere migliorata in modo considerevole tramite l'aggiunta
+di dispositivi a basso costo, come per esempio vari tipi di sensori, incrementando però anche il traffico dati che si genera.
 
 Sebbene questi scenari prendevano in considerazione la topologia stradale nel posizionamento dei veicoli,
-sarebbe necessario che i veicoli avessero la capacità di muoversi, seguendo uno dei diversi modelli di mobilità
-proposti in letteratura;
-ancora meglio sarebbe la possibilità di utilizzare tracce reali in modo da cogliere eventuali problematiche
-che potrebbero non presentarsi utilizzando un modello teorico.
-Un'altra possibile continuazione di questo lavoro consiste nell'effettuare degli esperimenti reali
-degli scenari proposti, anche se su aree ridotte, con lo scopo di determinare l'effettiva efficacia e
-validità del modello a ostacoli.
-Sempre in relazione a quest'ultimo, la modifica tridimensionale proposta è una delle
+permettere a questi di muoversi garantirebbbe risultati più affidabili;
+questo potrebbe essere fatto seguendo uno dei diversi modelli di mobilità proposti in letteratura,
+oppure utilizzando tracce reali rese disponbili dagli utenti su alcune piattaforme di navigazione.
+Per quanto riguarda la valutazione del protocollo, sarebbe interessante studiarne
+le prestazioni in presenza di diversi messaggi di inoltro generati da veicoli diversi,
+come anche in presenza di un servizio a livello applicativo che produca un traffico dati costante
+che il protocollo debba gestire.
+
+In relazione al modello a ostacoli, la modifica tridimensionale proposta è una delle
 possibili soluzioni e ulteriori prove sono sicuramente necessarie per determinare
-se e quanto l'utilizzo della terza dimensione impatti sui risulati delle simulazioni.
-Inoltre, sarebbe utile integrare in ns-3 in maniera più profonda le informazioni sugli ostacoli,
-in modo che non siano utilizzabili solo dal, o dai, modelli di propagazione ma anche
-da altri moduli come ad esempio nella mobilità, per permettere ai nodi di essere consapevoli di eventuali ostruzioni
+in che misura l'utilizzo della terza dimensione impatti sulle simulazioni.
+Inoltre, sarebbe utile integrare nel simulatore ns-3 in maniera più profonda le informazioni sugli ostacoli
+in modo che non siano utilizzabili anche da altri moduli,
+ad esempio per permettere ai nodi di essere consapevoli di eventuali ostruzioni durante il movimento.
 (si pensi a droni che si muovono intorno a degli edifici).
 % sviluppo futuri
 % - mobilità con traccie reali (maps ?)
