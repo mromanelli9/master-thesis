@@ -188,9 +188,9 @@ Il cerchio rosso evidenzia la posizione del nodo di partenza mentre i tre rimane
 e i due intervalli di confidenza.\label{fig:scenari-la-pd-osm}}
 \end{figure}
 %
-\subsection{Los Angeles}\label{subsec:risultati-la}
+\subsection{Scenario Los Angeles}\label{subsec:risultati-la}
 A differenza del precente, quando si va a considerare l'effetto dell'ombreggiatura in questo scenario
-si notano dei maggiori cambiamenti.
+si notano maggiori cambiamenti.
 In primo luogo, come si può vedere dalla \figurename~\ref{fig:risultati-la-copertura},
 è presente una diminuzione della copertura dei veicoli che è più marcata con raggio trasmissivo $300$m.
 Nelle simulazioni, infatti, le due diverse distanze massime raggiungibili dal segnale,
@@ -208,17 +208,18 @@ Questo fenomeno rimarrà costante anche nello scenario successivo.
 Per quanto riguarda il numero medio di salti necessari a raggiungere i veicoli sulla circonferenza,
 in \figurename~\ref{fig:risultati-la-salti},
 % TODO: contorllare che sia così anceh avendo nuovi dati
-si ha un incremento del $36,5\%$ nel caso di raggio trasmissivo $300$m mentre solo del $5\%$ nella controparte a $500$m.
-Inoltre, si può osservare come il protocollo FB abbia prestazioni migliori delle alternative statiche
-di circa il $10\%$ con $300$m e del $23\%$ con $500$m. % ha senso confrontarli così?
+si ha un incremento del $40,6\%$ nel caso di raggio trasmissivo $300$m mentre solo del $9\%$ nella controparte a $500$m.
+Inoltre, si può osservare come il protocollo FB abbia prestazioni migliori delle alternative statiche con la giusta
+coppia valore-stima di circa l'$1,5\%$,
+mentre nel caso \statica{}-$500$m (stima errata) si ha un miglioramento del $77\%$.
 Considerando il numero di messaggi di inoltro che vengono scambiati nella rete (\figurename~\ref{fig:risultati-la-messaggi}),
 rimane anomalo il caso \statica{}-$500$m, dove si ha un valore inferiore rispetto agli altri protocolli,
 anche se rimane coerente nel considerare l'effetto ombreggiatura (rispetto allo scenario senza).
-Mediamente, i messaggi inviati nel caso $300$m subiscono un incremento del $194,5\%$ e del $179,4\%$
+Mediamente, i messaggi inviati nel caso $300$m subiscono un incremento del $194,6\%$ e del $172\%$
 con $500$m.
 Un andamento inverso caratterizza il numero totale di messaggi di inoltro ricevuti:
-se si considera un raggio trasmissivo di $500$m si ha un aumento del $43\%$ in presenza di edifici,
-mentre un calo del $32,2\%$ con $300$m.
+se si considera un raggio trasmissivo di $500$m si ha un aumento del $41\%$ in presenza di edifici,
+mentre un calo del $31,3\%$ con $300$m.
 Ciò significa che nel primo caso gli ostacoli considerati causano la perdita di una grossa quantità di messaggi
 mentre così non avviene nel secondo.
 La causa di questo fenomeno potrebbe trovarsi nella topologia stradale presente in questo specifico scenario:
@@ -241,8 +242,7 @@ Ciò potrebbe voler dire anche che per effettuare una buona stima del raggio tra
 sono necessari più scambi di messaggi di quelli che si erano visti non considerando gli ostacoli. % --> sicuro? boh
 
 Anche in questo scenario, il protocollo FB si comporta secondo le aspettative
-garantendo una copertura migliore % TODO da confermare dopo con i nuovi dati
-rispetto ai protocolli con stima fissa,
+garantendo una buona copertura in entrambi i casi di mezzo trasmissivo,
 un numero di salti inferiore e quindi una consegna del messaggio più veloce
 e in generale un numero inferiore di messaggi inoltrati.
 %
@@ -268,18 +268,16 @@ e in generale un numero inferiore di messaggi inoltrati.
 \clearpage
 %
 %
-\subsection{Padova}\label{subsec:risultati-pd}
-% TODO: rivedere tutti qiesti risultati
+\subsection{Scenario Padova}\label{subsec:risultati-pd}
 Similmente ai risultati ottenuti nelle simulazioni precendenti,
 anche nel centro cittadino padovano si subisce una brusca riduzione della copertura totale
 quando si va a considerare l'effetto ombreggiatura casuato dagli edifici (\figurename~\ref{fig:risultati-padova-copertura}).
-Più precisamente, in questo caso il calo è maggiore e pari al $49,5\%$ nel caso $300$m,
+Più precisamente, in questo caso il calo è maggiore e pari al $50,5\%$ nel caso $300$m,
 a differenza del precente che si attestava al $30,5\%$;
 utilizzando il raggio trasmissivo pari a $500$m la differenza di copertura totale si attesta
-intorno al $9\%$ per entrambi gli scenari.
+intorno al $7,9\%$ per entrambi gli scenari.
 Una sostanziale differenza di nota anche nella copertura dei veicoli che si trovano sulla circonferenza,
-dove si registra un calo che arriva fino al $77,3\%$ con \statica{}-$300$m;
-lungo questo raggio si trovano $50$ veicoli ma nel caso $300$m se ne copre mediamente solo il $24,5\%$.
+dove si registra un calo che arriva fino al $77,3\%$ con \statica{}-$300$m.
 Se ne deduce che alcune caratteristiche intrinseche della città veneta
 impattano maggiormente un raggio trasmissivo minore che uno maggiore rispetto
 alle equivalenti della città californiana. % è giusto scriver così?
@@ -297,12 +295,11 @@ Rimane l'anomalia nel caso \statica{}-$500$m del numero di messaggi di inoltro i
 dove si ha un valore inferiore rispetto al protocollo statico con stima corretta.
 Come nello scenario precedente, la causa potrebbe essere la maggior influenza dell'ombreggiatura rispetto
 all'effettuare una stima corretta del mezzo fisico.
-Considerando l'effetto degli edifici si ha un aumento dei messaggi inviati del $234\%$ nel caso $300$m e del $197\%$ nell'altro,
+Considerando l'effetto degli edifici si ha un aumento dei messaggi inviati del $239\%$ nel caso $300$m e del $205\%$ nell'altro,
 un incremento maggiore rispetto allo scenario precente probabilmente per le stesse cause
 descritte in precedenza osservando gli effetti sulla copertura dei veicoli.
-Nel numero di messaggi di inoltro ricevuti si ha un calo nel caso $300$m,
-pari al $44,9\%$, e un aumento con il raggio trasmissivo maggiore, del $46,9\%$,
-come nelle simulazioni con la città californiana.
+Nel numero di messaggi di inoltro ricevuti si ha un calo nel caso $300$m pari al $45,5\%$,
+mentre un aumento del $51,8\%$ con il raggio trasmissivo maggiore, come nello scenario precedente.
 %
 \begin{figure}[htbp]
 	\centering
