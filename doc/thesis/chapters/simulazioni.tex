@@ -93,7 +93,7 @@ chiamano ``L'effetto cena con amici'' (\textit{The Dinner Party effect}): la pre
 può aumentare, localmente, la probabilità di tramissioni con successo in quanto aumenterebbe il riuso delle spazio.
 Tale fenomeno può anche essere visto nel grafico in \figurename~\ref{fig:risultati-griglia-messaggi}
 dove nel caso di raggio trasmissivo pari a $500$m è presente un aumento, in media, del $5,6$\%
-nel numero di messaggi di intoltro ricevuti, mentre quelli inviati sono più simili al caso senza edifici.
+nel numero di messaggi di inoltro ricevuti, mentre quelli inviati sono più simili al caso senza edifici.
 Anche il numero di salti necessari a raggiungere il perimetro della griglia rimane vicino
 e aumenta mediamente solo del $0,34\%$.
 Da tutto ciò si deduce che la presenza di edifici causa un aumento locale del traffico di messaggi
@@ -180,9 +180,9 @@ inoltre l'assunzione che il segnale si propaghi uniformemente fino a una certa d
 %
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=.491\textwidth]{osm_web-pd-2x2.png}
-		\hfill
-		\includegraphics[width=.489\textwidth]{osm_web-la-2x2.png}
+		\includegraphics[width=.65\textwidth]{osm_web-pd-2x2.png}
+		\vspace{10pt}
+		\includegraphics[width=.65\textwidth]{osm_web-la-2x2.png}
 \caption{Una vista delle aree selezionate per le simulazioni; a sinistra la città di Padova e a destra Los Angeles (fonte: OSM).
 Il cerchio rosso evidenzia la posizione del nodo di partenza mentre i tre rimanenti rappresentano il perimetro della circonferenza
 e i due intervalli di confidenza.\label{fig:scenari-la-pd-osm}}
@@ -361,9 +361,9 @@ la parte contenente i segnali luminosi dev'essere posizionata
 fra i $15$ e i $26,5$ piedi (rispettivamente $4,5$ e ho $8$ metri) nel caso di strutture al di sopra della
 careggiata~\cite{MUTCD}.
 
-Nel dettaglio, lo scenario attuale prevede la disposizione di $630$ veicoli distanti
-$25$ metri (come nello scenario precedente) l'uno dall'altro
-e di $120$ sensori posizionati agli incroci a un'altezza di $6$ metri.
+Nel dettaglio, lo scenario attuale prevede la disposizione di $295$ veicoli distanti
+$50$ metri (come nello scenario precedente) l'uno dall'altro
+e di $66$ sensori posizionati agli incroci a un'altezza di $6$ metri.
 Il raggio tramissivo è fissato a $300$ metri, i veicoli implementato il protocollo Fast broadcast
 mentre i sensori il semplice inoltro visto in precedenza.
 
@@ -385,11 +385,11 @@ da cui si evince la diffusione di ostacoli con informazioni tridimensionali.
 			\multicolumn{2}{|l|}{\multirow{2}{*}{Longitudine}}											&		O	 	& 	$-118,3214$										\\ \cline{3-4}
 			\multicolumn{2}{|l|}{}																									&		E	 	& 	$-118,3098$										\\ \hline
 			\multicolumn{3}{|l|}{Area approssimativa [km$^2$]}															&		$1,2$													\\ \hline
-			\multicolumn{3}{|l|}{Distanza fra veicoli [metri]}															&		$25$													\\ \hline
-			\multicolumn{3}{|l|}{Numero di veicoli}																					&		$630$													\\ \hline
+			\multicolumn{3}{|l|}{Distanza fra veicoli [metri]}															&		$50$													\\ \hline
+			\multicolumn{3}{|l|}{Numero di veicoli}																					&		$295$													\\ \hline
 			\multicolumn{3}{|l|}{Posizione sensori}																					&		incroci												\\ \hline
 			\multicolumn{3}{|l|}{Altezza dei sensori [metri]}																&		$6$														\\ \hline
-			\multicolumn{3}{|l|}{Numero di sensori}																					&		$120$												\\
+			\multicolumn{3}{|l|}{Numero di sensori}																					&		$66$												\\
 			\thickerline
 			\multicolumn{3}{|l|}{Simulazioni	per configurazione}														&		$30$													\\
 			\bottomrule
@@ -414,6 +414,32 @@ da cui si evince la diffusione di ostacoli con informazioni tridimensionali.
 \end{table}
 %
 \subsection{Risultati}\label{sec:configurazione-sensori-risultati}
-
-
+Dalla \figurename~\ref{fig:risultati-sensori-copertura}\footnotemark si nota subito come la percentuale
+di copertura totale dei veicoli è molto alta, intorno al $97$-$98\%$;
+\footnotetext{Errore standard con intervallo di confidenza del $80\%$.} inoltre, questo valore rimane stabile mentre si va ad aumentare la percentuale
+di veicoli disabilitati.
+Per quanto riguarda il numero di messaggi di inoltro inviati dai veicoli,
+in \figurename~\ref{fig:risultati-sensori-inviati}, si ha un valore inferiore
+con meno veicoli attivi (che comunicano) presenti,
+forse a causa
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{grafici/sensori/copertura_totale.png}
+\caption{Scenario sensori: copertura totale dei veicoli.\label{fig:risultati-sensori-copertura}}
+\end{figure}
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{grafici/sensori/messaggi_inviati.png}
+\caption{Scenario scenari: numero di messaggi di inoltro inviati.\label{fig:risultati-sensori-inviati}}
+\end{figure}
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{grafici/sensori/messaggi_ricevuti.png}
+\caption{Scenario scenari: numero di messaggi di inoltro ricevuti.\label{fig:risultati-sensori-ricevuti}}
+\end{figure}
+\clearpage
+%
 %
