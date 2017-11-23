@@ -414,14 +414,32 @@ da cui si evince la diffusione di ostacoli con informazioni tridimensionali.
 \end{table}
 %
 \subsection{Risultati}\label{sec:configurazione-sensori-risultati}
-Dalla \figurename~\ref{fig:risultati-sensori-copertura}\footnotemark si nota subito come la percentuale
-di copertura totale dei veicoli è molto alta, intorno al $97$-$98\%$;
-\footnotetext{Errore standard con intervallo di confidenza del $80\%$.} inoltre, questo valore rimane stabile mentre si va ad aumentare la percentuale
-di veicoli disabilitati.
-Per quanto riguarda il numero di messaggi di inoltro inviati dai veicoli,
-in \figurename~\ref{fig:risultati-sensori-inviati}, si ha un valore inferiore
-con meno veicoli attivi (che comunicano) presenti,
-forse a causa
+La \figurename~\ref{fig:risultati-sensori-copertura}\footnotemark{} mostra la percentuale dei veicoli raggiunti
+(sul totale di veicoli abilitati) al variare della percentuale di quelli disabilitati,
+ossia i veicoli che non partecipano allo scambio di messaggi.
+Per poter avere una base di riferimento, sono state effettuate anche delle simulazioni nelle quali i sensori non erano attivi,
+indicate in figura con l'etichetta ``senza sensori''.
+\footnotetext{Errore standard con intervallo di confidenza dell'$80\%$.}
+Mentre in questo caso la copertura totale non supera il $40\%$,
+attivando i sensori si ha un incremento sostanziale raggiungendo una copertura intorno al $97$-$98\%$.
+Inoltre, mentre senza i sensori la copertura soffre della mancanza di veicoli man mano che vengono disabilitati
+con i sensori questo non avviene.
+La presenza di sensori permette, quindi, non solo una copertura molto maggiore (in questo caso vicina al totale)
+dei veicoli, ma garantisce una rubustezza maggiore in caso di riduzione dei veicoli con capacità di comunicazione.
+
+La Tabella~\ref{tab:risulati-simulazioni-sensori-salti} mostra come i sensori permettano di raggiungere
+la circonferenza (questa volta di raggio $400$ metri) senza che nessun veicolo inoltri il messaggio,
+solo grazie al semplice inoltro che i primi implementano.
+Tuttavia, questo miglioramento costa un incremento notevole del traffico generato, come si può vedere dalla
+\figurename~\ref{fig:risultati-padova-messaggi}, che mostra la quantità di messaggi di inoltro ricevuti
+dai veicoli (attivi).
+Con il $10\%$ di veicoli disabilitati si ha un incremento di due volte e mezza dei messaggi,
+che diventa di sei volte più grande nel caso $50\%$.
+
+Concludendo, i sensori permettono una copertura quasi totale dei veicoli ma al costo di un incremento sostanziale del traffico di messaggi scambiati.
+È possibile implementare nei sensori algoritmi più intelligenti per l'inoltro, come ad esempio Fast Broadcast,
+anche se questo potrebbe ridurre il numero di veicoli raggiunti.
+È necessario, quindi, trovare un compromesso che bilanci questi aspetti.
 %
 \begin{figure}[htbp]
 	\centering
@@ -431,15 +449,26 @@ forse a causa
 %
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=\textwidth]{grafici/sensori/messaggi_inviati.png}
-\caption{Scenario scenari: numero di messaggi di inoltro inviati.\label{fig:risultati-sensori-inviati}}
-\end{figure}
-%
-\begin{figure}[htbp]
-	\centering
 		\includegraphics[width=\textwidth]{grafici/sensori/messaggi_ricevuti.png}
-\caption{Scenario scenari: numero di messaggi di inoltro ricevuti.\label{fig:risultati-sensori-ricevuti}}
+\caption{Scenario Padova: numero di messaggi di inoltro ricevuti.\label{fig:risultati-padova-messaggi}}
 \end{figure}
+%
+\begin{table}[htbp]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.3\linewidth}	| C{.12\linewidth} | C{.12\linewidth} |}
+		\toprule
+		\multirow{2}{*}{Percentuale veicoli disabilitati} 			&		\multicolumn{2}{c|}{Numero di salti} 		\\	\cline{2-3}
+																														&		Senza sensori			& 	Con sensori				\\
+		\thickerline
+		$10\%$																			&			$2,051$				&			\multirow{5}{*}{$0$}			\\ \cline{1-2}
+		$20\%$																			&			$2,215$				& 															\\ \cline{1-2}
+		$30\%$																			&			$2,126$				&																\\ \cline{1-2}
+		$40\%$																			&			$2,103$				& 															\\ \cline{1-2}
+		$50\%$																			&			$2,023$				&																\\ \cline{1-2}
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario sensori.: numero di salti.\label{tab:risulati-simulazioni-sensori-salti}}
+\end{table}
+%
 \clearpage
-%
-%
