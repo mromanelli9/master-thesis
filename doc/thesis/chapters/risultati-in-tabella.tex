@@ -10,7 +10,7 @@
 %----------------------------------------------------------------------------------------
 % GRUPPO SIMULAZIONI : GRIGLIA
 %----------------------------------------------------------------------------------------
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -25,7 +25,15 @@
 		\multirow{2}{*}{\staticb}					&	$300$m															&			$96,54$\%					&			$96,68$\%					\\ \cline{2-4}
 																			&	$500$m															&			$98,26$\%					& 		$98,09$\%					\\
 		\bottomrule
-		\multicolumn{4}{c}{} 	\\
+
+	\end{tabular}
+	\caption{Scenario a griglia: copertura dei veicoli in totale.\label{tab:risulati-simulazioni-griglia-copertura}}
+\end{table}
+%
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
 		\toprule
 		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura sulla circonferenza} 		\\	\cline{3-4}
 		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
@@ -38,10 +46,10 @@
 																			&	$500$m															&			$97,33$\%					& 		$98,11$\%					\\
 		\bottomrule
 	\end{tabular}
-	\caption{Scenario a griglia: copertura dei veicoli in totale e sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura}}
+	\caption{Scenario a griglia: copertura dei veicoli sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura-circ}}
 \end{table}
 %
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -60,7 +68,7 @@
 	\caption{Scenario a griglia: numero di salti.\label{tab:risulati-simulazioni-griglia-salti}}
 \end{table}
 %
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -74,8 +82,16 @@
 																		&	$500$m															&			$94$						& 		$98$				\\	\hline
 	\multirow{2}{*}{\staticb}					&	$300$m															&			$279$						&			$286$					\\ \cline{2-4}
 																		&	$500$m															&			$90$					& 		$95$						\\
+
 	\bottomrule
-	\multicolumn{4}{c}{} 	\\
+\end{tabular}
+\caption{Scenario a griglia: numero di messaggi di inoltro inviati.\label{tab:risulati-simulazioni-griglia-inviati}}
+\end{table}
+%
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
 	\toprule
 	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi ricevuti} 		\\	\cline{3-4}
 	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
@@ -88,7 +104,7 @@
 																		&	$500$m															&			$30426$					& 		$32116$					\\
 	\bottomrule
 \end{tabular}
-\caption{Scenario a griglia: numero di messaggi di inoltro inviati e ricevuti.\label{tab:risulati-simulazioni-griglia-copertura}}
+\caption{Scenario a griglia: numero di messaggi di inoltro icevuti.\label{tab:risulati-simulazioni-griglia-ricevuti}}
 \end{table}
 \clearpage
 %
@@ -96,7 +112,7 @@
 %----------------------------------------------------------------------------------------
 % GRUPPO SIMULAZIONI : LA
 %----------------------------------------------------------------------------------------
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -111,7 +127,13 @@
 		\multirow{2}{*}{\staticb}					&	$300$m															&			$97,41$\%					&			$69,86$\%					\\ \cline{2-4}
 																			&	$500$m															&			$98,40$\%					& 		$93,87$\%					\\
 		\bottomrule
-		\multicolumn{4}{c}{} 	\\
+	\end{tabular}
+	\caption{Scenario L.A.: copertura dei veicoli in totale.\label{tab:risulati-simulazioni-la-copertura}}
+\end{table}
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
 		\toprule
 		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura sulla circonferenza} 		\\	\cline{3-4}
 		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
@@ -124,10 +146,10 @@
 																			&	$500$m															&			$98,29$\%					& 		$97,52 $\%					\\
 		\bottomrule
 	\end{tabular}
-	\caption{Scenario L.A.: copertura dei veicoli in totale e sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura}}
+	\caption{Scenario L.A.: copertura dei veicoli sulla circonferenza.\label{tab:risulati-simulazioni-la-copertura-circ}}
 \end{table}
 %
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -146,7 +168,7 @@
 	\caption{Scenario L.A.: numero di salti.\label{tab:risulati-simulazioni-griglia-salti}}
 \end{table}
 %
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -161,7 +183,13 @@
 	\multirow{2}{*}{\staticb}					&	$300$m															&			$62$						&			$185$					\\ \cline{2-4}
 																		&	$500$m															&			$27$					& 		$83$						\\
 	\bottomrule
-	\multicolumn{4}{c}{} 	\\
+\end{tabular}
+\caption{Scenario L.A.: numero di messaggi di inoltro inviati.\label{tab:risulati-simulazioni-la-inviati}}
+\end{table}
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
 	\toprule
 	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi ricevuti} 		\\	\cline{3-4}
 	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
@@ -174,7 +202,7 @@
 																		&	$500$m															&			$7400$					& 		$12085$					\\
 	\bottomrule
 \end{tabular}
-\caption{Scenario L.A.: numero di messaggi di inoltro inviati e ricevuti.\label{tab:risulati-simulazioni-griglia-copertura}}
+\caption{Scenario L.A.: numero di messaggi di inoltro ricevuti.\label{tab:risulati-simulazioni-la-ricevuti}}
 \end{table}
 \clearpage
 %
@@ -182,7 +210,7 @@
 %----------------------------------------------------------------------------------------
 % GRUPPO SIMULAZIONI : PD
 %----------------------------------------------------------------------------------------
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -197,7 +225,14 @@
 		\multirow{2}{*}{\staticb}					&	$300$m															&			$96,52$\%					&			$50,30$\%					\\ \cline{2-4}
 																			&	$500$m															&			$97,86$\%					& 		$94,08$\%					\\
 		\bottomrule
-		\multicolumn{4}{c}{} 	\\
+	\end{tabular}
+	\caption{Scenario Padova: copertura dei veicoli in totale.\label{tab:risulati-simulazioni-pd-copertura}}
+\end{table}
+%
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
 		\toprule
 		\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Copertura sulla circonferenza} 		\\	\cline{3-4}
 		\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
@@ -210,10 +245,10 @@
 																			&	$500$m															&			$98,21$\%					& 		$93,88$\%					\\
 		\bottomrule
 	\end{tabular}
-	\caption{Scenario Padova: copertura dei veicoli in totale e sulla circonferenza.\label{tab:risulati-simulazioni-griglia-copertura}}
+	\caption{Scenario Padova: copertura dei veicoli circonferenza.\label{tab:risulati-simulazioni-pd-copertura-tot}}
 \end{table}
 %
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -232,7 +267,7 @@
 	\caption{Scenario Padova: numero di salti.\label{tab:risulati-simulazioni-griglia-salti}}
 \end{table}
 %
-\begin{table}[htbp]
+\begin{table}[!h]
 	\footnotesize
 	\centering
 	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
@@ -247,7 +282,14 @@
 	\multirow{2}{*}{\staticb}					&	$300$m															&			$73$						&			$253$					\\ \cline{2-4}
 																		&	$500$m															&			$32$					& 		$106$						\\
 	\bottomrule
-	\multicolumn{4}{c}{} 	\\
+\end{tabular}
+\caption{Scenario Padova: numero di messaggi di inoltro inviati.\label{tab:risulati-simulazioni-pd-inviati}}
+\end{table}
+%
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.2\linewidth} | l | C{.15\linewidth} | C{.15\linewidth} |}
 	\toprule
 	\multicolumn{2}{|l|}{\multirow{2}{*}{Protocollo e raggio trasmissivo}}	&		\multicolumn{2}{c|}{Messaggi ricevuti} 		\\	\cline{3-4}
 	\multicolumn{2}{|l|}{}																									&		Senza edifici				& 	Con edifici				\\
@@ -260,7 +302,44 @@
 																		&	$500$m															&			$8634$					& 		$14280$					\\
 	\bottomrule
 \end{tabular}
-\caption{Scenario Padova: numero di messaggi di inoltro inviati e ricevuti.\label{tab:risulati-simulazioni-griglia-copertura}}
+\caption{Scenario Padova: numero di messaggi di inoltro ricevuti.\label{tab:risulati-simulazioni-griglia-ricevuti}}
 \end{table}
 \clearpage
 %
+\section{Scenario con sensori}
+%
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.3\linewidth}	| C{.12\linewidth} | C{.12\linewidth} |}
+		\toprule
+		\multirow{2}{*}{Percentuale veicoli disabilitati} 			&		\multicolumn{2}{c|}{Copertura totale} 		\\	\cline{2-3}
+																														&		Senza sensori			& 	Con sensori				\\
+		\thickerline
+		$10\%$																			&			$39,35$				&		$98,20$														\\ \hline
+		$20\%$																			&			$32,50$				& 	$98,16$														\\ \hline
+		$30\%$																			&			$31,38$				&		$98,51$														\\ \hline
+		$40\%$																			&			$23,50$				& 	$97,84$														\\ \hline
+		$50\%$																			&			$21,23$				&		$97,81$														\\
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario con sensori: copertura dei veicoli in totale.\label{tab:risulati-simulazioni-sensori-copertura}}
+\end{table}
+%
+\begin{table}[!h]
+	\footnotesize
+	\centering
+	\begin{tabular}{| L{.3\linewidth}	| C{.12\linewidth} | C{.12\linewidth} |}
+		\toprule
+		\multirow{2}{*}{Percentuale veicoli disabilitati} 			&		\multicolumn{2}{c|}{Messaggi ricevuti} 		\\	\cline{2-3}
+																														&		Senza sensori			& 	Con sensori				\\
+		\thickerline
+		$10\%$																			&			$337$				&		$1172$														\\ \hline
+		$20\%$																			&			$240$				& 	$1014$														\\ \hline
+		$30\%$																			&			$199$				&		$902$														\\ \hline
+		$40\%$																			&			$125$				& 	$748$														\\ \hline
+		$50\%$																			&			$89$				&		$636$														\\
+		\bottomrule
+	\end{tabular}
+	\caption{Scenario con sensori: numero di messaggi di inoltro ricevuti.\label{tab:risulati-simulazioni-sensori-ricevuti}}
+\end{table}
