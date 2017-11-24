@@ -1,0 +1,78 @@
+% !TEX encoding = UTF-8
+% !TEX program = pdflatex
+% !TEX root = presentazione.tex
+% !TeX spellcheck = it_IT
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND MISC SETTINGS
+%----------------------------------------------------------------------------------------
+
+\documentclass[12pt]{beamer}
+%\documentclass[12pt,aspectratio=169]{beamer}
+%\documentclass[12pt,aspectratio=43]{beamer}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{alltt}
+\usepackage{tikz}
+\usepackage{macros/appendixnumberbeamer}
+\usepackage[pageofpages=di,% String used between the current page and the
+                         % total page count.
+          bullet=circle,% Use circles instead of squares for bullets.
+          titleline=true,% Show a line below the frame title.
+          alternativetitlepage=true,% Use the fancy title page.
+          titlepagelogo=unipd-pollo,% Logo for the first page.
+          watermark=logo-unipd-int% Watermark used in every page.
+          ]{beamerthemeTorino}
+\hypersetup{
+	pdftitle={Propagazione di messaggi tra veicoli con modello urbano realistico},
+	pdfauthor={Marco Romanelli},
+	pdfstartview={Fit},
+	pdfstartpage=1,
+	bookmarks=true,
+	bookmarkstype=toc,
+	bookmarksopen=true,
+	pdfhighlight=/I,
+	pdfpagemode=FullScreen
+}
+
+\graphicspath{{resources/}{figures/}}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\author[Romanelli,Marco]{Marco Romanelli\\[.5\baselineskip]
+\scriptsize Relatore: Prof.\ Claudio Enrico Palazzin\\
+\scriptsize Co-relatore: Dott.\ Armir Bujari}
+
+\title{Propagazione di messaggi tra veicoli con modello urbano realistico}
+% \course{Laurea Magistrale in Informatica}
+\institute{Università di Padova}
+\date{7 dicembre 2017}
+
+\begin{document}
+
+\section{Introduzione}\label{sec:intro}
+\begin{frame}[t,plain]
+	\titlepage
+\end{frame}
+
+	%----------------------------------------------------------------------------------------
+	%	BODY
+	%----------------------------------------------------------------------------------------
+
+	\setcounter{framenumber}{0} % start from here
+	\section{Contenuto}\label{sec:contenuto}
+	\input{frames/intro}
+
+	\section{Fine}\label{sec:fine}
+	\input{frames/fine}
+
+	%----------------------------------------------------------------------------------------
+	%	END
+	%----------------------------------------------------------------------------------------
+
+\end{document}
