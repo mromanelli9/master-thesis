@@ -22,25 +22,26 @@ I risultati mostrano tuttavia che, in alcuni casi, l'effetto dell'ombreggiatura
 potrebbe impattare in modo maggiore rispetto allo non stimare correttamente il mezzo fisico. % --> boh
 È opinione degli autori che un adeguato modello di rappresentazione dell'ambiente sia
 necessario durante lo studio di questa tipologia di scenari in quanto la presenza degli ostacoli non può essere esclusa.
-L'utilizzo di dati effettivi sulla geometria di questi permette di ridurre ulteriormente il divario fra simulazioni software e prove sul campo.
+L'utilizzo di dati effettivi sulla geometria di questi permette di ridurre ulteriormente il divario fra simulazioni software
+ed esperimenti reali effettuati sul campo.
 In aggiunta, si è visto come la bassa copertura dei veicoli può essere migliorata in modo considerevole tramite l'aggiunta
-di dispositivi a basso costo, come per esempio vari tipi di sensori, incrementando però anche il traffico dati che si genera.
+di dispositivi a basso costo, come per esempio vari tipi di sensori, incrementando tuttavia il traffico dati che viene generato.
 
-Sebbene questi scenari prendevano in considerazione la topologia stradale nel posizionamento dei veicoli,
-permettere a questi di muoversi garantirebbbe risultati più affidabili;
-questo potrebbe essere fatto seguendo uno dei diversi modelli di mobilità proposti in letteratura,
+Una prima modifica possibile alle configurazioni adottate consisterebbe
+nell'implementazione di un modello di mobilità per i veicoli,
+seguendo una delle diverse proposte presenti in letteratura
 oppure utilizzando tracce reali rese disponbili dagli utenti su alcune piattaforme di navigazione.
-Per quanto riguarda la valutazione del protocollo, sarebbe interessante studiarne
+Per quanto riguarda il protocollo, sarebbe interessante studiarne
 le prestazioni in presenza di diversi messaggi di inoltro generati da veicoli diversi,
-come anche in presenza di un servizio a livello applicativo che produca un traffico dati costante
-che il protocollo debba gestire.
+come anche l'utilizzo di un servizio a livello applicativo che produca un traffico dati costante
+fornito poi al protocollo.
 
 In relazione al modello a ostacoli, la modifica tridimensionale proposta è una delle
 possibili soluzioni e ulteriori prove sono sicuramente necessarie per determinare
 in che misura l'utilizzo della terza dimensione impatti sulle simulazioni.
 Inoltre, sarebbe utile integrare nel simulatore ns-3 in maniera più profonda le informazioni sugli ostacoli
 in modo che non siano utilizzabili anche da altri moduli,
-ad esempio per permettere ai nodi di essere consapevoli di eventuali ostruzioni durante il movimento.
+ad esempio per permettere ai nodi di essere consapevoli di eventuali ostruzioni durante il movimento
 (si pensi a droni che si muovono intorno a degli edifici).
 % sviluppo futuri
 % - mobilità con traccie reali (maps ?)
