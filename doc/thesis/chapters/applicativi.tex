@@ -63,7 +63,7 @@ Per creare uno scenario derivato da un ambiente reale come quelli che saranno ut
 e poterlo utilizzare in ns-3, sono necessarie alcune elaborazioni intermedie.
 
 Il primo passo consiste nell'utilizzare la piattaforma gratuita OpenStreetMap (OSM)~\cite{osmWebsite} per
-ottenere le informazioni sul mondo reale (Figura~\ref{fig:esempio-file-osm}) e da queste estrarre i dati sugli ostacoli.
+ottenere le informazioni sul mondo reale (Figura~\ref{fig:esempio-file-osm}) e da queste estrarre i dati sugli ostacoli (Figura~\ref{fig:esempio-file-poly}).
 Il file ottenuto viene convertito dall'\textit{utiliy} di SUMO Polyconvert che si occupa di tradure alcune informazioni
 sugli ostacoli, come per esempio convertire la posizione da coordinate geografiche a cartesiane;
 il file risultante conterrà i poligoni che saranno letti dal modulo \textit{Obstacle Shadowing} (Figura~\ref{fig:esempio-file-poly}).
@@ -84,7 +84,7 @@ inclusa nel pacchetto SUMO che permette la creazione, gestione e simulazione del
 \begin{figure}[htbp]
 	\centering
 		\fbox{\includegraphics[width=\textwidth]{file-osm-dettaglio.png}}
-\caption{Un estratto del file dati sugli edifici dopo la conversione con Polyconvert.\label{fig:esempio-file-osm}}
+\caption{Un estratto del file dati generato da OSM.\label{fig:esempio-file-osm}}
 \end{figure}
 %
 %
