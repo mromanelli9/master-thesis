@@ -58,8 +58,16 @@ Il raggio trasmissivo effettivo (fisico) assume due valori possibili: $300$ o $5
 \end{table}
 \footnotetext{\textit{Direct Sequence Spread Spectrum}}	% TODO controllare la posizone, che sia nella stessa pagina della tabella.
 %
-Per valutare il protocollo sono stati presi in esame diversi parametri: la copertura totale e la copertura sulla circonferenza,
-il numero di salti necessari a raggiungere il bordo della griglia, il numero totale di messaggi di inoltro ricevuti e inviati.
+
+Per la valutazione del protocollo sono stati presi in esame diversi parametri:
+\setlist{nolistsep}
+\begin{itemize}
+	\item copertura totale: percentuale di veicoli, rispetto al numero totale, raggiunta dal messaggio di inoltro;
+	\item copertura sulla circonferenza: come sopra, ma rispetto al numero di veicoli presenti sulla circonferenza invece che sul totale;
+	\item salti: numero medio di salti necessari a raggiungere i veicoli posti sul perimetro della griglia;
+	\item messaggi di inoltro inviati: indica quante volte i veicoli hanno inoltrato il messaggio;
+	\item messaggi di inoltro ricevuti: ogni volta che un veicolo riceve un messaggio di inoltro viene incrementato questo conteggio.
+\end{itemize}
 Per poter confrontare le prestazioni del protocollo Fast Broadcast, quest'ultimo è stato comparato con altri due metodi chiamati \statica e \staticb,
 che utilizzano una stima fissa del raggio tramissivo rispettivamente di $300$ e $500$ metri.
 Il raggio trasmissivo varia agendo sul modello di propagazione \textsf{ns3::RangePropagation},
@@ -87,7 +95,7 @@ Come si può notare, la presenza degli ostacoli influisce molto poco sui quasi t
 La differenza sulla copertura totale è, in generale, inferiore o vicina all'$1\%$, tuttavia utilizando i protocolli FB e \statica{} si vede
 un leggero calo nel caso di raggio tramissivo pari a $300$m e un leggero incremento con $500$m, mentre
 è l'opposto con \staticb{}; la differenza è comunque minima per ipotizzare la causa di questo comportamento. % ?
-I veicoli sulla circonferenza (di raggio $1000$m) ottengono una copertura legggermente migliore
+I veicoli sulla circonferenza (di raggio $1000$m) ottengono una copertura leggermente migliore
 (in media dello $0,5\%$), tranne nel caso di \staticb{} con raggio trasmissivo $500$m.
 Questo leggero aumento della copertura potrebbe essere dovuto a quello che gli autori del modello a ostacoli (~\cite{Carpenter:2015:OMI:2756509.2756512})
 chiamano ``L'effetto cena con amici'' (\textit{The Dinner Party effect}): la presenza di ostacoli come edifici
@@ -196,7 +204,7 @@ In primo luogo, come si può vedere dalla \figurename~\ref{fig:risultati-la-cope
 è presente una diminuzione della copertura dei veicoli che è più marcata con raggio trasmissivo $300$m.
 Nelle simulazioni, infatti, le due diverse distanze massime raggiungibili dal segnale,
 $300$ e $500$ metri senza ostruzioni, sono state implementate tramite una diversa potenza in fase di trasmissione.
-Un sengale più potente ha, naturalmente,
+Un segnale più potente ha, naturalmente,
 più probabilità di ``superare'' un ostacolo rispetto a un segnale con meno potenza.
 Inoltre, avendo una portata maggiore potrebbe raggiungere altri elementi in ricezione,
 permettere degli inoltri e coprire ulteriori veicoli.
