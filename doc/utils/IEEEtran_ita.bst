@@ -55,7 +55,7 @@
  %             "Daly, P., and Cox, D.R."		-->				"Daly P. e Cox D.R."
  %             "Technical Report"						-->				"Relazione Tecnica"
  %             "Ph.D. thesis"               -->		   	"Tesi di Dottorato di Ricerca"
- %             "Master thesis"              -->       "Tesi di Master"
+ %             "Master thesis"              -->       "Tesi Magistrale"
  %             "2nd ed."                    -->       "2a ed."
  %             "jul. 2013"                  -->       "lug. 2013"
  %             "[Online] Avaiable http://.." -->      "[Online] Disponibile a: http://.."
@@ -225,7 +225,7 @@ FUNCTION {bbl.revision}{ "Rev." }
 FUNCTION {bbl.series}{ "ser." }
 FUNCTION {bbl.standard}{ "Std." }
 FUNCTION {bbl.techrep}{ "Relazione Tecnica" }
-FUNCTION {bbl.mthesis}{ "Tesi di Master" }
+FUNCTION {bbl.mthesis}{ "Tesi Magistrale" }
 FUNCTION {bbl.phdthesis}{ "Tesi di Dottorato di Ricerca" }
 FUNCTION {bbl.st}{ "st" }
 FUNCTION {bbl.nd}{ "nd" }
