@@ -19,28 +19,10 @@ import optparse
 from math import sqrt
 import Queue
 
-  # SUMO_HOME = os.environ.get('SUMO_HOME',
-						   # os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
-# sys.path.append(os.path.join(SUMO_HOME, 'tools'))
-
 import sumolib
 from sumolib import route2trips
 from sumolib.miscutils import euclidean
 from sumolib.net.lane import SUMO_VEHICLE_CLASSES
-
-global __vDistance
-
-class Point:
-	def __init__(self,x_init,y_init):
-		self.x = x_init
-		self.y = y_init
-
-	def shift(self, x, y):
-		self.x += x
-		self.y += y
-
-	def __repr__(self):
-		return "".join(["Point(", str(self.x), ",", str(self.y), ")"])
 
 def distance(a, b):
 	return sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
@@ -84,7 +66,7 @@ def getOppositeDirection(idx):
 	# the id is in the form "111288429"
 		return '-' + idx
 
-def dfs_search(nodes, edges, trips, vdistance = 50):
+def dfs_search(nodes, edges, trips, vdistance):
 	tripId = 0
 	visited = {}
 
@@ -112,7 +94,7 @@ def visit_node(edge, colors, visited, trips, vdistance, missingPos = None):
 			visited[idx] = 1
 
 			# Check where i put the last vehicle
-			pos = missingPos if (missingPos != None) else 1
+			pos = missingPos if (missingPos != None) else (length/2)
 
 			while (pos < length):
 				current = generate_one(len(trips), 0, pos, idx, idx)
@@ -162,8 +144,6 @@ def main(options):
 
 		fouttrips.write("</routes>\n")
 
-
-# info: print([method_name for method_name in dir(net._edges[0])])
 
 if __name__ == "__main__":
 	# Increase the recursion limit

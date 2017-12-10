@@ -77,9 +77,6 @@ $NETCONVERT_CC --osm-files="$OSM_FILE" -o "$NET_FILE"
 # Generate buildings
 $POLYCONVERT_CC --osm-files="$OSM_FILE" --net-file="$NET_FILE" --shapefile.add-param=true --prune.in-net=true --prune.explicit="fountain" -o "$BUILDINGS_FILE"
 
-# Prune buildings
-$PRUNE_POLY --poly-file="$BUILDINGS_FILE" --output-file="$BUILDINGS_FILE_2"
-
 # Generate routes
 $POSITIONER -n "$NET_FILE" -d 25 -o "$ROUTES_FILE"
 
