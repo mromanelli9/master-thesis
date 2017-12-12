@@ -69,9 +69,10 @@ public:
 	 * \param node node to add
 	 * \param source source socket of the node
 	 * \param sink sink socket of the node
+	 * \param onstats if this node is a vehicle
 	 * \return none
 	 */
-	void AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink);
+	void AddNode (Ptr<Node> node, Ptr<Socket> source, Ptr<Socket> sink, bool onstats);
 
 	/**
 	 * \brief Print value of some useful field

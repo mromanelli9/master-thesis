@@ -43,7 +43,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("fb-vanet-3d");
+NS_LOG_COMPONENT_DEFINE ("fb-vanet");
 
 /* -----------------------------------------------------------------------------
 *			CLASS AND METHODS PROTOTIPES
@@ -336,7 +336,7 @@ protected:
 	 * \brief Configure the FB application
 	 * \return none
 	 */
-	void ConfigureApplications ();
+	void ConfigureFBApplication ();
 
 	/**
 	 * \brief Run the simulation
@@ -385,18 +385,11 @@ private:
 	static void
 	CourseChange (std::ostream *os, std::string foo, Ptr<const MobilityModel> mobility);
 
-	/**
-	 * \brief Implements a dummy forwarding mechanism
-	 * \return none
-	 */
-	void DummyForwarding (Ptr<Socket> socket);
 
 	Ptr<FBApplication>								m_fbApplication;
 	uint32_t 													m_nNodes;
-	uint32_t 													m_nVehicles;
-	uint32_t 													m_nVehiclesEnabled;
-	uint32_t 													m_nSensors;
 	NodeContainer											m_adhocNodes;
+	Ptr<ListPositionAllocator> 				m_adhocPositionAllocator;
 	NetDeviceContainer								m_adhocDevices;
 	Ipv4InterfaceContainer						m_adhocInterfaces;
 	std::vector <Ptr<Socket>>					m_adhocSources;
@@ -417,10 +410,7 @@ private:
 	uint32_t													m_loadBuildings;
 	std::string												m_traceFile;
 	std::string												m_bldgFile;
-	uint32_t													m_nDisabled;
-	uint32_t													m_enableSensors;
 	double														m_TotalSimTime;
-	std::map<uint32_t, uint32_t> 			m_sensorsMemory;
 };
 
 /* -----------------------------------------------------------------------------
@@ -429,10 +419,7 @@ private:
 */
 
 FBVanetExperiment::FBVanetExperiment ()
-	:	m_nNodes (0),
-		m_nVehicles (0),
-		m_nVehiclesEnabled (0),
-		m_nSensors (0),
+	:	m_nNodes (0),	// random value, it will be set later
 		m_packetSize ("64"),
 		m_rate ("2048bps"),
 		m_phyMode ("DsssRate11Mbps"),
@@ -449,8 +436,6 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_loadBuildings (0),
 		m_traceFile (""),
 		m_bldgFile (""),
-		m_nDisabled (0),
-		m_enableSensors (0),
 		m_TotalSimTime (30)
 {
 	srand (time (0));
@@ -481,7 +466,7 @@ FBVanetExperiment::Simulate ()
 	SetupAdhocDevices ();
 	ConfigureConnections ();
 
-	ConfigureApplications ();
+	ConfigureFBApplication ();
 
 	// Run simulation and print some results
 	RunSimulation ();
@@ -528,16 +513,14 @@ FBVanetExperiment::ConfigureMobility ()
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure current mobility mode.");
 
-	// Nodes positions
 	// Create Ns2MobilityHelper with the specified trace log file as parameter
 	Ns2MobilityHelper ns2 = Ns2MobilityHelper (m_traceFile);
-	NS_LOG_INFO ("Loading vehicle (ns2) mobility file \"" << m_traceFile << "\".");
+	NS_LOG_INFO ("Loading ns2 mobility file \"" << m_traceFile << "\".");
 
 	// Disable node movements
 	ns2.DisableNodeMovements ();
 
-	// configure movements for all nodes
-	ns2.Install (ns3::NodeList::Begin(), ns3::NodeList::End());
+	ns2.Install (); // configure movements for each node, while reading trace file
 
 	// Configure callback for logging
 	std::ofstream m_os;
@@ -627,41 +610,10 @@ FBVanetExperiment::ConfigureTracingAndLogging ()
 }
 
 void
-FBVanetExperiment::ConfigureApplications ()
+FBVanetExperiment::ConfigureFBApplication ()
 {
 	NS_LOG_FUNCTION (this);
 	NS_LOG_INFO ("Configure FB application.");
-
-	// Extract randomly which vehicles must be disabled
-	// First manage extremities
-	std::vector<uint32_t> nogood;
-
-	if (m_nDisabled != 0)
-	{
-		uint32_t portion = std::floor(m_nVehicles / 100.0 * m_nDisabled);
-		uint32_t candidate = 0;
-		bool found = false;
-
-		NS_LOG_INFO (portion << " vehicles down (with V2V comm disabled).");
-
-		for (uint32_t i = 0; i < portion; i++)
-		{
-			found = true;
-			while (found) {
-				candidate = (rand() % m_nVehicles) + 1;
-
-				// m_startingNode can't be in here
-				if (candidate == m_startingNode)
-					continue;
-
-				if (std::find(nogood.begin(), nogood.end(), candidate) == nogood.end()) {
-					found = false;
-				}
-			}
-
-			nogood.push_back (candidate);
-		}
-	}
 
 	// Delete pre-existing application
 	if (m_fbApplication)
@@ -679,48 +631,14 @@ FBVanetExperiment::ConfigureApplications ()
 	m_fbApplication->SetStartTime (Seconds (1));
 	m_fbApplication->SetStopTime (Seconds (m_TotalSimTime));
 
-	// Add vehicles to the application except whose who are in ids
-	for (uint32_t i = 0; i < m_nVehicles; i++)
+	// Add nodes to the application
+	for (uint32_t i = 0; i < m_nNodes; i++)
 	{
-		// If this vehicles is disabled, skip
-		if (std::find(nogood.begin(), nogood.end(), i) != nogood.end()) {
-			continue;
-		}
-		m_nVehiclesEnabled++;
-		m_fbApplication->AddNode (m_adhocNodes.Get (i),
-														m_adhocSources.at (i),
-														m_adhocSinks.at (i),
-														true);
+		m_fbApplication->AddNode (m_adhocNodes.Get (i), m_adhocSources.at (i), m_adhocSinks.at (i));
 	}
 
 	// Add the application to a node
 	m_adhocNodes.Get (m_startingNode)->AddApplication (m_fbApplication);
-
-	if (m_enableSensors != 0)
-	{
-		// if (m_scenario == 2)
-		// {
-		// 	// sensor use FB app
-		// 	for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
-		// 	{
-		// 		m_fbApplication->AddNode (m_adhocNodes.Get (i),
-		// 															m_adhocSources.at (i),
-		// 															m_adhocSinks.at (i),
-		// 															false);
-		// 	}
-		// }
-		// else
-		// {
-			// sensor as dummy forwarder
-
-			for (uint32_t id = m_nVehicles; id < m_nNodes; id++)
-			{
-				m_sensorsMemory[id] = 0;	// never see a packet
-
-				m_adhocSinks.at (id)->SetRecvCallback (MakeCallback (&FBVanetExperiment::DummyForwarding, this));
-			}
-		// }
-	}
 }
 
 void
@@ -732,53 +650,62 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 	CommandLine cmd;
 
 	// allow command line overrides
-	cmd.AddValue ("sensors", "Enable or disable sensors", m_enableSensors);
-	cmd.AddValue ("scenario", "1=Config1, 2=Config2", m_scenario);
-	cmd.AddValue ("disabled", "Portion of vehicles to disable (no V2V capabilities), in percentage", m_nDisabled);
+	cmd.AddValue ("nodes", "Number of nodes (i.e. vehicles)", m_nNodes);
+	cmd.AddValue ("nodes", "Id of the first node who will start an aler", m_startingNode);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
 	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C500", m_staticProtocol);
 	cmd.AddValue ("flooding", "Enable flooding", m_flooding);
 	cmd.AddValue ("alertGeneration", "Time at which the first Alert Message should be generated.", m_alertGeneration);
 	cmd.AddValue ("area", "Radius of the area of interest", m_areaOfInterest);
+	cmd.AddValue ("scenario", "1=Padova, 2=Los Angeles", m_scenario);
 	cmd.AddValue ("buildings", "Load building (obstacles)", m_loadBuildings);
+	cmd.AddValue ("trace", "Vehicles trace file (ns2mobility format)", m_traceFile);
 	cmd.AddValue ("totalTime", "Simulation end time", m_TotalSimTime);
 
 	cmd.Parse (argc, argv);
-
-	if (m_nDisabled < 0 || m_nDisabled > 99)
-		NS_LOG_ERROR("Percentage of disable vehciles must be greather than 0 and less than 100.");
 }
 
 void
 FBVanetExperiment::SetupScenario ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Configure scenario (" << m_scenario << ").");
+	NS_LOG_INFO ("Configure current scenario (" << m_scenario << ").");
 
 	m_alertGeneration = 9;	// 10 -1 (start time of the application)
 	m_TotalSimTime = 990000.0;
-	m_areaOfInterest = 400;	// meters, radius
-	m_bldgFile = "LA-1x1.3Dpoly.xml";
+	m_areaOfInterest = 1000;	// meters
+	m_vehiclesDistance = 25;	// meters
 
-	if (m_scenario == 1)
-	{		// Setup #1
-		m_traceFile = "LA-1x1.conf1.ns2mobility.xml";
-		m_vehiclesDistance = 50;
+	if (m_scenario == 0)
+	{
+		// DEBUG, TODO: delete this scenario
+		m_bldgFile = "Griglia.poly.xml";
+		m_traceFile = "Griglia.ns2mobility.xml";
 
-		m_nVehicles = 295;
-		m_startingNode = 190;		// shoud be 0 <= m_startingNode < m_nVehicles
+		m_nNodes = 96;
+		m_startingNode = 23;
+
+		m_areaOfInterest = 500;
+	} else if (m_scenario == 1)
+	{
+		// Padova (2x2 km)
+		m_bldgFile = "Padova.poly.xml";
+		m_traceFile = "Padova.ns2mobility.xml";
+
+		m_nNodes = 2224;
+		m_startingNode = 313;
+	}
+	else if (m_scenario == 2)
+	{
+		// L.A.  (2x2 km)
+		m_bldgFile = "LA.poly.xml";
+		m_traceFile = "LA.ns2mobility.xml";
+
+		m_nNodes = 1905;
+		m_startingNode = 365;
 	}
 	else
-	{		// Setup #2
-		m_traceFile = "LA-1x1.conf2.ns2mobility.xml";
-		m_vehiclesDistance = 100;
-
-		m_nVehicles = 166;
-		m_startingNode = 109;		// shoud be 0 <= m_startingNode < m_nVehicles
-	}
-	m_nSensors = 119;
-
-	m_nNodes = m_nVehicles + m_nSensors;
+		NS_LOG_ERROR ("Invalid scenario specified. Values must be [1-2].");
 
 	if (m_loadBuildings != 0)
 	{
@@ -806,13 +733,11 @@ FBVanetExperiment::ProcessOutputs ()
 	m_fbApplication->PrintStats (dataStream);
 
 	g_csvData.AddValue((int) RngSeedManager::GetRun ());
+	g_csvData.AddValue((int) m_scenario);
 	g_csvData.AddValue((int) m_actualRange);
 	g_csvData.AddValue((int) m_staticProtocol);
 	g_csvData.AddValue((int) m_loadBuildings);
-	g_csvData.AddValue((int) m_enableSensors);
-	g_csvData.AddValue((int) m_nDisabled);
 	g_csvData.AddValue((int) m_nNodes);
-	g_csvData.AddValue((int) m_nVehiclesEnabled);
 	g_csvData.AddMultipleValues(dataStream);
 	g_csvData.CloseRow ();
 }
@@ -877,33 +802,6 @@ FBVanetExperiment::SetupPacketSend (Ipv4Address addr, Ptr<Node> node)
 	return sender;
 }
 
-void
-FBVanetExperiment::DummyForwarding (Ptr<Socket> socket)
-{
-	NS_LOG_FUNCTION (this << socket);
-
-	// Get the node who received this message and the corresponding FBNode
-	Ptr<Node> node = socket->GetNode ();
-	uint32_t id = node->GetId ();
-
-	Ptr<Packet> packet;
-	Address senderAddress;
-
-	while ((packet = socket->RecvFrom (senderAddress)))
-	{
-		NS_LOG_DEBUG ("Packet received by dummy forwarding on node " << id << ".");
-
-		// If I never saw this packet
-		if (m_sensorsMemory[id] == 0)
-		{
-			m_sensorsMemory[id] = 1;	// mark as seen
-			m_adhocSources.at (id)->Send(packet);
-
-			NS_LOG_DEBUG ("Packet forwarded by dummy forwarding on node " << node->GetId () << ".");
-		}
-	}
-}
-
 
 /* -----------------------------------------------------------------------------
 *			MAIN
@@ -917,24 +815,9 @@ int main (int argc, char *argv[])
 	uint32_t maxRun = RngSeedManager::GetRun ();
 
 	// Manage data storage
-	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet-3d");	// cluster
-	g_csvData.EnableAlternativeFilename ("fb-vanet-3d");
-	g_csvData.WriteHeader ("\"id\",\
-\"Actual Range\",\
-\"Protocol\",\
-\"Buildings\",\
-\"Sensors\",\
-\"Nodes disabled\",\
-\"Total nodes\",\
-\"Vehicles enabled\",\
-\"Vehicles on circ\",\
-\"Total vehicles coverage\",\
-\"Vehicles coverage on circ\",\
-\"Alert received mean time\",\
-\"Mean hops\",\
-\"Mean slots\",\
-\"Messages sent\",\
-\"Messages received\"");
+	// g_csvData.EnableAlternativeFilename ("/home/mromanel/ns-3/data/fb-vanet");	// cluster
+	g_csvData.EnableAlternativeFilename ("fb-vanet");
+	g_csvData.WriteHeader ("\"id\",\"Scenario\",\"Actual Range\",\"Protocol\",\"Buildings\",\"Total nodes\",\"Nodes on circ\",\"Total coverage\",\"Coverage on circ\",\"Alert received mean time\",\"Hops\",\"Slots\",\"Messages sent\",\"Messages received\"");
 
 	for (uint32_t runId = 1; runId <= maxRun; runId++)
 	{

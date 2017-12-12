@@ -565,7 +565,7 @@ FBApplication::PrintStats (std::stringstream &dataStream)
 	dataStream << circCont << ","
 			<< cover << ","
 			<< circ << ","
-			<< timeref.GetMicroSeconds () - (time_sum / (double) circ)  << ","
+			<< (time_sum / (double) circ) - timeref.GetMicroSeconds () << ","
 			<< (nums_sum / (double) circ) << ","
 			<< (slots_sum / (double) circ) << ","
 			<< m_sent << ","

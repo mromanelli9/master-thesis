@@ -58,7 +58,8 @@
 			m_slot (0),
 			m_received (false),
 			m_sent (false),
-			m_timestamp (0)
+			m_timestamp (0),
+			m_amIaVehicle (true)
 	{
 	  NS_LOG_FUNCTION (this);
 	}
@@ -157,6 +158,13 @@
 	{
 		NS_LOG_FUNCTION (this);
 		return m_timestamp;
+	}
+
+	bool
+	FBNode::AmIaVehicle (void) const
+	{
+		NS_LOG_FUNCTION (this);
+		return m_amIaVehicle;
 	}
 
 	void
@@ -271,5 +279,12 @@
 	{
 		NS_LOG_FUNCTION (this << value);
 		m_timestamp = value;
+	}
+
+	void
+	FBNode::SetMeAsVehicle (bool value)
+	{
+		NS_LOG_FUNCTION (this << value);
+		m_amIaVehicle = value;
 	}
 } // namespace ns3
