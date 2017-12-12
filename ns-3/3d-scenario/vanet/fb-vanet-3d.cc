@@ -413,7 +413,6 @@ private:
 	uint32_t													m_alertGeneration;
 	uint32_t													m_areaOfInterest;
 	uint32_t													m_vehiclesDistance;
-	uint32_t													m_scenario;
 	uint32_t													m_loadBuildings;
 	std::string												m_traceFile;
 	std::string												m_bldgFile;
@@ -447,7 +446,6 @@ FBVanetExperiment::FBVanetExperiment ()
 		m_alertGeneration (20),
 		m_areaOfInterest (1000),
 		m_vehiclesDistance (250),
-		m_scenario (1),
 		m_loadBuildings (0),
 		m_traceFile (""),
 		m_bldgFile (""),
@@ -702,28 +700,12 @@ FBVanetExperiment::ConfigureApplications ()
 
 	if (m_enableSensors != 0)
 	{
-		// if (m_scenario == 2)
-		// {
-		// 	// sensor use FB app
-		// 	for (uint32_t i = m_nVehicles; i < m_nNodes; i++)
-		// 	{
-		// 		m_fbApplication->AddNode (m_adhocNodes.Get (i),
-		// 															m_adhocSources.at (i),
-		// 															m_adhocSinks.at (i),
-		// 															false);
-		// 	}
-		// }
-		// else
-		// {
-			// sensor as dummy forwarder
+		for (uint32_t id = m_nVehicles; id < m_nNodes; id++)
+		{
+			m_sensorsMemory[id] = 0;	// never see a packet
 
-			for (uint32_t id = m_nVehicles; id < m_nNodes; id++)
-			{
-				m_sensorsMemory[id] = 0;	// never see a packet
-
-				m_adhocSinks.at (id)->SetRecvCallback (MakeCallback (&FBVanetExperiment::DummyForwarding, this));
-			}
-		// }
+			m_adhocSinks.at (id)->SetRecvCallback (MakeCallback (&FBVanetExperiment::DummyForwarding, this));
+		}
 	}
 }
 
@@ -737,7 +719,6 @@ FBVanetExperiment::CommandSetup (int argc, char **argv)
 
 	// allow command line overrides
 	cmd.AddValue ("sensors", "Enable or disable sensors", m_enableSensors);
-	cmd.AddValue ("scenario", "1=Config1, 2=Config2", m_scenario);
 	cmd.AddValue ("disabled", "Portion of vehicles to disable (no V2V capabilities), in percentage", m_nDisabled);
 	cmd.AddValue ("actualRange", "Actual transimision range (meters)", m_actualRange);
 	cmd.AddValue ("protocol", "Estimantion protocol: 1=FB, 2=C300, 3=C500", m_staticProtocol);
@@ -757,29 +738,18 @@ void
 FBVanetExperiment::SetupScenario ()
 {
 	NS_LOG_FUNCTION (this);
-	NS_LOG_INFO ("Configure scenario (" << m_scenario << ").");
+	NS_LOG_INFO ("Configure scenario.");
 
 	m_alertGeneration = 9;	// 10 -1 (start time of the application)
 	m_TotalSimTime = 990000.0;
 	m_areaOfInterest = 400;	// meters, radius
 	m_bldgFile = "LA-1x1.3Dpoly.xml";
 
-	if (m_scenario == 1)
-	{		// Setup #1
-		m_traceFile = "LA-1x1.conf1.ns2mobility.xml";
-		m_vehiclesDistance = 50;
+	m_traceFile = "LA-1x1.ns2mobility.xml";
+	m_vehiclesDistance = 50;
 
-		m_nVehicles = 295;
-		m_startingNode = 190;		// shoud be 0 <= m_startingNode < m_nVehicles
-	}
-	else
-	{		// Setup #2
-		m_traceFile = "LA-1x1.conf2.ns2mobility.xml";
-		m_vehiclesDistance = 100;
-
-		m_nVehicles = 166;
-		m_startingNode = 109;		// shoud be 0 <= m_startingNode < m_nVehicles
-	}
+	m_nVehicles = 295;
+	m_startingNode = 190;		// shoud be 0 <= m_startingNode < m_nVehicles
 	m_nSensors = 66;
 
 	m_nNodes = m_nVehicles + m_nSensors;
